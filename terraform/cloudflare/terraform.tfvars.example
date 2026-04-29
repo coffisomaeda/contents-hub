@@ -1,0 +1,49 @@
+# Cloudflare
+cloudflare_account_id = "your-account-id"
+
+# Cloudflare Pages
+pages_project_name      = "contents-hub"
+pages_production_branch = "main"
+
+# GitHub 連携（Cloudflare GitHub App インストール後に設定）
+# github_owner     = "your-github-username"
+# github_repo_name = "contents-hub"  # 省略時は pages_project_name を使用
+
+# ビルド設定（フロントエンドフレームワーク確定後に更新）
+# pages_build_command    = "pnpm run build"
+# pages_build_output_dir = "dist"
+
+# カスタムドメイン（不要な場合はコメントアウトのまま）
+# custom_domain = "contents-hub.example.com"
+
+# 環境変数（フロントエンドフレームワーク確定後に設定）
+# Vite 系の場合は VITE_ プレフィックスが必要:
+# pages_production_env_vars = {
+#   VITE_SUPABASE_URL = {
+#     type  = "plain_text"
+#     value = "https://xxxx.supabase.co"
+#   }
+#   VITE_SUPABASE_ANON_KEY = {
+#     type  = "secret_text"
+#     value = "your-anon-key"
+#   }
+# }
+# pages_preview_env_vars = {
+#   VITE_SUPABASE_URL = {
+#     type  = "plain_text"
+#     value = "https://xxxx.supabase.co"
+#   }
+#   VITE_SUPABASE_ANON_KEY = {
+#     type  = "secret_text"
+#     value = "your-anon-key"
+#   }
+# }
+
+# ──────────────────────────────────────
+# 以下はシークレットのため terraform.tfvars には書かず、
+# 環境変数で設定してください:
+#
+#   export CLOUDFLARE_API_TOKEN="xxxxx"
+#
+# .env ファイルに記述し、direnv や source .env で読み込む運用を推奨します。
+# ──────────────────────────────────────
