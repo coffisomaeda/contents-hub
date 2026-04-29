@@ -42,6 +42,28 @@ values
     now()
   );
 
+-- 1b. テストユーザーの auth.identities 作成（signInWithPassword に必要）
+insert into auth.identities (
+  id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at
+)
+values
+  (
+    gen_random_uuid(),
+    '00000000-0000-0000-0000-000000000001',
+    json_build_object('sub', '00000000-0000-0000-0000-000000000001', 'email', 'test1@example.com')::jsonb,
+    'email',
+    '00000000-0000-0000-0000-000000000001',
+    now(), now(), now()
+  ),
+  (
+    gen_random_uuid(),
+    '00000000-0000-0000-0000-000000000002',
+    json_build_object('sub', '00000000-0000-0000-0000-000000000002', 'email', 'test2@example.com')::jsonb,
+    'email',
+    '00000000-0000-0000-0000-000000000002',
+    now(), now(), now()
+  );
+
 -- profiles はトリガーによって自動生成されるため省略
 
 -- 2. コンテンツ (contents) の作成
@@ -119,10 +141,11 @@ values
   );
 
 -- 5. 映像作品固有 (videos)
-insert into public.videos (id, tmdb_id, original_title, poster_path, backdrop_path, genres, vote_average, vote_count, runtime, number_of_seasons, number_of_episodes, status, imdb_id, watchmode_id)
+insert into public.videos (id, media_type, tmdb_id, original_title, poster_path, backdrop_path, genres, vote_average, vote_count, runtime, number_of_seasons, number_of_episodes, status, imdb_id, watchmode_id)
 values
   (
     '33333333-3333-3333-3333-333333333333',
+    'movie',
     603,
     'The Matrix',
     '/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg',
@@ -139,6 +162,7 @@ values
   ),
   (
     '44444444-4444-4444-4444-444444444444',
+    'tv',
     1396,
     'Breaking Bad',
     '/ggFHVNu6YYI5L9pCfOacjizRGt.jpg',

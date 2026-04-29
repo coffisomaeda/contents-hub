@@ -50,7 +50,9 @@ create table contents (
   release_date date,
   item_url    text,
   created_at  timestamptz not null default now(),
-  updated_at  timestamptz not null default now()
+  updated_at  timestamptz not null default now(),
+
+  unique (id, media_type)
 );
 
 comment on table contents is 'コンテンツ共通テーブル（全メディア横断）';
@@ -95,6 +97,7 @@ comment on table games is 'ゲーム固有情報（楽天ブックスゲーム�
 -- ---------------------------------------------------------------------------
 create table videos (
   id                  uuid primary key references contents (id) on delete cascade,
+  media_type          text not null check (media_type in ('movie', 'tv')),
   tmdb_id             integer not null,
   original_title      text,
   poster_path         text,
@@ -107,7 +110,10 @@ create table videos (
   number_of_episodes  integer,
   status              text,
   imdb_id             text,
-  watchmode_id        integer
+  watchmode_id        integer,
+
+  foreign key (id, media_type) references contents (id, media_type),
+  unique (tmdb_id, media_type)
 );
 
 comment on table videos is '映像作品固有情報（TMDB API 対応）';
@@ -166,7 +172,7 @@ create index idx_user_contents_user_id on user_contents (user_id);
 create index idx_user_contents_content_id on user_contents (content_id);
 create index idx_user_contents_status on user_contents (status);
 create index idx_video_sources_video_id on video_sources (video_id);
-create index idx_videos_tmdb_id on videos (tmdb_id);
+-- (tmdb_id, media_type) のユニークインデックスはテーブル定義の UNIQUE 制約で作成済み
 
 -- =============================================================================
 -- updated_at 自動更新トリガー
