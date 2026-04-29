@@ -69,6 +69,7 @@ erDiagram
 
     videos {
         uuid id PK
+        text media_type
         integer tmdb_id
         text original_title
         text poster_path
