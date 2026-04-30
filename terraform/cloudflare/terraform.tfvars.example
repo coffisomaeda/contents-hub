@@ -1,0 +1,19 @@
+# Cloudflare
+cloudflare_account_id = "your-account-id"
+
+# Cloudflare Workers
+# worker_name = "contents-hub"  # デフォルト: contents-hub
+
+# カスタムドメイン（不要な場合はコメントアウトのまま）
+# custom_domain      = "contents-hub.example.com"
+# cloudflare_zone_id = "your-zone-id"
+
+# ──────────────────────────────────────
+# 以下はシークレットのため terraform.tfvars には書かず、
+# 環境変数で設定してください:
+#
+#   export CLOUDFLARE_API_TOKEN="xxxxx"
+#
+# Worker の環境変数・シークレットは wrangler.toml / wrangler secret で管理します。
+# .env ファイルに記述し、direnv や source .env で読み込む運用を推奨します。
+# ──────────────────────────────────────

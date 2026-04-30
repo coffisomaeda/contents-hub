@@ -1,1 +1,21 @@
 node_modules/
+
+# Terraform
+terraform/**/.terraform/
+terraform/**/*.tfstate
+terraform/**/*.tfstate.*
+terraform/**/*.tfvars
+!terraform/**/*.tfvars.example
+terraform/**/crash.log
+terraform/**/override.tf
+terraform/**/override.tf.json
+
+# Environment
+.env
+.env.*
+!.env.example
+
+.mise.local.toml
+
+# AI tools
+.serena/

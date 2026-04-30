@@ -1,0 +1,27 @@
+variable "cloudflare_account_id" {
+  description = "Cloudflare の Account ID"
+  type        = string
+}
+
+variable "worker_name" {
+  description = "Cloudflare Worker のスクリプト名"
+  type        = string
+  default     = "contents-hub"
+}
+
+variable "custom_domain" {
+  description = "カスタムドメイン（不要な場合は null）"
+  type        = string
+  default     = null
+}
+
+variable "cloudflare_zone_id" {
+  description = "Cloudflare の Zone ID（カスタムドメイン使用時に必要）"
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.cloudflare_zone_id != null || var.custom_domain == null
+    error_message = "custom_domain を設定する場合は cloudflare_zone_id も必要です。"
+  }
+}
