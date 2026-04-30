@@ -11,3 +11,15 @@ terraform {
 
 # 認証: 環境変数 SUPABASE_ACCESS_TOKEN を使用
 provider "supabase" {}
+
+# 東京リージョンに新規プロジェクトを作成
+resource "supabase_project" "main" {
+  organization_id   = var.supabase_organization_id
+  name              = "contents-hub"
+  database_password = var.supabase_db_password
+  region            = "ap-northeast-1"
+
+  lifecycle {
+    ignore_changes = [database_password]
+  }
+}

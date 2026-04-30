@@ -29,14 +29,14 @@ resource "cloudflare_pages_project" "contents_hub" {
     build_caching   = true
   }
 
-  deployment_configs = {
-    production = {
-      env_vars = var.pages_production_env_vars
-    }
-    preview = {
-      env_vars = var.pages_preview_env_vars
-    }
-  }
+  # deployment_configs = {
+  #   production = {
+  #     env_vars = var.pages_production_env_vars
+  #   }
+  #   preview = {
+  #     env_vars = var.pages_preview_env_vars
+  #   }
+  # }
 }
 
 # カスタムドメイン（var.custom_domain が設定された場合のみ作成）

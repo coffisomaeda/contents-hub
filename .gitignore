@@ -14,3 +14,8 @@ terraform/**/override.tf.json
 .env
 .env.*
 !.env.example
+
+.mise.local.toml
+
+# AI tools
+.serena/
