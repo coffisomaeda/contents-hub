@@ -1,5 +1,4 @@
 # Supabase
-supabase_project_ref     = "your-project-ref"
 supabase_organization_id = "your-org-id"
 
 # ──────────────────────────────────────
@@ -7,6 +6,7 @@ supabase_organization_id = "your-org-id"
 # 環境変数で設定してください:
 #
 #   export SUPABASE_ACCESS_TOKEN="sbp_xxxxx"
+#   export TF_VAR_supabase_db_password="your-db-password"
 #
 # .env ファイルに記述し、direnv や source .env で読み込む運用を推奨します。
 # ──────────────────────────────────────
