@@ -2,6 +2,6 @@
 
 - 日本語で回答すること
 
-### 禁止事項
+### プロジェクト管理
 
-- terraform applyは実行しない
+- [docs/ROADMAP.md](./docs/ROADMAP.md)
