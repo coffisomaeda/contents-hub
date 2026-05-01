@@ -1,4 +1,5 @@
 import { redirect, type RequestHandler } from '@sveltejs/kit';
+import { getSafeRedirect } from '$lib/utils/auth';
 
 export const GET: RequestHandler = async ({ locals, url }) => {
   const code = url.searchParams.get('code');
@@ -8,7 +9,7 @@ export const GET: RequestHandler = async ({ locals, url }) => {
     await locals.supabase.auth.exchangeCodeForSession(code);
   }
 
-  // オープンリダイレクト対策: 相対パス（/ で始まり // で始まらない）のみ許可
-  const safeNext = next.startsWith('/') && !next.startsWith('//') ? next : '/';
+  // オープンリダイレクト対策: 共通ユーティリティを使用して検証
+  const safeNext = getSafeRedirect(next);
   redirect(303, safeNext);
 };

@@ -1,5 +1,15 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
+import { z } from 'zod';
+
+const signupSchema = z.object({
+  displayName: z.string().trim().optional(),
+  email: z
+    .string()
+    .trim()
+    .pipe(z.email({ error: '有効なメールアドレスを入力してください。' })),
+  password: z.string().min(6, 'パスワードは6文字以上で入力してください。'),
+});
 
 export const load: PageServerLoad = async ({ locals }) => {
   const { user } = await locals.safeGetSession();
@@ -12,25 +22,25 @@ export const load: PageServerLoad = async ({ locals }) => {
 export const actions: Actions = {
   default: async ({ request, locals, url }) => {
     const formData = await request.formData();
-    const displayName = String(formData.get('displayName') ?? '').trim();
-    const email = String(formData.get('email') ?? '').trim();
-    const password = String(formData.get('password') ?? '');
+    const displayNameStr = String(formData.get('displayName') ?? '');
+    const emailStr = String(formData.get('email') ?? '');
+    const passwordStr = String(formData.get('password') ?? '');
 
-    if (!email || !password) {
+    const parsed = signupSchema.safeParse({
+      displayName: displayNameStr,
+      email: emailStr,
+      password: passwordStr,
+    });
+
+    if (!parsed.success) {
       return fail(400, {
-        displayName,
-        email,
-        message: 'メールアドレスとパスワードを入力してください。',
+        displayName: displayNameStr,
+        email: emailStr,
+        message: parsed.error.issues[0].message,
       });
     }
 
-    if (password.length < 6) {
-      return fail(400, {
-        displayName,
-        email,
-        message: 'パスワードは6文字以上で入力してください。',
-      });
-    }
+    const { displayName, email, password } = parsed.data;
 
     const { data, error } = await locals.supabase.auth.signUp({
       email,
