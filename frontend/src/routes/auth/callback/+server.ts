@@ -8,5 +8,7 @@ export const GET: RequestHandler = async ({ locals, url }) => {
     await locals.supabase.auth.exchangeCodeForSession(code);
   }
 
-  redirect(303, next);
+  // オープンリダイレクト対策: 相対パス（/ で始まり // で始まらない）のみ許可
+  const safeNext = next.startsWith('/') && !next.startsWith('//') ? next : '/';
+  redirect(303, safeNext);
 };

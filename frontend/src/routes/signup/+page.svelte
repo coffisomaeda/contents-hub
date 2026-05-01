@@ -10,9 +10,9 @@
 
   {#if form?.message}
     <p
-      class="bg-[#fff1f2] border border-[#fecdd3] rounded-sm p-3 mb-6 text-caption {form.success
-        ? 'bg-[#f0fdf4] border-[#bbf7d0] text-[#15803d]'
-        : 'text-[#be123c]'}"
+      class="rounded-sm p-3 mb-6 text-caption {form.success
+        ? 'bg-[#f0fdf4] border border-[#bbf7d0] text-[#15803d]'
+        : 'bg-[#fff1f2] border border-[#fecdd3] text-[#be123c]'}"
       role="status"
     >
       {form.message}

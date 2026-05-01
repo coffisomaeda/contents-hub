@@ -122,6 +122,13 @@
   letter-spacing: -0.224px;
 }
 
+@utility text-nav-link {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.12px;
+}
+
 @utility text-dense-link {
   font-size: 17px;
   font-weight: 400;

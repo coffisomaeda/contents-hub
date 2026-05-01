@@ -28,9 +28,9 @@
   }
 
   .eyebrow {
-    color: #1f6feb;
+    color: var(--color-primary);
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: 0;
     margin: 0 0 12px;
     text-transform: uppercase;
@@ -43,7 +43,7 @@
   }
 
   p {
-    color: #526071;
+    color: var(--color-ink-muted-80);
     font-size: 18px;
     line-height: 1.75;
     margin: 22px 0 0;
@@ -56,17 +56,17 @@
   }
 
   .actions a {
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    color: #243044;
-    font-weight: 700;
+    border: 1px solid var(--color-hairline);
+    border-radius: var(--radius-sm);
+    color: var(--color-ink);
+    font-weight: 600;
     padding: 10px 14px;
     text-decoration: none;
   }
 
   .actions .primary {
-    background: #1f6feb;
-    border-color: #1f6feb;
+    background: var(--color-primary);
+    border-color: var(--color-primary);
     color: #ffffff;
   }
 </style>
