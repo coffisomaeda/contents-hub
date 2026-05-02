@@ -13,7 +13,7 @@
       class="rounded-sm p-3 mb-6 text-caption {form.success
         ? 'bg-[#f0fdf4] border border-[#bbf7d0] text-[#15803d]'
         : 'bg-[#fff1f2] border border-[#fecdd3] text-[#be123c]'}"
-      role="status"
+      role={form.success ? 'status' : 'alert'}
     >
       {form.message}
     </p>

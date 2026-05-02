@@ -6,7 +6,14 @@ export const GET: RequestHandler = async ({ locals, url }) => {
   const next = url.searchParams.get('next') ?? '/';
 
   if (code) {
-    await locals.supabase.auth.exchangeCodeForSession(code);
+    const { error } = await locals.supabase.auth.exchangeCodeForSession(code);
+    if (error) {
+      // エラーがある場合はログインページにリダイレクト
+      const message = encodeURIComponent(
+        '認証に失敗しました。リンクが無効か期限切れの可能性があります。',
+      );
+      redirect(303, `/login?message=${message}`);
+    }
   }
 
   // オープンリダイレクト対策: 共通ユーティリティを使用して検証

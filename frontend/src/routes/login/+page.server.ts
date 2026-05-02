@@ -10,12 +10,16 @@ const loginSchema = z.object({
   password: z.string().min(1, 'パスワードを入力してください。'),
 });
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ locals, url }) => {
   const { user } = await locals.safeGetSession();
 
   if (user) {
     redirect(303, '/');
   }
+
+  return {
+    message: url.searchParams.get('message'),
+  };
 };
 
 export const actions: Actions = {
