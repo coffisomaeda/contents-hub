@@ -10,10 +10,16 @@ terraform/**/crash.log
 terraform/**/override.tf
 terraform/**/override.tf.json
 
+# Frontend (SvelteKit / Cloudflare Workers)
+frontend/.svelte-kit/
+frontend/.wrangler/
+frontend/build/
+
 # Environment
 .env
 .env.*
 !.env.example
+!.env.test
 
 .mise.local.toml
 

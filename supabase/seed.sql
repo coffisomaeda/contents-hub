@@ -14,7 +14,11 @@ insert into auth.users (
   email_confirmed_at,
   raw_user_meta_data,
   created_at,
-  updated_at
+  updated_at,
+  confirmation_token,
+  recovery_token,
+  email_change_token_new,
+  email_change_token_current
 )
 values
   (
@@ -27,7 +31,11 @@ values
     now(),
     '{"display_name": "Test User 1", "avatar_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=Test1"}',
     now(),
-    now()
+    now(),
+    '',
+    '',
+    '',
+    ''
   ),
   (
     '00000000-0000-0000-0000-000000000002',
@@ -39,7 +47,11 @@ values
     now(),
     '{"display_name": "Test User 2", "avatar_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=Test2"}',
     now(),
-    now()
+    now(),
+    '',
+    '',
+    '',
+    ''
   );
 
 -- 1b. テストユーザーの auth.identities 作成（signInWithPassword に必要）
