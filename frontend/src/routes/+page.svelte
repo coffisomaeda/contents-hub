@@ -38,6 +38,7 @@
 
   h1 {
     font-size: clamp(34px, 6vw, 60px);
+    font-weight: 600;
     line-height: 1.08;
     margin: 0;
   }
