@@ -2,7 +2,7 @@
   import { resolve } from '$app/paths';
 
   let { data, form } = $props();
-  const message = form?.message ?? data?.message;
+  const message = $derived(form?.message ?? data?.message);
 </script>
 
 <section class="max-w-[420px] mx-auto mt-12 sm:mt-24 p-6 sm:p-0">
