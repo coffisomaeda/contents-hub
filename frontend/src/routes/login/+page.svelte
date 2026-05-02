@@ -1,19 +1,20 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
 
-  let { form } = $props();
+  let { data, form } = $props();
+  const message = form?.message ?? data?.message;
 </script>
 
 <section class="max-w-[420px] mx-auto mt-12 sm:mt-24 p-6 sm:p-0">
   <p class="text-primary text-[13px] font-bold tracking-normal uppercase mb-2">Login</p>
   <h1 class="text-display-md mb-6 text-ink">ログイン</h1>
 
-  {#if form?.message}
+  {#if message}
     <p
       class="bg-[#fff1f2] border border-[#fecdd3] rounded-sm text-[#be123c] p-3 mb-6 text-caption"
       role="alert"
     >
-      {form.message}
+      {message}
     </p>
   {/if}
 
