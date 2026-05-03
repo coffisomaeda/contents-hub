@@ -66,4 +66,8 @@ export const consumeToken = async (kv: KVNamespace, config: TokenBucketConfig): 
     const waitMs = Math.ceil(((1 - tokens) / config.refillRatePerSecond) * 1000);
     await sleep(waitMs);
   }
+
+  throw new Error(
+    `レート制限: ${config.bucket} のトークン取得に失敗しました。時間をおいて再試行してください。`,
+  );
 };

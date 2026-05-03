@@ -41,6 +41,8 @@ const WATCHMODE_TOKEN_BUCKET: TokenBucketConfig = {
   refillRatePerSecond: 0.001,
 };
 
+type CachedSearchResult = { value: WatchmodeTitleResult | null };
+
 export const createWatchmodeClient = (kv: KVNamespace | undefined, apiKey?: string) => {
   const searchByTmdbId = async (
     mediaType: 'movie' | 'tv',
@@ -49,8 +51,8 @@ export const createWatchmodeClient = (kv: KVNamespace | undefined, apiKey?: stri
     if (!apiKey) return null;
 
     const cacheKey = buildCacheKey('watchmode', 'search', mediaType, String(tmdbId));
-    const cached = await getFromCache<WatchmodeTitleResult | null>(kv, cacheKey);
-    if (cached !== null) return cached;
+    const cached = await getFromCache<CachedSearchResult>(kv, cacheKey);
+    if (cached !== null) return cached.value;
 
     if (kv) await consumeToken(kv, WATCHMODE_TOKEN_BUCKET);
 
@@ -69,7 +71,7 @@ export const createWatchmodeClient = (kv: KVNamespace | undefined, apiKey?: stri
     const payload = (await response.json()) as WatchmodeSearchApiResponse;
     const result = payload.title_results?.[0] ?? null;
 
-    await setToCache(kv, cacheKey, result, WATCHMODE_SEARCH_CACHE_TTL);
+    await setToCache(kv, cacheKey, { value: result }, WATCHMODE_SEARCH_CACHE_TTL);
     return result;
   };
 

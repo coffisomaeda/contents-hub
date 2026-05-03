@@ -21,7 +21,8 @@ export const fetchWithRetry = async (
     lastResponse = response;
 
     const retryAfterHeader = response.headers.get('Retry-After');
-    const waitMs = retryAfterHeader ? Number(retryAfterHeader) * 1000 : Math.pow(2, attempt) * 1000;
+    const retryAfterSec = retryAfterHeader ? Number(retryAfterHeader) : NaN;
+    const waitMs = !isNaN(retryAfterSec) ? retryAfterSec * 1000 : Math.pow(2, attempt) * 1000;
 
     await sleep(waitMs);
   }

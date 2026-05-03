@@ -16,44 +16,43 @@ type RegistrationFormKey = keyof typeof contentRegistrationSchema.shape;
 const formValue = (formData: FormData, key: RegistrationFormKey) =>
   formData.get(String(key)) ?? undefined;
 
-const buildRegistrationInput = (formData: FormData) =>
-  contentRegistrationSchema.parse({
-    mediaType: formValue(formData, 'mediaType'),
-    title: formValue(formData, 'title'),
-    titleKana: formValue(formData, 'titleKana'),
-    description: formValue(formData, 'description'),
-    imageUrl: formValue(formData, 'imageUrl'),
-    releaseDate: formValue(formData, 'releaseDate'),
-    itemUrl: formValue(formData, 'itemUrl'),
-    status: formValue(formData, 'status') ?? 'want',
-    rating: formValue(formData, 'rating'),
-    memo: formValue(formData, 'memo'),
-    isbn: formValue(formData, 'isbn'),
-    author: formValue(formData, 'author'),
-    authorKana: formValue(formData, 'authorKana'),
-    publisherName: formValue(formData, 'publisherName'),
-    jan: formValue(formData, 'jan'),
-    hardware: formValue(formData, 'hardware'),
-    label: formValue(formData, 'label'),
-    makerCode: formValue(formData, 'makerCode'),
-    itemPrice: formValue(formData, 'itemPrice'),
-    rakutenGenreId: formValue(formData, 'rakutenGenreId'),
-    reviewCount: formValue(formData, 'reviewCount'),
-    reviewAverage: formValue(formData, 'reviewAverage'),
-    tmdbId: formValue(formData, 'tmdbId'),
-    originalTitle: formValue(formData, 'originalTitle'),
-    posterPath: formValue(formData, 'posterPath'),
-    backdropPath: formValue(formData, 'backdropPath'),
-    genresJson: formValue(formData, 'genresJson'),
-    voteAverage: formValue(formData, 'voteAverage'),
-    voteCount: formValue(formData, 'voteCount'),
-    runtime: formValue(formData, 'runtime'),
-    numberOfSeasons: formValue(formData, 'numberOfSeasons'),
-    numberOfEpisodes: formValue(formData, 'numberOfEpisodes'),
-    videoStatus: formValue(formData, 'videoStatus'),
-    imdbId: formValue(formData, 'imdbId'),
-    watchmodeId: formValue(formData, 'watchmodeId'),
-  });
+const buildRegistrationInput = (formData: FormData) => ({
+  mediaType: formValue(formData, 'mediaType'),
+  title: formValue(formData, 'title'),
+  titleKana: formValue(formData, 'titleKana'),
+  description: formValue(formData, 'description'),
+  imageUrl: formValue(formData, 'imageUrl'),
+  releaseDate: formValue(formData, 'releaseDate'),
+  itemUrl: formValue(formData, 'itemUrl'),
+  status: formValue(formData, 'status') ?? 'want',
+  rating: formValue(formData, 'rating'),
+  memo: formValue(formData, 'memo'),
+  isbn: formValue(formData, 'isbn'),
+  author: formValue(formData, 'author'),
+  authorKana: formValue(formData, 'authorKana'),
+  publisherName: formValue(formData, 'publisherName'),
+  jan: formValue(formData, 'jan'),
+  hardware: formValue(formData, 'hardware'),
+  label: formValue(formData, 'label'),
+  makerCode: formValue(formData, 'makerCode'),
+  itemPrice: formValue(formData, 'itemPrice'),
+  rakutenGenreId: formValue(formData, 'rakutenGenreId'),
+  reviewCount: formValue(formData, 'reviewCount'),
+  reviewAverage: formValue(formData, 'reviewAverage'),
+  tmdbId: formValue(formData, 'tmdbId'),
+  originalTitle: formValue(formData, 'originalTitle'),
+  posterPath: formValue(formData, 'posterPath'),
+  backdropPath: formValue(formData, 'backdropPath'),
+  genresJson: formValue(formData, 'genresJson'),
+  voteAverage: formValue(formData, 'voteAverage'),
+  voteCount: formValue(formData, 'voteCount'),
+  runtime: formValue(formData, 'runtime'),
+  numberOfSeasons: formValue(formData, 'numberOfSeasons'),
+  numberOfEpisodes: formValue(formData, 'numberOfEpisodes'),
+  videoStatus: formValue(formData, 'videoStatus'),
+  imdbId: formValue(formData, 'imdbId'),
+  watchmodeId: formValue(formData, 'watchmodeId'),
+});
 
 export const load: PageServerLoad = async ({ locals, platform }) => {
   const { user } = await locals.safeGetSession();
@@ -74,7 +73,11 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 };
 
 export const actions: Actions = {
-  search: async ({ request, platform }) => {
+  search: async ({ request, locals, platform }) => {
+    const { user } = await locals.safeGetSession();
+    if (!user) {
+      redirect(303, '/login');
+    }
     const formData = await request.formData();
     const parsed = contentSearchSchema.safeParse({
       mediaType: formData.get('mediaType'),

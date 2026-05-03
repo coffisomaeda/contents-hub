@@ -87,7 +87,10 @@ const createContent = async (
       review_average: toNull(input.reviewAverage),
     });
 
-    if (error) throw new Error(error.message);
+    if (error) {
+      await supabase.from('contents').delete().eq('id', content.id);
+      throw new Error(error.message);
+    }
   }
 
   if (input.mediaType === 'game') {
@@ -103,11 +106,15 @@ const createContent = async (
       review_average: toNull(input.reviewAverage),
     });
 
-    if (error) throw new Error(error.message);
+    if (error) {
+      await supabase.from('contents').delete().eq('id', content.id);
+      throw new Error(error.message);
+    }
   }
 
   if (input.mediaType === 'movie' || input.mediaType === 'tv') {
     if (!input.tmdbId) {
+      await supabase.from('contents').delete().eq('id', content.id);
       throw new Error('映像作品の登録には TMDB ID が必要です。');
     }
 
@@ -129,7 +136,10 @@ const createContent = async (
       watchmode_id: toNull(input.watchmodeId),
     });
 
-    if (error) throw new Error(error.message);
+    if (error) {
+      await supabase.from('contents').delete().eq('id', content.id);
+      throw new Error(error.message);
+    }
   }
 
   return content.id;
