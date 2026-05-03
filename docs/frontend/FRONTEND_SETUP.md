@@ -33,12 +33,17 @@ cp .env.example .env
 
 設定が必要な値:
 
-| 変数名                     | 説明                         | 設定方法                                               |
-| -------------------------- | ---------------------------- | ------------------------------------------------------ |
-| `PUBLIC_SUPABASE_URL`      | Supabase プロジェクトの URL  | Supabase ダッシュボード → Settings → API → Project URL |
-| `PUBLIC_SUPABASE_ANON_KEY` | Supabase の anon（公開）キー | Supabase ダッシュボード → Settings → API → anon key    |
+| 変数名                     | 説明                               | 設定方法                                               |
+| -------------------------- | ---------------------------------- | ------------------------------------------------------ |
+| `PUBLIC_SUPABASE_URL`      | Supabase プロジェクトの URL        | Supabase ダッシュボード → Settings → API → Project URL |
+| `PUBLIC_SUPABASE_ANON_KEY` | Supabase の anon（公開）キー       | Supabase ダッシュボード → Settings → API → anon key    |
+| `RAKUTEN_APP_ID`           | 楽天 Web Service の Application ID | 楽天 Web Service → アプリ ID 発行                      |
+| `RAKUTEN_ACCESS_KEY`       | 楽天 Web Service の Access Key     | 楽天 Web Service → アプリ ID 発行                      |
+| `TMDB_API_KEY`             | TMDB API キー                      | TMDB の API 設定画面                                   |
+| `WATCHMODE_API_KEY`        | Watchmode API キー                 | Watchmode の API 設定画面                              |
 
 > **注意**: `PUBLIC_` プレフィックスの変数はブラウザに公開されます。anon key は公開して問題ありません（RLS でアクセス制御します）。
+> `RAKUTEN_APP_ID`、`RAKUTEN_ACCESS_KEY`、`TMDB_API_KEY`、`WATCHMODE_API_KEY` はサーバー側専用です。`PUBLIC_` を付けないでください。
 
 ### 3. Cloudflare の型生成
 
@@ -74,6 +79,95 @@ supabase gen types typescript --local > frontend/src/lib/database.types.ts
 | `pnpm format`      | Prettier で自動フォーマット                  |
 | `pnpm gen`         | Cloudflare Workers の型を再生成              |
 
+## 楽天ブックス API をローカルで確認する
+
+楽天 Web Service の新しい API エンドポイントでは `Application ID` と `Access Key` に加えて、リクエスト元の Web サイト制限が使われます。`localhost` や `127.0.0.1` は Allowed websites に登録できない場合があるため、ローカル開発では Cloudflare Tunnel の Quick Tunnel を使って公開 URL を作ります。
+
+### 1. 環境変数を設定する
+
+`frontend/.env` に以下を設定します。
+
+```env
+RAKUTEN_APP_ID=your-rakuten-application-id
+RAKUTEN_ACCESS_KEY=your-rakuten-access-key
+```
+
+`Application ID` と `Access Key` は楽天 Web Service のアプリ情報画面で確認します。Affiliate ID や Client Secret ではありません。
+
+環境変数を追加・変更したら型を再生成します。
+
+```bash
+cd frontend
+pnpm gen
+```
+
+### 2. 開発サーバーを起動する
+
+```bash
+cd frontend
+pnpm dev --host 127.0.0.1
+```
+
+### 3. Cloudflare Tunnel を起動する
+
+別ターミナルで実行します。
+
+```bash
+cloudflared tunnel --url http://127.0.0.1:5173
+```
+
+`cloudflared` が未インストールの場合は、Cloudflare の公式手順に従ってインストールします。
+
+実行後、以下のような URL が表示されます。
+
+```txt
+https://example-words.trycloudflare.com
+```
+
+Quick Tunnel の URL は起動するたびに変わります。固定 URL が必要な場合は、Cloudflare に管理させている独自ドメインで固定 hostname の Tunnel を作成します。
+
+### 4. Vite の allowedHosts に Tunnel hostname を追加する
+
+Tunnel 経由で Vite dev server にアクセスすると、未許可ホストとしてブロックされることがあります。その場合は `frontend/vite.config.ts` の `server.allowedHosts` に Tunnel の hostname を追加します。
+
+```typescript
+export default defineConfig({
+  plugins: [tailwindcss(), sveltekit()],
+  server: {
+    allowedHosts: ['example-words.trycloudflare.com'],
+  },
+});
+```
+
+Quick Tunnel の URL が変わった場合は、この hostname も更新して dev server を再起動します。
+
+### 5. 楽天 Allowed websites に登録する
+
+楽天 Web Service のアプリ設定で、Allowed websites に Tunnel の hostname を登録します。
+
+```txt
+example-words.trycloudflare.com
+```
+
+`https://` やポート番号は付けません。`localhost`、`127.0.0.1`、`http://localhost:5173` は楽天側で無効な値として拒否される場合があります。
+
+### 6. Tunnel URL から動作確認する
+
+ブラウザで Tunnel URL を開きます。
+
+```txt
+https://example-words.trycloudflare.com
+```
+
+テストユーザーでログインします。
+
+```txt
+email: test1@example.com
+password: password123
+```
+
+`/contents/new` で書籍またはゲームを選択し、キーワード検索します。検索に成功すると楽天ブックス API の結果が表示されます。
+
 ## Cloudflare へのデプロイ
 
 ### 前提
@@ -105,6 +199,7 @@ npx wrangler deploy
 
 ```bash
 npx wrangler secret put RAKUTEN_APP_ID
+npx wrangler secret put RAKUTEN_ACCESS_KEY
 npx wrangler secret put TMDB_API_KEY
 npx wrangler secret put WATCHMODE_API_KEY
 ```

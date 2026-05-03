@@ -20,6 +20,11 @@ declare global {
         ASSETS: { fetch: typeof fetch };
         PUBLIC_SUPABASE_URL: string;
         PUBLIC_SUPABASE_ANON_KEY: string;
+        RAKUTEN_APP_ID?: string;
+        RAKUTEN_ACCESS_KEY?: string;
+        TMDB_API_KEY?: string;
+        WATCHMODE_API_KEY?: string;
+        EXTERNAL_API_CACHE: KVNamespace;
       };
       ctx: {
         waitUntil: (promise: Promise<unknown>) => void;

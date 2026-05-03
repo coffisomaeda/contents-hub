@@ -1,4 +1,6 @@
-export const load = async ({ depends, locals }) => {
+import type { LayoutServerLoad } from './$types';
+
+export const load: LayoutServerLoad = async ({ depends, locals }) => {
   depends('supabase:auth');
 
   const { session, user } = await locals.safeGetSession();
