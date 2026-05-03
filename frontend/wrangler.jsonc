@@ -10,4 +10,11 @@
   },
   "workers_dev": true,
   "preview_urls": true,
+  "kv_namespaces": [
+    {
+      "binding": "EXTERNAL_API_CACHE",
+      "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "preview_id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    },
+  ],
 }

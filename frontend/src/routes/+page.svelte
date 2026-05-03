@@ -9,8 +9,11 @@
     <p class="eyebrow">Signed in</p>
     <h1>コンテンツを記録する準備ができています</h1>
     <p>
-      書籍、ゲーム、映像作品をひとつの場所で管理するためのホームです。次のフェーズで検索と登録機能をここに追加します。
+      書籍、ゲーム、映像作品をひとつの場所で管理できます。まずは新しいコンテンツを登録してください。
     </p>
+    <div class="actions">
+      <a class="primary" href={resolve('/contents/new')}>登録する</a>
+    </div>
   {:else}
     <p class="eyebrow">Contents Hub</p>
     <h1>見たもの、読んだもの、遊んだものをまとめて管理</h1>

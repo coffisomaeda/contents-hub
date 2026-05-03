@@ -17,6 +17,8 @@ export const load: PageServerLoad = async ({ locals }) => {
   if (user) {
     redirect(303, '/');
   }
+
+  return {};
 };
 
 export const actions: Actions = {
