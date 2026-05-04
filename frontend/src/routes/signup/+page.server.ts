@@ -56,6 +56,12 @@ export const actions: Actions = {
     });
 
     if (error) {
+      console.error('Supabase signup failed', {
+        status: error.status,
+        code: error.code,
+        message: error.message,
+      });
+
       return fail(400, {
         displayName,
         email,

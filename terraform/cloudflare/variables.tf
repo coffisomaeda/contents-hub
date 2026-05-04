@@ -3,6 +3,13 @@ variable "cloudflare_account_id" {
   type        = string
 }
 
+variable "cloudflare_api_token" {
+  description = "Cloudflare API Token。未指定時は provider が CLOUDFLARE_API_TOKEN を参照します。"
+  type        = string
+  default     = null
+  sensitive   = true
+}
+
 variable "worker_name" {
   description = "Cloudflare Worker のスクリプト名"
   type        = string

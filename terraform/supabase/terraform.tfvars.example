@@ -1,6 +1,13 @@
 # Supabase
 supabase_organization_id = "your-org-id"
 
+# Supabase Auth
+# 本番 URL が決まったら設定します。
+# supabase_site_url = "https://contents-hub.example.workers.dev"
+# supabase_auth_redirect_urls = [
+#   "https://contents-hub.example.workers.dev/auth/callback",
+# ]
+
 # ──────────────────────────────────────
 # 以下はシークレットのため terraform.tfvars には書かず、
 # 環境変数で設定してください:

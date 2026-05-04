@@ -8,3 +8,15 @@ variable "supabase_db_password" {
   type        = string
   sensitive   = true
 }
+
+variable "supabase_site_url" {
+  description = "Supabase Auth の Site URL。本番 URL が決まったら設定します。"
+  type        = string
+  default     = null
+}
+
+variable "supabase_auth_redirect_urls" {
+  description = "Supabase Auth の Redirect URLs。例: https://example.com/auth/callback"
+  type        = list(string)
+  default     = []
+}

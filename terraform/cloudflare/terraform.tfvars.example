@@ -10,9 +10,15 @@ cloudflare_account_id = "your-account-id"
 
 # ──────────────────────────────────────
 # 以下はシークレットのため terraform.tfvars には書かず、
-# 環境変数で設定してください:
+# 環境変数で設定してください。
 #
 #   export CLOUDFLARE_API_TOKEN="xxxxx"
+#
+# または Terraform 変数として渡す場合:
+#
+#   export TF_VAR_cloudflare_api_token="xxxxx"
+#
+# .env を source する場合は、子プロセスへ渡るように export してください。
 #
 # Worker の環境変数・シークレットは wrangler.toml / wrangler secret で管理します。
 # .env ファイルに記述し、direnv や source .env で読み込む運用を推奨します。

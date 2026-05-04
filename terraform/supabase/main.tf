@@ -26,3 +26,13 @@ resource "supabase_project" "main" {
     ignore_changes = [database_password]
   }
 }
+
+resource "supabase_settings" "auth" {
+  count       = var.supabase_site_url == null ? 0 : 1
+  project_ref = supabase_project.main.id
+
+  auth = jsonencode({
+    site_url       = var.supabase_site_url
+    uri_allow_list = join(",", var.supabase_auth_redirect_urls)
+  })
+}

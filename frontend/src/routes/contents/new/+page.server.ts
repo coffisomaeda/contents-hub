@@ -78,6 +78,7 @@ export const actions: Actions = {
     if (!user) {
       redirect(303, '/login');
     }
+
     const formData = await request.formData();
     const parsed = contentSearchSchema.safeParse({
       mediaType: formData.get('mediaType'),

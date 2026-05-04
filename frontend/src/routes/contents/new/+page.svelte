@@ -1,7 +1,9 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
+  import { enhance } from '$app/forms';
 
   let { data, form } = $props();
+  let isSearching = $state(false);
 
   const value = (input: unknown) => (input === null || input === undefined ? '' : String(input));
   const currentMediaType = $derived(form?.mediaType ?? 'book');
@@ -50,10 +52,22 @@
         </p>
       </div>
 
-      <form method="POST" action="?/search" class="grid gap-3 sm:grid-cols-[180px_1fr_auto]">
+      <form
+        method="POST"
+        action="?/search"
+        class="grid gap-3 sm:grid-cols-[180px_1fr_auto]"
+        use:enhance={() => {
+          isSearching = true;
+
+          return async ({ update }) => {
+            await update();
+            isSearching = false;
+          };
+        }}
+      >
         <label class="grid gap-2 text-body-strong">
           種別
-          <select class="input-standard" name="mediaType">
+          <select class="input-standard" name="mediaType" disabled={isSearching}>
             <option value="book" selected={currentMediaType === 'book'}>書籍</option>
             <option value="game" selected={currentMediaType === 'game'}>ゲーム</option>
             <option value="movie" selected={currentMediaType === 'movie'}>映画</option>
@@ -69,12 +83,36 @@
             value={form?.query ?? ''}
             placeholder="タイトルで検索"
             required
+            disabled={isSearching}
           />
         </label>
-        <button type="submit" class="btn-primary self-end rounded-sm">検索</button>
+        <button
+          type="submit"
+          class="btn-primary self-end rounded-sm min-w-[88px]"
+          disabled={isSearching}
+        >
+          {isSearching ? '検索中' : '検索'}
+        </button>
       </form>
 
-      {#if searchResults.length > 0}
+      {#if isSearching}
+        <div
+          class="grid gap-3 rounded-sm border border-hairline bg-canvas p-4"
+          role="status"
+          aria-live="polite"
+        >
+          <div class="flex items-center gap-3">
+            <span
+              class="block h-4 w-4 rounded-full border-2 border-hairline border-t-primary animate-spin"
+            ></span>
+            <span class="text-body-strong text-ink">検索中</span>
+          </div>
+          <div class="grid gap-2">
+            <div class="h-3 w-full max-w-[520px] rounded-sm bg-canvas-parchment"></div>
+            <div class="h-3 w-full max-w-[360px] rounded-sm bg-canvas-parchment"></div>
+          </div>
+        </div>
+      {:else if searchResults.length > 0}
         <div class="grid gap-3">
           {#each searchResults as result (`${result.mediaType}:${result.isbn ?? result.jan ?? result.tmdbId ?? result.title}`)}
             <article

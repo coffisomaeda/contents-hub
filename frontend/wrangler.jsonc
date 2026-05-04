@@ -4,6 +4,16 @@
   "compatibility_date": "2026-04-30",
   "compatibility_flags": ["nodejs_als"],
   "main": ".svelte-kit/cloudflare/_worker.js",
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "invocation_logs": true,
+      "persist": true,
+    },
+  },
   "assets": {
     "binding": "ASSETS",
     "directory": ".svelte-kit/cloudflare",
@@ -13,7 +23,7 @@
   "kv_namespaces": [
     {
       "binding": "EXTERNAL_API_CACHE",
-      "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "id": "2775d91c558441a8b35fc6d261629ee0",
       "preview_id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
     },
   ],

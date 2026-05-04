@@ -13,6 +13,7 @@
     "lint": "prettier --check . && eslint .",
     "format": "prettier --write .",
     "gen": "wrangler types",
+    "gen:types": "supabase gen types typescript --local > src/lib/types/supabase.ts",
     "test": "playwright test"
   },
   "devDependencies": {

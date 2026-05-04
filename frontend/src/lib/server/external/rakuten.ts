@@ -42,7 +42,7 @@ type RakutenResponse<T> = {
 };
 
 const RAKUTEN_MAX_HITS_PER_PAGE = 30;
-const RAKUTEN_SEARCH_CANDIDATE_LIMIT = 100;
+const RAKUTEN_SEARCH_CANDIDATE_LIMIT = 30; // 1ページ（30件）のみ取得するように変更
 const SEARCH_RESULT_LIMIT = 10;
 const RAKUTEN_CACHE_TTL = 86400; // 24 hours
 

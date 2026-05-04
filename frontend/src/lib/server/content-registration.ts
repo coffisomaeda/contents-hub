@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ContentRegistrationInput } from '$lib/validation/content';
+import type { Database, Json } from '$lib/types/supabase';
 
 type RegisterResult = {
   contentId: string;
@@ -19,7 +20,7 @@ const parseJson = (value: string | undefined) => {
 };
 
 const findExistingContent = async (
-  supabase: SupabaseClient,
+  supabase: SupabaseClient<Database>,
   input: ContentRegistrationInput,
 ): Promise<string | null> => {
   if (input.mediaType === 'book' && input.isbn) {
@@ -53,7 +54,7 @@ const findExistingContent = async (
 };
 
 const createContent = async (
-  supabase: SupabaseClient,
+  supabase: SupabaseClient<Database>,
   input: ContentRegistrationInput,
 ): Promise<string> => {
   const { data: content, error: contentError } = await supabase
@@ -125,7 +126,7 @@ const createContent = async (
       original_title: toNull(input.originalTitle),
       poster_path: toNull(input.posterPath),
       backdrop_path: toNull(input.backdropPath),
-      genres: parseJson(input.genresJson),
+      genres: parseJson(input.genresJson) as Json,
       vote_average: toNull(input.voteAverage),
       vote_count: toNull(input.voteCount),
       runtime: toNull(input.runtime),
@@ -146,7 +147,7 @@ const createContent = async (
 };
 
 export const registerContentForUser = async (
-  supabase: SupabaseClient,
+  supabase: SupabaseClient<Database>,
   userId: string,
   input: ContentRegistrationInput,
 ): Promise<RegisterResult> => {
