@@ -1,12 +1,14 @@
 import { test, expect } from '@playwright/test';
 
+const APP_ORIGIN = 'http://localhost:5175';
+
 test.describe('Auth API (SvelteKit Form Actions)', () => {
   // 1. ログイン失敗（存在しないユーザーや誤ったパスワード）のテスト
   test('POST /login with invalid credentials returns action failure', async ({ request }) => {
     const response = await request.post('/login', {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        Origin: 'http://localhost:5173',
+        Origin: APP_ORIGIN,
         // HTMLではなくJSONフォーマットでアクションの結果を受け取るため
         Accept: 'application/json',
       },
@@ -31,7 +33,7 @@ test.describe('Auth API (SvelteKit Form Actions)', () => {
     const response = await request.post('/signup', {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        Origin: 'http://localhost:5173',
+        Origin: APP_ORIGIN,
         Accept: 'application/json',
       },
       data: 'email=test@example.com&password=123',
@@ -52,7 +54,7 @@ test.describe('Auth API (SvelteKit Form Actions)', () => {
     const response = await request.post('/logout', {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        Origin: 'http://localhost:5173',
+        Origin: APP_ORIGIN,
       },
       maxRedirects: 0, // リダイレクトを自動追従しない
     });
@@ -70,7 +72,7 @@ test.describe('Auth API (SvelteKit Form Actions)', () => {
     const response = await request.post('/login', {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        Origin: 'http://localhost:5173',
+        Origin: APP_ORIGIN,
         Accept: 'application/json', // ActionResultとして受け取る
       },
       data: 'email=test1@example.com&password=password123',

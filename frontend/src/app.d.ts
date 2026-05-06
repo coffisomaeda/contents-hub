@@ -26,6 +26,7 @@ declare global {
         RAKUTEN_ACCESS_KEY?: string;
         TMDB_API_KEY?: string;
         WATCHMODE_API_KEY?: string;
+        WATCHMODE_API_BASE_URL?: string;
         EXTERNAL_API_CACHE: KVNamespace;
       };
       ctx: {

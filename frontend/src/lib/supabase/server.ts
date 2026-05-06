@@ -1,3 +1,4 @@
+import { dev } from '$app/environment';
 import { createServerClient } from '@supabase/ssr';
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
 import type { Cookies } from '@sveltejs/kit';
@@ -9,7 +10,7 @@ export function createClient(cookies: Cookies) {
       getAll: () => cookies.getAll(),
       setAll: (cookiesToSet) => {
         cookiesToSet.forEach(({ name, value, options }) => {
-          cookies.set(name, value, { ...options, path: '/' });
+          cookies.set(name, value, { ...options, path: '/', secure: dev ? false : options.secure });
         });
       },
     },
