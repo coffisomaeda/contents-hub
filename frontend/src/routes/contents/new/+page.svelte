@@ -5,12 +5,22 @@
 
   let { data, form } = $props();
   let isSearching = $state(false);
+  let isRegistering = $state(false);
   let selectedResult = $state<Partial<ContentRegistrationInput> | null>(null);
   let selectedMediaType = $state('book');
 
   const value = (input: unknown) => (input === null || input === undefined ? '' : String(input));
   const searchResults = $derived(form?.kind === 'search' ? (form.results ?? []) : []);
   const messageTone = $derived(form?.success ? 'success' : 'error');
+  const isVideoRegistration = $derived(
+    selectedResult?.mediaType === 'movie' || selectedResult?.mediaType === 'tv',
+  );
+  const registrationStatusTitle = $derived(isVideoRegistration ? '配信情報を取得中' : '登録中');
+  const registrationStatusDescription = $derived(
+    isVideoRegistration
+      ? 'Watchmode API から配信サービス情報を取得しています。'
+      : '登録内容を保存しています。',
+  );
   const mediaTypeMeta: Record<string, { label: string; iconPath: string }> = {
     book: {
       label: '書籍',
@@ -197,13 +207,30 @@
             <button
               type="button"
               class="border border-hairline rounded-sm px-4 py-2 text-button-utility text-ink bg-canvas hover:border-primary"
+              disabled={isRegistering}
               onclick={() => (selectedResult = null)}
             >
               検索結果に戻る
             </button>
           </div>
 
-          <form method="POST" action="?/register" class="grid gap-5">
+          <form
+            method="POST"
+            action="?/register"
+            class="grid gap-5"
+            aria-busy={isRegistering}
+            use:enhance={() => {
+              isRegistering = true;
+
+              return async ({ update }) => {
+                try {
+                  await update();
+                } finally {
+                  isRegistering = false;
+                }
+              };
+            }}
+          >
             <input type="hidden" name="mediaType" value={value(selectedResult.mediaType)} />
             <input type="hidden" name="title" value={value(selectedResult.title)} />
             <input type="hidden" name="titleKana" value={value(selectedResult.titleKana)} />
@@ -358,7 +385,7 @@
             <div class="grid gap-4 md:grid-cols-3">
               <label class="grid gap-2 text-body-strong">
                 ステータス
-                <select class="input-standard" name="status">
+                <select class="input-standard" name="status" disabled={isRegistering}>
                   <option value="want" selected={selectedResult.status === 'want'}>気になる</option>
                   <option value="doing" selected={selectedResult.status === 'doing'}>進行中</option>
                   <option value="done" selected={selectedResult.status === 'done'}>完了</option>
@@ -373,25 +400,47 @@
                   min="1"
                   max="5"
                   value={value(selectedResult.rating)}
+                  disabled={isRegistering}
                 />
               </label>
               <label class="grid gap-2 text-body-strong md:col-span-3">
                 メモ
-                <textarea class="input-standard min-h-[96px]" name="memo"
+                <textarea class="input-standard min-h-[96px]" name="memo" disabled={isRegistering}
                   >{value(selectedResult.memo)}</textarea
                 >
               </label>
             </div>
 
+            {#if isRegistering}
+              <div
+                class="grid gap-3 rounded-sm border border-hairline bg-canvas-parchment p-4"
+                role="status"
+                aria-live="polite"
+              >
+                <div class="flex items-center gap-3">
+                  <span
+                    class="block h-4 w-4 rounded-full border-2 border-hairline border-t-primary animate-spin"
+                  ></span>
+                  <span class="text-body-strong text-ink">{registrationStatusTitle}</span>
+                </div>
+                <p class="text-caption text-ink-muted-80 m-0">
+                  {registrationStatusDescription}
+                </p>
+              </div>
+            {/if}
+
             <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 class="border border-hairline rounded-sm px-4 py-2 text-button-utility text-ink bg-canvas hover:border-primary"
+                disabled={isRegistering}
                 onclick={() => (selectedResult = null)}
               >
                 検索結果に戻る
               </button>
-              <button type="submit" class="btn-primary rounded-sm">登録</button>
+              <button type="submit" class="btn-primary rounded-sm" disabled={isRegistering}>
+                {isRegistering ? registrationStatusTitle : '登録'}
+              </button>
             </div>
           </form>
         </section>
