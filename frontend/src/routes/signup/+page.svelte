@@ -4,7 +4,7 @@
   let { form } = $props();
 </script>
 
-<section class="max-w-[420px] mx-auto mt-12 sm:mt-24 p-6 sm:p-0">
+<section class="max-w-[420px] mx-auto mt-4 sm:mt-24 p-0 sm:p-0">
   <p class="text-primary text-[13px] font-bold tracking-normal uppercase mb-2">Create account</p>
   <h1 class="text-display-md mb-6 text-ink">アカウント登録</h1>
 

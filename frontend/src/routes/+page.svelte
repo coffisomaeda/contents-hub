@@ -41,7 +41,7 @@
   }
 
   h1 {
-    font-size: clamp(34px, 6vw, 60px);
+    font-size: clamp(28px, 6vw, 60px);
     font-weight: 600;
     line-height: 1.08;
     margin: 0;
@@ -49,15 +49,24 @@
 
   p {
     color: var(--color-ink-muted-80);
-    font-size: 18px;
+    font-size: 17px;
     line-height: 1.75;
     margin: 22px 0 0;
   }
 
   .actions {
     display: flex;
-    gap: 14px;
-    margin-top: 30px;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  @media (min-width: 640px) {
+    .actions {
+      flex-direction: row;
+      gap: 14px;
+      margin-top: 30px;
+    }
   }
 
   .actions a {
@@ -65,7 +74,8 @@
     border-radius: var(--radius-sm);
     color: var(--color-ink);
     font-weight: 600;
-    padding: 10px 14px;
+    padding: 12px 14px;
+    text-align: center;
     text-decoration: none;
   }
 

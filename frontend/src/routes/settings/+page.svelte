@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from '$app/paths';
   import SearchSettingsForm from '$lib/components/SearchSettingsForm.svelte';
 
   let { data, form } = $props();
@@ -15,5 +16,19 @@
 
   <section class="rounded-sm border border-hairline bg-canvas p-5">
     <SearchSettingsForm searchMediaTypes={data.searchMediaTypes} {form} />
+  </section>
+
+  <section class="rounded-sm border border-hairline bg-canvas p-5">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h2 class="text-body-strong m-0">アカウント</h2>
+        <p class="text-caption text-ink-muted-48 mt-1 mb-0">{data.user?.email ?? ''}</p>
+      </div>
+      <form method="POST" action={resolve('/logout')} class="m-0">
+        <button type="submit" class="btn-secondary rounded-sm w-full sm:w-auto">
+          ログアウト
+        </button>
+      </form>
+    </div>
   </section>
 </section>

@@ -49,10 +49,10 @@
 
   <fieldset class="grid gap-3 border-0 p-0 m-0">
     <legend class="text-body-strong">検索対象</legend>
-    <div class="grid gap-2 sm:grid-cols-2">
+    <div class="grid gap-2 grid-cols-2">
       {#each searchMediaTypeValues as mediaType (mediaType)}
         <label
-          class={`flex cursor-pointer items-center gap-3 rounded-sm border bg-canvas px-3 py-3 text-caption transition-colors ${
+          class={`flex cursor-pointer items-center gap-3 rounded-sm border bg-canvas px-3 py-3.5 text-caption transition-colors min-h-[48px] ${
             selectedMediaTypes.includes(mediaType)
               ? 'border-primary text-primary'
               : 'border-divider-soft text-ink hover:border-primary'

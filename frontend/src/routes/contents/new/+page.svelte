@@ -46,21 +46,21 @@
   };
 </script>
 
-<section class="mx-auto grid max-w-[1040px] gap-8">
+<section class="mx-auto grid max-w-[1040px] gap-6 sm:gap-8">
   <div class="grid gap-3">
     <p class="text-primary text-[13px] font-bold tracking-normal uppercase m-0">
       Content registration
     </p>
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
         <h1 class="text-display-md m-0 text-ink">コンテンツ登録</h1>
-        <p class="text-ink-muted-80 mt-3 mb-0 max-w-[620px]">
+        <p class="text-ink-muted-80 mt-2 mb-0 sm:mt-3 sm:max-w-[620px]">
           設定した検索対象をキーワード検索から登録します。
         </p>
       </div>
       <a
         href={resolve('/')}
-        class="border border-hairline rounded-sm px-4 py-2 text-button-utility text-ink no-underline hover:border-primary"
+        class="hidden sm:inline-block border border-hairline rounded-sm px-4 py-2 text-button-utility text-ink no-underline hover:border-primary"
         >ホーム</a
       >
     </div>
@@ -85,7 +85,7 @@
     </div>
   {/if}
 
-  <div class="grid gap-6">
+  <div class="grid gap-5 sm:gap-6">
     <section class="grid gap-4">
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <h2 class="text-tagline m-0">検索</h2>
@@ -100,7 +100,7 @@
       <form
         method="POST"
         action="?/search"
-        class="grid gap-3 sm:grid-cols-[320px_1fr_auto]"
+        class="grid gap-3"
         use:enhance={() => {
           isSearching = true;
 
@@ -115,7 +115,7 @@
           <div class="grid grid-cols-2 gap-2">
             {#each mediaTypeOptions as [mediaType, mediaTypeOption] (mediaType)}
               <label
-                class={`flex cursor-pointer items-center gap-2 rounded-sm border bg-canvas px-3 py-2 text-caption transition-colors ${
+                class={`flex cursor-pointer items-center gap-2 rounded-sm border bg-canvas px-3 py-2.5 text-caption transition-colors ${
                   selectedMediaType === mediaType
                     ? 'border-primary text-primary'
                     : 'border-divider-soft text-ink hover:border-primary'
@@ -154,7 +154,7 @@
         </label>
         <button
           type="submit"
-          class="btn-primary self-end rounded-sm min-w-[88px]"
+          class="btn-primary rounded-sm w-full sm:w-auto sm:self-end sm:min-w-[88px]"
           disabled={isSearching}
         >
           {isSearching ? '検索中' : '検索'}
@@ -179,7 +179,7 @@
           </div>
         </div>
       {:else if selectedResult}
-        <section class="grid gap-4 rounded-sm border border-hairline bg-canvas p-4">
+        <section class="grid gap-4 rounded-sm border border-hairline bg-canvas p-3 sm:p-4">
           <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h2 class="text-tagline m-0">登録</h2>
@@ -195,7 +195,7 @@
             </div>
             <button
               type="button"
-              class="border border-hairline rounded-sm px-4 py-2 text-button-utility text-ink bg-canvas hover:border-primary"
+              class="border border-hairline rounded-sm px-4 py-2 text-button-utility text-ink bg-canvas hover:border-primary w-full sm:w-auto"
               disabled={isRegistering}
               onclick={() => (selectedResult = null)}
             >
@@ -206,7 +206,7 @@
           <form
             method="POST"
             action="?/register"
-            class="grid gap-5"
+            class="grid gap-4 sm:gap-5"
             aria-busy={isRegistering}
             use:enhance={() => {
               isRegistering = true;
@@ -239,18 +239,22 @@
             <input type="hidden" name="genresJson" value={value(selectedResult.genresJson)} />
             <input type="hidden" name="makerCode" value={value(selectedResult.makerCode)} />
 
-            <div class="grid gap-4 lg:grid-cols-[160px_1fr]">
-              {#if selectedResult.imageUrl}
-                <img
-                  src={selectedResult.imageUrl}
-                  alt=""
-                  class="h-[220px] w-[160px] rounded-sm object-cover bg-canvas-parchment"
-                />
-              {:else}
-                <div class="h-[220px] w-[160px] rounded-sm bg-canvas-parchment"></div>
-              {/if}
+            <div class="grid gap-4">
+              <div class="flex justify-center sm:justify-start">
+                {#if selectedResult.imageUrl}
+                  <img
+                    src={selectedResult.imageUrl}
+                    alt=""
+                    class="h-[180px] w-[130px] rounded-sm object-cover bg-canvas-parchment sm:h-[220px] sm:w-[160px]"
+                  />
+                {:else}
+                  <div
+                    class="h-[180px] w-[130px] rounded-sm bg-canvas-parchment sm:h-[220px] sm:w-[160px]"
+                  ></div>
+                {/if}
+              </div>
 
-              <div class="grid gap-4">
+              <div class="grid gap-3 sm:gap-4">
                 <div>
                   <h3 class="text-body-strong m-0">{selectedResult.title}</h3>
                   {#if selectedResult.titleKana}
@@ -259,13 +263,15 @@
                     </p>
                   {/if}
                   {#if selectedResult.description}
-                    <p class="text-caption text-ink-muted-80 mt-3 mb-0">
+                    <p
+                      class="text-caption text-ink-muted-80 mt-2 mb-0 line-clamp-3 sm:line-clamp-none"
+                    >
                       {selectedResult.description}
                     </p>
                   {/if}
                 </div>
 
-                <dl class="grid gap-3 text-caption md:grid-cols-2">
+                <dl class="grid grid-cols-2 gap-3 text-caption">
                   {#if selectedResult.releaseDate}
                     <div>
                       <dt class="text-ink-muted-48">発売日</dt>
@@ -273,7 +279,7 @@
                     </div>
                   {/if}
                   {#if selectedResult.itemUrl}
-                    <div>
+                    <div class="col-span-2">
                       <dt class="text-ink-muted-48">商品URL</dt>
                       <dd class="m-0 break-all text-ink">{selectedResult.itemUrl}</dd>
                     </div>
@@ -283,7 +289,7 @@
             </div>
 
             {#if selectedResult.mediaType === 'book'}
-              <dl class="grid gap-3 text-caption md:grid-cols-2">
+              <dl class="grid grid-cols-2 gap-3 text-caption">
                 {#if selectedResult.isbn}
                   <div>
                     <dt class="text-ink-muted-48">ISBN</dt>
@@ -304,7 +310,7 @@
                 {/if}
               </dl>
             {:else if selectedResult.mediaType === 'game'}
-              <dl class="grid gap-3 text-caption md:grid-cols-2">
+              <dl class="grid grid-cols-2 gap-3 text-caption">
                 {#if selectedResult.jan}
                   <div>
                     <dt class="text-ink-muted-48">JAN</dt>
@@ -345,7 +351,7 @@
             <input type="hidden" name="reviewCount" value={value(selectedResult.reviewCount)} />
             <input type="hidden" name="reviewAverage" value={value(selectedResult.reviewAverage)} />
 
-            <div class="grid gap-4 md:grid-cols-3">
+            <div class="grid gap-4">
               <label class="grid gap-2 text-body-strong">
                 ステータス
                 <select class="input-standard" name="status" disabled={isRegistering}>
@@ -366,7 +372,7 @@
                   disabled={isRegistering}
                 />
               </label>
-              <label class="grid gap-2 text-body-strong md:col-span-3">
+              <label class="grid gap-2 text-body-strong">
                 メモ
                 <textarea class="input-standard min-h-[96px]" name="memo" disabled={isRegistering}
                   >{value(selectedResult.memo)}</textarea
@@ -395,13 +401,17 @@
             <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
               <button
                 type="button"
-                class="border border-hairline rounded-sm px-4 py-2 text-button-utility text-ink bg-canvas hover:border-primary"
+                class="border border-hairline rounded-sm px-4 py-2 text-button-utility text-ink bg-canvas hover:border-primary order-2 sm:order-1"
                 disabled={isRegistering}
                 onclick={() => (selectedResult = null)}
               >
                 検索結果に戻る
               </button>
-              <button type="submit" class="btn-primary rounded-sm" disabled={isRegistering}>
+              <button
+                type="submit"
+                class="btn-primary rounded-sm order-1 sm:order-2"
+                disabled={isRegistering}
+              >
                 {isRegistering ? registrationStatusTitle : '登録'}
               </button>
             </div>
@@ -411,19 +421,21 @@
         <div class="grid gap-3">
           {#each searchResults as result (`${result.mediaType}:${result.isbn ?? result.jan ?? result.tmdbId ?? result.title}`)}
             <article
-              class="grid gap-4 rounded-sm border border-hairline bg-canvas p-4 sm:grid-cols-[72px_1fr_auto]"
+              class="grid grid-cols-[64px_1fr] gap-3 rounded-sm border border-hairline bg-canvas p-3 sm:grid-cols-[72px_1fr_auto] sm:p-4"
             >
               {#if result.imageUrl}
                 <img
                   src={result.imageUrl}
                   alt=""
-                  class="h-[96px] w-[72px] rounded-sm object-cover bg-canvas-parchment"
+                  class="h-[88px] w-[64px] rounded-sm object-cover bg-canvas-parchment sm:h-[96px] sm:w-[72px]"
                 />
               {:else}
-                <div class="h-[96px] w-[72px] rounded-sm bg-canvas-parchment"></div>
+                <div
+                  class="h-[88px] w-[64px] rounded-sm bg-canvas-parchment sm:h-[96px] sm:w-[72px]"
+                ></div>
               {/if}
               <div class="min-w-0">
-                <h3 class="text-body-strong m-0">{result.title}</h3>
+                <h3 class="text-body-strong m-0 line-clamp-2">{result.title}</h3>
                 <p class="text-caption text-ink-muted-48 m-0 mt-1">
                   {result.author ??
                     result.hardware ??
@@ -432,14 +444,14 @@
                     '詳細なし'}
                 </p>
                 {#if result.description}
-                  <p class="text-caption text-ink-muted-80 mt-2 mb-0 line-clamp-2">
+                  <p class="text-caption text-ink-muted-80 mt-1 mb-0 line-clamp-2 hidden sm:block">
                     {result.description}
                   </p>
                 {/if}
               </div>
               <button
                 type="button"
-                class="btn-primary self-center rounded-sm whitespace-nowrap"
+                class="btn-primary self-center rounded-sm whitespace-nowrap col-span-2 sm:col-span-1"
                 onclick={() => selectResult(result)}
               >
                 登録

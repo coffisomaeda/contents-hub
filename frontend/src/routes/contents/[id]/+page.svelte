@@ -60,25 +60,27 @@
   };
 </script>
 
-<section class="mx-auto grid max-w-[1120px] gap-8">
+<section class="mx-auto grid max-w-[1120px] gap-6 sm:gap-8">
   <div>
     <a class="text-caption text-primary no-underline" href={resolve('/contents')}>一覧に戻る</a>
   </div>
 
-  <article class="grid gap-8 lg:grid-cols-[260px_1fr]">
-    <div>
+  <article class="grid gap-6 sm:gap-8 lg:grid-cols-[260px_1fr]">
+    <div class="flex justify-center lg:justify-start">
       {#if data.content.image_url}
         <img
           src={data.content.image_url}
           alt=""
-          class="h-auto w-full max-w-[260px] rounded-sm bg-canvas object-cover shadow-product"
+          class="h-auto w-[180px] rounded-sm bg-canvas object-cover shadow-product sm:w-full sm:max-w-[260px]"
         />
       {:else}
-        <div class="h-[360px] w-full max-w-[260px] rounded-sm bg-canvas"></div>
+        <div
+          class="h-[250px] w-[180px] rounded-sm bg-canvas sm:h-[360px] sm:w-full sm:max-w-[260px]"
+        ></div>
       {/if}
     </div>
 
-    <div class="grid gap-6">
+    <div class="grid gap-5 sm:gap-6">
       <div>
         <p class="text-caption text-primary m-0 font-semibold">
           {mediaTypeLabels[data.content.media_type] ?? data.content.media_type}
@@ -88,14 +90,14 @@
           <p class="text-caption text-ink-muted-48 m-0 mt-2">{data.content.title_kana}</p>
         {/if}
         {#if data.content.description}
-          <p class="text-body text-ink-muted-80 m-0 mt-5 whitespace-pre-wrap">
+          <p class="text-body text-ink-muted-80 m-0 mt-4 whitespace-pre-wrap">
             {data.content.description}
           </p>
         {/if}
       </div>
 
-      <section class="grid gap-5 rounded-sm border border-hairline bg-canvas p-5">
-        <dl class="grid gap-4 text-caption sm:grid-cols-2 lg:grid-cols-3">
+      <section class="grid gap-4 rounded-sm border border-hairline bg-canvas p-4 sm:gap-5 sm:p-5">
+        <dl class="grid grid-cols-2 gap-3 text-caption sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
           <div>
             <dt class="text-ink-muted-48">登録日</dt>
             <dd class="m-0">{formatDateTime(data.userContent.created_at)}</dd>
@@ -111,7 +113,7 @@
             </div>
           {/if}
           {#if data.content.item_url}
-            <div>
+            <div class="col-span-2 sm:col-span-1">
               <dt class="text-ink-muted-48">商品URL</dt>
               <dd class="m-0 break-all">
                 <a class="text-primary" href={data.content.item_url}>{data.content.item_url}</a>
@@ -148,13 +150,17 @@
         </dl>
 
         {#if data.videoSources.length > 0}
-          <div class="grid gap-3 border-t border-hairline pt-5">
+          <div class="grid gap-3 border-t border-hairline pt-4 sm:pt-5">
             <h3 class="text-caption text-ink-muted-48 m-0">配信情報</h3>
             <div class="grid gap-3">
               {#each data.videoSources as source (source.id)}
-                <div class="grid gap-2 text-caption sm:grid-cols-[1fr_120px_auto] sm:items-center">
-                  <p class="m-0">{source.name}</p>
-                  <p class="m-0">{videoSourceTypeLabels[source.type] ?? source.type}</p>
+                <div
+                  class="grid gap-1 text-caption sm:grid-cols-[1fr_120px_auto] sm:items-center sm:gap-2"
+                >
+                  <p class="m-0 font-semibold sm:font-normal">{source.name}</p>
+                  <p class="m-0 text-ink-muted-48 sm:text-ink">
+                    {videoSourceTypeLabels[source.type] ?? source.type}
+                  </p>
                   <div>
                     {#if source.web_url}
                       <a class="text-primary" href={source.web_url}>開く</a>
@@ -167,7 +173,7 @@
         {/if}
       </section>
 
-      <section class="grid gap-5 rounded-sm border border-hairline bg-canvas p-5">
+      <section class="grid gap-4 rounded-sm border border-hairline bg-canvas p-4 sm:gap-5 sm:p-5">
         {#if editMessage}
           <p
             class="text-caption m-0 rounded-sm px-3 py-2 {editMessage.type === 'error'
@@ -179,8 +185,8 @@
           </p>
         {/if}
 
-        <form method="POST" action="?/edit" use:enhance={handleSubmit} class="grid gap-5">
-          <div class="grid gap-4 sm:grid-cols-2">
+        <form method="POST" action="?/edit" use:enhance={handleSubmit} class="grid gap-4 sm:gap-5">
+          <div class="grid gap-4">
             <div class="grid gap-2">
               <label for="edit-status" class="text-caption text-ink-muted-48">ステータス</label>
               <select
@@ -222,7 +228,12 @@
           </div>
 
           <div class="flex items-center gap-4">
-            <button type="submit" class="btn-secondary" disabled={saving} id="edit-submit">
+            <button
+              type="submit"
+              class="btn-secondary w-full sm:w-auto"
+              disabled={saving}
+              id="edit-submit"
+            >
               {saving ? '保存中...' : '保存'}
             </button>
           </div>
