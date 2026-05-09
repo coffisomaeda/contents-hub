@@ -345,32 +345,6 @@
               <input type="hidden" name="voteAverage" value={value(selectedResult.voteAverage)} />
               <input type="hidden" name="voteCount" value={value(selectedResult.voteCount)} />
               <input type="hidden" name="videoStatus" value={value(selectedResult.videoStatus)} />
-              <dl class="grid gap-3 text-caption md:grid-cols-2">
-                {#if selectedResult.tmdbId}
-                  <div>
-                    <dt class="text-ink-muted-48">TMDB ID</dt>
-                    <dd class="m-0 text-ink">{selectedResult.tmdbId}</dd>
-                  </div>
-                {/if}
-                {#if selectedResult.originalTitle}
-                  <div>
-                    <dt class="text-ink-muted-48">原題</dt>
-                    <dd class="m-0 text-ink">{selectedResult.originalTitle}</dd>
-                  </div>
-                {/if}
-                {#if selectedResult.voteAverage !== undefined}
-                  <div>
-                    <dt class="text-ink-muted-48">投票平均</dt>
-                    <dd class="m-0 text-ink">{selectedResult.voteAverage}</dd>
-                  </div>
-                {/if}
-                {#if selectedResult.voteCount !== undefined}
-                  <div>
-                    <dt class="text-ink-muted-48">投票数</dt>
-                    <dd class="m-0 text-ink">{selectedResult.voteCount}</dd>
-                  </div>
-                {/if}
-              </dl>
             {/if}
 
             <input type="hidden" name="itemPrice" value={value(selectedResult.itemPrice)} />

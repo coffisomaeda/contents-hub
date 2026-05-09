@@ -161,6 +161,7 @@ test.describe('Content Registration API (SvelteKit Form Actions)', () => {
     expect(detailHtml).toContain('レンタル');
     expect(detailHtml.match(/<p class="m-0">Amazon Prime Video<\/p>/g) ?? []).toHaveLength(1);
     expect(detailHtml).not.toContain('TMDB ID');
+    expect(detailHtml).not.toContain('投票平均');
     expect(detailHtml).not.toContain('ジャンル');
     expect(detailHtml).not.toContain('投票数');
     expect(detailHtml).not.toContain('シーズン数');

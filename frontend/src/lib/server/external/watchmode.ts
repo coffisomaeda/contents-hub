@@ -33,12 +33,11 @@ const WATCHMODE_BASE_URL = 'https://api.watchmode.com/v1';
 const WATCHMODE_SEARCH_CACHE_TTL = 604800; // 7 days
 const WATCHMODE_SOURCES_CACHE_TTL = 604800; // 7 days
 
-// 月 2,500 リクエスト ≈ 83 req/day ≈ 0.001 req/sec
-// maxTokens=5 でバーストを許容しつつ、日次上限に近い速度で補充
+// Watchmode は検索と配信情報取得で連続して呼ぶため、UI操作中の長時間待機を避ける
 const WATCHMODE_TOKEN_BUCKET: TokenBucketConfig = {
   bucket: 'watchmode',
-  maxTokens: 5,
-  refillRatePerSecond: 0.001,
+  maxTokens: 20,
+  refillRatePerSecond: 1,
 };
 
 type CachedSearchResult = { value: WatchmodeTitleResult | null };
