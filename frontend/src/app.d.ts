@@ -1,21 +1,23 @@
+import type { Session, SupabaseClient, User } from '@supabase/supabase-js';
+import type { Database } from '$lib/types/supabase';
+import type { SearchMediaType } from '$lib/media-types';
+
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
 declare global {
   namespace App {
     interface Locals {
-      supabase: import('@supabase/supabase-js').SupabaseClient<
-        import('$lib/types/supabase').Database
-      >;
+      supabase: SupabaseClient<Database>;
       safeGetSession: () => Promise<{
-        session: import('@supabase/supabase-js').Session | null;
-        user: import('@supabase/supabase-js').User | null;
+        session: Session | null;
+        user: User | null;
       }>;
     }
 
     interface PageData {
-      session: import('@supabase/supabase-js').Session | null;
-      user: import('@supabase/supabase-js').User | null;
-      searchMediaTypes: import('$lib/media-types').SearchMediaType[];
+      session: Session | null;
+      user: User | null;
+      searchMediaTypes: SearchMediaType[];
       settingsCompletedAt: string | null;
     }
 
