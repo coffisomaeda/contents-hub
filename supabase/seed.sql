@@ -12,12 +12,14 @@ insert into auth.users (
   email,
   encrypted_password,
   email_confirmed_at,
+  raw_app_meta_data,
   raw_user_meta_data,
   created_at,
   updated_at,
   confirmation_token,
   recovery_token,
   email_change_token_new,
+  email_change,
   email_change_token_current
 )
 values
@@ -29,9 +31,11 @@ values
     'test1@example.com',
     crypt('password123', gen_salt('bf')),
     now(),
+    '{"provider": "email", "providers": ["email"]}',
     '{"display_name": "Test User 1", "avatar_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=Test1"}',
     now(),
     now(),
+    '',
     '',
     '',
     '',
@@ -45,9 +49,11 @@ values
     'test2@example.com',
     crypt('password123', gen_salt('bf')),
     now(),
+    '{"provider": "email", "providers": ["email"]}',
     '{"display_name": "Test User 2", "avatar_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=Test2"}',
     now(),
     now(),
+    '',
     '',
     '',
     '',
@@ -87,7 +93,7 @@ values
     '進撃の巨人（1）',
     'シンゲキノキョジン1',
     '巨人がすべてを支配する世界。巨人の餌と化した人類は、巨大な壁を築き、壁外への自由と引き換えに侵略を防いでいた...',
-    'https://example.com/images/book1.jpg',
+    'https://covers.openlibrary.org/b/isbn/9784063842760-L.jpg',
     '2010-03-17',
     'https://books.rakuten.co.jp/rb/6368481/'
   ),
@@ -97,9 +103,29 @@ values
     'ゼルダの伝説 ティアーズ オブ ザ キングダム',
     'ゼルダノデンセツ ティアーズオブザキングダム',
     '果てなき冒険は、大空へ広がる。『ゼルダの伝説 ブレス オブ ザ ワイルド』続編。',
-    'https://example.com/images/game1.jpg',
+    'https://images.igdb.com/igdb/image/upload/t_cover_big/co5vmg.jpg',
     '2023-05-12',
     'https://books.rakuten.co.jp/rb/17424606/'
+  ),
+  (
+    '55555555-5555-5555-5555-555555555555',
+    'book',
+    'プロダクトマネジメントのすべて',
+    'プロダクトマネジメントノスベテ',
+    'プロダクト開発に必要な戦略、ロードマップ、チーム運営、仮説検証を体系的に扱う実務書。',
+    'https://covers.openlibrary.org/b/isbn/9784798166391-L.jpg',
+    '2021-03-03',
+    'https://books.rakuten.co.jp/rb/16567358/'
+  ),
+  (
+    '66666666-6666-6666-6666-666666666666',
+    'game',
+    'ELDEN RING',
+    'エルデンリング',
+    '広大なフィールドとダンジョン探索、高い自由度のビルドを特徴とするアクションRPG。',
+    'https://images.igdb.com/igdb/image/upload/t_cover_big/co4jni.jpg',
+    '2022-02-25',
+    'https://www.eldenring.jp/'
   ),
   (
     '33333333-3333-3333-3333-333333333333',
@@ -135,6 +161,17 @@ values
     '001001001',
     100,
     4.5
+  ),
+  (
+    '55555555-5555-5555-5555-555555555555',
+    '9784798166391',
+    '及川 卓也、曽根原 春樹、小城 久美子',
+    null,
+    '翔泳社',
+    2860,
+    '001005017',
+    42,
+    4.3
   );
 
 -- 4. ゲーム固有 (games)
@@ -150,6 +187,17 @@ values
     '006001001',
     500,
     4.8
+  ),
+  (
+    '66666666-6666-6666-6666-666666666666',
+    '4949776441067',
+    'PlayStation 5',
+    'フロム・ソフトウェア',
+    'ELJM-30112',
+    9240,
+    '006515',
+    820,
+    4.7
   );
 
 -- 5. 映像作品固有 (videos)
@@ -234,6 +282,34 @@ values
     'doing',
     null,
     'まだ序盤だけど楽しい。'
+  ),
+  (
+    '00000000-0000-0000-0000-000000000001',
+    '33333333-3333-3333-3333-333333333333',
+    'done',
+    4,
+    '何度見ても世界観が強い。配信情報の表示確認用。'
+  ),
+  (
+    '00000000-0000-0000-0000-000000000001',
+    '44444444-4444-4444-4444-444444444444',
+    'want',
+    null,
+    '長編ドラマの詳細表示を確認するためのサンプル。'
+  ),
+  (
+    '00000000-0000-0000-0000-000000000001',
+    '55555555-5555-5555-5555-555555555555',
+    'doing',
+    4,
+    '仕事の参考資料として少しずつ読む。'
+  ),
+  (
+    '00000000-0000-0000-0000-000000000001',
+    '66666666-6666-6666-6666-666666666666',
+    'want',
+    null,
+    null
   ),
   (
     '00000000-0000-0000-0000-000000000002',

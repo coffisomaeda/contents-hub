@@ -1,10 +1,23 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ContentRegistrationInput } from '$lib/validation/content';
 import type { Database, Json } from '$lib/types/supabase';
+import type { WatchmodeSource, WatchmodeTitleResult } from './external/watchmode';
 
 type RegisterResult = {
   contentId: string;
   reusedContent: boolean;
+};
+
+type WatchmodeClient = {
+  searchByTmdbId: (
+    mediaType: 'movie' | 'tv',
+    tmdbId: number,
+  ) => Promise<WatchmodeTitleResult | null>;
+  getStreamingSources: (watchmodeId: number, regions?: string) => Promise<WatchmodeSource[]>;
+};
+
+type RegisterContentOptions = {
+  watchmode?: WatchmodeClient;
 };
 
 const toNull = <T>(value: T | undefined) => value ?? null;
@@ -56,6 +69,7 @@ const findExistingContent = async (
 const createContent = async (
   supabase: SupabaseClient<Database>,
   input: ContentRegistrationInput,
+  options: RegisterContentOptions = {},
 ): Promise<string> => {
   const { data: content, error: contentError } = await supabase
     .from('contents')
@@ -119,6 +133,8 @@ const createContent = async (
       throw new Error('映像作品の登録には TMDB ID が必要です。');
     }
 
+    const watchmodeId = input.watchmodeId ?? (await resolveWatchmodeId(options.watchmode, input));
+
     const { error } = await supabase.from('videos').insert({
       id: content.id,
       media_type: input.mediaType,
@@ -134,25 +150,74 @@ const createContent = async (
       number_of_episodes: toNull(input.numberOfEpisodes),
       status: toNull(input.videoStatus),
       imdb_id: toNull(input.imdbId),
-      watchmode_id: toNull(input.watchmodeId),
+      watchmode_id: toNull(watchmodeId),
     });
 
     if (error) {
       await supabase.from('contents').delete().eq('id', content.id);
       throw new Error(error.message);
     }
+
+    await saveWatchmodeSources(supabase, content.id, watchmodeId, options.watchmode);
   }
 
   return content.id;
+};
+
+const resolveWatchmodeId = async (
+  watchmode: WatchmodeClient | undefined,
+  input: ContentRegistrationInput,
+) => {
+  if (!watchmode || !input.tmdbId || (input.mediaType !== 'movie' && input.mediaType !== 'tv')) {
+    return undefined;
+  }
+
+  try {
+    return (await watchmode.searchByTmdbId(input.mediaType, input.tmdbId))?.id;
+  } catch {
+    return undefined;
+  }
+};
+
+const saveWatchmodeSources = async (
+  supabase: SupabaseClient<Database>,
+  videoId: string,
+  watchmodeId: number | undefined,
+  watchmode: WatchmodeClient | undefined,
+) => {
+  if (!watchmodeId || !watchmode) return;
+
+  try {
+    const sources = await watchmode.getStreamingSources(watchmodeId, 'JP');
+    if (sources.length === 0) return;
+
+    await supabase.from('video_sources').insert(
+      sources.map((source) => ({
+        video_id: videoId,
+        source_id: toNull(source.source_id),
+        name: source.name,
+        type: source.type,
+        region: toNull(source.region),
+        web_url: toNull(source.web_url),
+        format: toNull(source.format),
+        price: toNull(source.price),
+        seasons: toNull(source.seasons),
+        episodes: toNull(source.episodes),
+      })),
+    );
+  } catch {
+    // Watchmode 連携失敗時もコンテンツ登録は成功扱い
+  }
 };
 
 export const registerContentForUser = async (
   supabase: SupabaseClient<Database>,
   userId: string,
   input: ContentRegistrationInput,
+  options: RegisterContentOptions = {},
 ): Promise<RegisterResult> => {
   const existingContentId = await findExistingContent(supabase, input);
-  const contentId = existingContentId ?? (await createContent(supabase, input));
+  const contentId = existingContentId ?? (await createContent(supabase, input, options));
 
   const { error } = await supabase.from('user_contents').insert({
     user_id: userId,

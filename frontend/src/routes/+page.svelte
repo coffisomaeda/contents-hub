@@ -12,6 +12,7 @@
       書籍、ゲーム、映像作品をひとつの場所で管理できます。まずは新しいコンテンツを登録してください。
     </p>
     <div class="actions">
+      <a href={resolve('/contents')}>一覧を見る</a>
       <a class="primary" href={resolve('/contents/new')}>登録する</a>
     </div>
   {:else}

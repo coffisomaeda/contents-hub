@@ -1,9 +1,11 @@
 import { env } from '$env/dynamic/private';
+import { dev } from '$app/environment';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { registerContentForUser } from '$lib/server/content-registration';
 import { createRakutenClient } from '$lib/server/external/rakuten';
 import { createTmdbClient } from '$lib/server/external/tmdb';
+import { createWatchmodeClient } from '$lib/server/external/watchmode';
 import { contentRegistrationSchema, contentSearchSchema } from '$lib/validation/content';
 
 const getPrivateEnv = (platform: App.Platform | undefined, key: string): string | undefined => {
@@ -62,6 +64,7 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
   }
 
   return {
+    showApiAvailability: dev,
     apiAvailability: {
       rakuten: Boolean(
         getPrivateEnv(platform, 'RAKUTEN_APP_ID') && getPrivateEnv(platform, 'RAKUTEN_ACCESS_KEY'),
@@ -127,7 +130,7 @@ export const actions: Actions = {
       });
     }
   },
-  register: async ({ request, locals }) => {
+  register: async ({ request, locals, platform }) => {
     const { user } = await locals.safeGetSession();
 
     if (!user) {
@@ -145,7 +148,14 @@ export const actions: Actions = {
     }
 
     try {
-      const result = await registerContentForUser(locals.supabase, user.id, parsed.data);
+      const kv = platform?.env?.EXTERNAL_API_CACHE;
+      const result = await registerContentForUser(locals.supabase, user.id, parsed.data, {
+        watchmode: createWatchmodeClient(
+          kv,
+          getPrivateEnv(platform, 'WATCHMODE_API_KEY'),
+          getPrivateEnv(platform, 'WATCHMODE_API_BASE_URL'),
+        ),
+      });
 
       return {
         kind: 'register',

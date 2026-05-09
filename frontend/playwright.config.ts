@@ -7,15 +7,27 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
-  webServer: {
-    command: 'pnpm dev --host 127.0.0.1',
-    url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-  },
+  webServer: [
+    {
+      command: 'node tests/api/watchmode-mock-server.mjs',
+      url: 'http://127.0.0.1:5174/health',
+      reuseExistingServer: false,
+      timeout: 120 * 1000,
+    },
+    {
+      command: 'pnpm dev --host 127.0.0.1 --port 5175',
+      url: 'http://localhost:5175',
+      reuseExistingServer: false,
+      timeout: 120 * 1000,
+      env: {
+        WATCHMODE_API_KEY: process.env.WATCHMODE_API_KEY ?? 'playwright-watchmode-key',
+        WATCHMODE_API_BASE_URL: process.env.WATCHMODE_API_BASE_URL ?? 'http://127.0.0.1:5174/v1',
+      },
+    },
+  ],
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://localhost:5173',
+    baseURL: 'http://localhost:5175',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',

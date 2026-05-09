@@ -4,11 +4,25 @@
 
 ## 前提
 
-- Docker が起動していること
+- Docker Engine が起動していて `docker info` が成功すること
 - このリポジトリのルートでコマンドを実行すること
 - Supabase CLI は `mise.toml` で管理（`supabase` コマンドで直接実行）
 
 設定ファイルは `supabase/config.toml` にあります。
+
+Docker Desktop は必須ではありません。Linux では Docker Engine の daemon が起動していれば十分です。
+
+```bash
+docker info
+```
+
+daemon が起動していない場合は、OS 側で Docker Engine を起動してください。
+
+```bash
+sudo systemctl enable --now docker
+```
+
+`docker` は Docker daemon に命令を送るクライアントで、daemon 自体を起動するコマンドではありません。
 
 ## よく使う流れ
 
@@ -31,7 +45,7 @@ supabase init
 ### 起動
 
 ```bash
-supabase start
+pnpm supabase:start
 ```
 
 起動後は次の情報が表示されます。
@@ -44,7 +58,7 @@ supabase start
 ### 状態確認
 
 ```bash
-supabase status
+pnpm supabase:status
 ```
 
 環境変数形式で見たい場合:
@@ -56,7 +70,7 @@ supabase status -o env
 ### 停止
 
 ```bash
-supabase stop --project-id content-hub
+pnpm supabase:stop
 ```
 
 全プロジェクトのローカル Supabase を止める場合:
@@ -68,7 +82,7 @@ supabase stop --all
 データ volume も削除して完全に消したい場合:
 
 ```bash
-supabase stop --project-id content-hub --no-backup
+supabase stop --project-id contents-hub --no-backup
 ```
 
 ## DB と migration
@@ -190,9 +204,9 @@ warning 止まりで起動失敗ではありませんが、seed を使うなら 
 ローカル変更を migration 化して確認する時:
 
 ```bash
-supabase start
+pnpm supabase:start
 supabase db diff -f <migration_name>
-supabase db reset
+pnpm supabase:reset
 ```
 
 本番または共有環境に反映する前:
@@ -211,8 +225,8 @@ supabase db push
 前回の `supabase start` の残骸コンテナが残っています。
 
 ```bash
-supabase stop --project-id content-hub
-supabase start
+pnpm supabase:stop
+pnpm supabase:start
 ```
 
 ### `failed to resolve reference`

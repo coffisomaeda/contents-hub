@@ -33,17 +33,22 @@ const WATCHMODE_BASE_URL = 'https://api.watchmode.com/v1';
 const WATCHMODE_SEARCH_CACHE_TTL = 604800; // 7 days
 const WATCHMODE_SOURCES_CACHE_TTL = 604800; // 7 days
 
-// 月 2,500 リクエスト ≈ 83 req/day ≈ 0.001 req/sec
-// maxTokens=5 でバーストを許容しつつ、日次上限に近い速度で補充
+// Watchmode は検索と配信情報取得で連続して呼ぶため、UI操作中の長時間待機を避ける
 const WATCHMODE_TOKEN_BUCKET: TokenBucketConfig = {
   bucket: 'watchmode',
-  maxTokens: 5,
-  refillRatePerSecond: 0.001,
+  maxTokens: 20,
+  refillRatePerSecond: 1,
 };
 
 type CachedSearchResult = { value: WatchmodeTitleResult | null };
 
-export const createWatchmodeClient = (kv: KVNamespace | undefined, apiKey?: string) => {
+export const createWatchmodeClient = (
+  kv: KVNamespace | undefined,
+  apiKey?: string,
+  baseUrl = WATCHMODE_BASE_URL,
+) => {
+  const cacheKv = baseUrl === WATCHMODE_BASE_URL ? kv : undefined;
+
   const searchByTmdbId = async (
     mediaType: 'movie' | 'tv',
     tmdbId: number,
@@ -51,13 +56,13 @@ export const createWatchmodeClient = (kv: KVNamespace | undefined, apiKey?: stri
     if (!apiKey) return null;
 
     const cacheKey = buildCacheKey('watchmode', 'search', mediaType, String(tmdbId));
-    const cached = await getFromCache<CachedSearchResult>(kv, cacheKey);
+    const cached = await getFromCache<CachedSearchResult>(cacheKv, cacheKey);
     if (cached !== null) return cached.value;
 
-    if (kv) await consumeToken(kv, WATCHMODE_TOKEN_BUCKET);
+    if (cacheKv) await consumeToken(cacheKv, WATCHMODE_TOKEN_BUCKET);
 
     const searchField = mediaType === 'movie' ? 'tmdb_movie_id' : 'tmdb_tv_id';
-    const url = new URL(`${WATCHMODE_BASE_URL}/search/`);
+    const url = new URL(`${baseUrl}/search/`);
     url.searchParams.set('apiKey', apiKey);
     url.searchParams.set('search_field', searchField);
     url.searchParams.set('search_value', String(tmdbId));
@@ -71,7 +76,7 @@ export const createWatchmodeClient = (kv: KVNamespace | undefined, apiKey?: stri
     const payload = (await response.json()) as WatchmodeSearchApiResponse;
     const result = payload.title_results?.[0] ?? null;
 
-    await setToCache(kv, cacheKey, { value: result }, WATCHMODE_SEARCH_CACHE_TTL);
+    await setToCache(cacheKv, cacheKey, { value: result }, WATCHMODE_SEARCH_CACHE_TTL);
     return result;
   };
 
@@ -82,12 +87,12 @@ export const createWatchmodeClient = (kv: KVNamespace | undefined, apiKey?: stri
     if (!apiKey) return [];
 
     const cacheKey = buildCacheKey('watchmode', 'sources', String(watchmodeId), regions);
-    const cached = await getFromCache<WatchmodeSource[]>(kv, cacheKey);
+    const cached = await getFromCache<WatchmodeSource[]>(cacheKv, cacheKey);
     if (cached) return cached;
 
-    if (kv) await consumeToken(kv, WATCHMODE_TOKEN_BUCKET);
+    if (cacheKv) await consumeToken(cacheKv, WATCHMODE_TOKEN_BUCKET);
 
-    const url = new URL(`${WATCHMODE_BASE_URL}/title/${watchmodeId}/sources/`);
+    const url = new URL(`${baseUrl}/title/${watchmodeId}/sources/`);
     url.searchParams.set('apiKey', apiKey);
     url.searchParams.set('regions', regions);
 
@@ -98,7 +103,7 @@ export const createWatchmodeClient = (kv: KVNamespace | undefined, apiKey?: stri
 
     const result = (await response.json()) as WatchmodeSource[];
 
-    await setToCache(kv, cacheKey, result, WATCHMODE_SOURCES_CACHE_TTL);
+    await setToCache(cacheKv, cacheKey, result, WATCHMODE_SOURCES_CACHE_TTL);
     return result;
   };
 

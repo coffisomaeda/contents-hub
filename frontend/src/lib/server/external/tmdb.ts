@@ -56,6 +56,7 @@ export const createTmdbClient = (kv: KVNamespace | undefined, apiKey?: string) =
     url.searchParams.set('api_key', apiKey);
     url.searchParams.set('query', query);
     url.searchParams.set('language', 'ja-JP');
+    url.searchParams.set('region', 'JP');
     url.searchParams.set('include_adult', 'false');
 
     const response = await fetchWithRetry(url);
