@@ -1,6 +1,8 @@
-import { error, redirect } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
+import { error, fail } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
 import type { Tables } from '$lib/types/supabase';
+import { requireUser } from '$lib/server/auth';
+import { contentEditSchema } from '$lib/validation/content-edit';
 
 type UserContent = Tables<'user_contents'> & {
   contents: Tables<'contents'> | null;
@@ -28,11 +30,7 @@ const compactVideoSources = (sources: VideoSource[]) => {
 };
 
 export const load: PageServerLoad = async ({ locals, params }) => {
-  const { user } = await locals.safeGetSession();
-
-  if (!user) {
-    redirect(303, '/login');
-  }
+  const user = await requireUser(locals);
 
   const { data: userContent, error: userContentError } = await locals.supabase
     .from('user_contents')
@@ -82,4 +80,49 @@ export const load: PageServerLoad = async ({ locals, params }) => {
     video: videoResult.data as Tables<'videos'> | null,
     videoSources: compactVideoSources((sourcesResult.data ?? []) as VideoSource[]),
   };
+};
+
+export const actions: Actions = {
+  edit: async ({ request, locals, params }) => {
+    const user = await requireUser(locals);
+
+    const formData = await request.formData();
+    const parsed = contentEditSchema.safeParse({
+      status: formData.get('status'),
+      rating: formData.get('rating'),
+      memo: formData.get('memo'),
+    });
+
+    if (!parsed.success) {
+      return fail(400, {
+        kind: 'edit' as const,
+        message: parsed.error.issues[0].message,
+      });
+    }
+
+    const { status, rating, memo } = parsed.data;
+
+    const { error: updateError } = await locals.supabase
+      .from('user_contents')
+      .update({
+        status,
+        rating: rating ?? null,
+        memo: memo ?? null,
+      })
+      .eq('user_id', user.id)
+      .eq('content_id', params.id);
+
+    if (updateError) {
+      return fail(500, {
+        kind: 'edit' as const,
+        message: 'コンテンツの更新に失敗しました。',
+      });
+    }
+
+    return {
+      kind: 'edit' as const,
+      success: true,
+      message: 'コンテンツを更新しました。',
+    };
+  },
 };

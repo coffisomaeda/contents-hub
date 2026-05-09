@@ -1,7 +1,7 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
 
-  let { data } = $props();
+  let { data, form } = $props();
 
   const mediaTypeMeta: Record<string, { label: string; iconPath: string; className: string }> = {
     book: {
@@ -54,6 +54,17 @@
     <a class="btn-primary rounded-sm text-center" href={resolve('/contents/new')}>登録する</a>
   </div>
 
+  {#if form?.kind === 'delete' && form.message}
+    <div
+      class="rounded-sm p-3 text-caption {form.success
+        ? 'bg-[#f0fdf4] border border-[#bbf7d0] text-[#15803d]'
+        : 'bg-[#fff1f2] border border-[#fecdd3] text-[#be123c]'}"
+      role={form.success ? 'status' : 'alert'}
+    >
+      {form.message}
+    </div>
+  {/if}
+
   {#if data.items.length === 0}
     <div class="grid gap-4 rounded-sm border border-hairline bg-canvas p-6">
       <h2 class="text-tagline m-0">まだ登録なし</h2>
@@ -71,19 +82,20 @@
         {#if content}
           {@const mediaType = mediaTypeMeta[content.media_type]}
           {@const status = statusMeta[item.status]}
-          <a
-            class="grid gap-4 rounded-sm border border-hairline bg-canvas p-4 text-ink no-underline transition-colors hover:border-primary md:grid-cols-[96px_1fr_auto]"
-            href={resolve(`/contents/${content.id}`)}
+          <article
+            class="grid gap-4 rounded-sm border border-hairline bg-canvas p-4 text-ink transition-colors hover:border-primary md:grid-cols-[96px_1fr_auto]"
           >
-            {#if content.image_url}
-              <img
-                src={content.image_url}
-                alt=""
-                class="h-[132px] w-[96px] rounded-sm bg-canvas-parchment object-cover"
-              />
-            {:else}
-              <div class="h-[132px] w-[96px] rounded-sm bg-canvas-parchment"></div>
-            {/if}
+            <a href={resolve(`/contents/${content.id}`)} class="block no-underline">
+              {#if content.image_url}
+                <img
+                  src={content.image_url}
+                  alt=""
+                  class="h-[132px] w-[96px] rounded-sm bg-canvas-parchment object-cover"
+                />
+              {:else}
+                <div class="h-[132px] w-[96px] rounded-sm bg-canvas-parchment"></div>
+              {/if}
+            </a>
 
             <div class="grid content-start gap-3">
               <div>
@@ -107,7 +119,12 @@
                   {/if}
                   {mediaType?.label ?? content.media_type}
                 </span>
-                <h2 class="text-tagline m-0 mt-1">{content.title}</h2>
+                <h2 class="text-tagline m-0 mt-1">
+                  <a
+                    class="text-ink no-underline hover:text-primary"
+                    href={resolve(`/contents/${content.id}`)}>{content.title}</a
+                  >
+                </h2>
               </div>
               <dl class="grid gap-2 text-caption sm:grid-cols-2 lg:grid-cols-4">
                 <div>
@@ -135,12 +152,29 @@
               </dl>
             </div>
 
-            <span
-              class="text-caption text-primary self-center justify-self-start md:justify-self-end"
+            <div
+              class="flex items-center gap-3 self-center justify-self-start md:flex-col md:items-end md:justify-self-end"
             >
-              詳細
-            </span>
-          </a>
+              <a
+                class="text-caption text-primary no-underline hover:underline"
+                href={resolve(`/contents/${content.id}`)}>詳細</a
+              >
+              <form method="POST" action="?/delete" class="m-0">
+                <input type="hidden" name="contentId" value={content.id} />
+                <button
+                  type="submit"
+                  class="rounded-sm border border-[#fecdd3] bg-[#fff1f2] px-3 py-2 text-caption text-[#be123c] hover:border-[#f43f5e]"
+                  onclick={(event) => {
+                    if (!confirm('一覧から削除しますか？')) {
+                      event.preventDefault();
+                    }
+                  }}
+                >
+                  削除
+                </button>
+              </form>
+            </div>
+          </article>
         {/if}
       {/each}
     </div>

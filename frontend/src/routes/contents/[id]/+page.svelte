@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
+  import type { SubmitFunction } from '@sveltejs/kit';
 
   let { data } = $props();
 
@@ -10,11 +12,20 @@
     tv: 'TV',
   };
 
-  const statusLabels: Record<string, string> = {
-    want: '気になる',
-    doing: '進行中',
-    done: '完了',
-  };
+  const statusOptions = [
+    { value: 'want', label: '気になる' },
+    { value: 'doing', label: '進行中' },
+    { value: 'done', label: '完了' },
+  ];
+
+  const ratingOptions = [
+    { value: '', label: '未評価' },
+    { value: '1', label: '1' },
+    { value: '2', label: '2' },
+    { value: '3', label: '3' },
+    { value: '4', label: '4' },
+    { value: '5', label: '5' },
+  ];
 
   const videoSourceTypeLabels: Record<string, string> = {
     sub: 'サブスク',
@@ -26,8 +37,27 @@
 
   const formatDate = (value: string | null) => value ?? '未設定';
   const formatDateTime = (value: string) => new Date(value).toLocaleString('ja-JP');
-  const formatRating = (value: number | null) => (value ? `${value}/5` : '未評価');
   const hasValue = (value: unknown) => value !== null && value !== undefined && value !== '';
+
+  let saving = $state(false);
+  let editMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const handleSubmit: SubmitFunction = () => {
+    saving = true;
+    editMessage = null;
+
+    return async ({ update, result }) => {
+      saving = false;
+
+      if (result.type === 'success' && result.data?.kind === 'edit') {
+        editMessage = { type: 'success', text: String(result.data.message ?? '') };
+      } else if (result.type === 'failure' && result.data?.kind === 'edit') {
+        editMessage = { type: 'error', text: String(result.data.message ?? '') };
+      }
+
+      await update();
+    };
+  };
 </script>
 
 <section class="mx-auto grid max-w-[1120px] gap-8">
@@ -66,14 +96,6 @@
 
       <section class="grid gap-5 rounded-sm border border-hairline bg-canvas p-5">
         <dl class="grid gap-4 text-caption sm:grid-cols-2 lg:grid-cols-3">
-          <div>
-            <dt class="text-ink-muted-48">ステータス</dt>
-            <dd class="m-0">{statusLabels[data.userContent.status] ?? data.userContent.status}</dd>
-          </div>
-          <div>
-            <dt class="text-ink-muted-48">評価</dt>
-            <dd class="m-0">{formatRating(data.userContent.rating)}</dd>
-          </div>
           <div>
             <dt class="text-ink-muted-48">登録日</dt>
             <dd class="m-0">{formatDateTime(data.userContent.created_at)}</dd>
@@ -125,13 +147,6 @@
           {/if}
         </dl>
 
-        {#if data.userContent.memo}
-          <div>
-            <h3 class="text-caption text-ink-muted-48 m-0">メモ</h3>
-            <p class="text-body m-0 mt-2 whitespace-pre-wrap">{data.userContent.memo}</p>
-          </div>
-        {/if}
-
         {#if data.videoSources.length > 0}
           <div class="grid gap-3 border-t border-hairline pt-5">
             <h3 class="text-caption text-ink-muted-48 m-0">配信情報</h3>
@@ -150,6 +165,68 @@
             </div>
           </div>
         {/if}
+      </section>
+
+      <section class="grid gap-5 rounded-sm border border-hairline bg-canvas p-5">
+        {#if editMessage}
+          <p
+            class="text-caption m-0 rounded-sm px-3 py-2 {editMessage.type === 'error'
+              ? 'bg-[#fef2f2] text-[#991b1b]'
+              : 'bg-[#f0fdf4] text-[#166534]'}"
+            id="edit-message"
+          >
+            {editMessage.text}
+          </p>
+        {/if}
+
+        <form method="POST" action="?/edit" use:enhance={handleSubmit} class="grid gap-5">
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div class="grid gap-2">
+              <label for="edit-status" class="text-caption text-ink-muted-48">ステータス</label>
+              <select
+                id="edit-status"
+                name="status"
+                class="input-standard text-caption"
+                value={data.userContent.status}
+              >
+                {#each statusOptions as option (option.value)}
+                  <option value={option.value}>{option.label}</option>
+                {/each}
+              </select>
+            </div>
+
+            <div class="grid gap-2">
+              <label for="edit-rating" class="text-caption text-ink-muted-48">評価</label>
+              <select
+                id="edit-rating"
+                name="rating"
+                class="input-standard text-caption"
+                value={data.userContent.rating?.toString() ?? ''}
+              >
+                {#each ratingOptions as option (option.value)}
+                  <option value={option.value}>{option.label}</option>
+                {/each}
+              </select>
+            </div>
+          </div>
+
+          <div class="grid gap-2">
+            <label for="edit-memo" class="text-caption text-ink-muted-48">メモ</label>
+            <textarea
+              id="edit-memo"
+              name="memo"
+              rows="4"
+              class="input-standard text-caption resize-y"
+              placeholder="感想やメモを自由に入力...">{data.userContent.memo ?? ''}</textarea
+            >
+          </div>
+
+          <div class="flex items-center gap-4">
+            <button type="submit" class="btn-secondary" disabled={saving} id="edit-submit">
+              {saving ? '保存中...' : '保存'}
+            </button>
+          </div>
+        </form>
       </section>
     </div>
   </article>

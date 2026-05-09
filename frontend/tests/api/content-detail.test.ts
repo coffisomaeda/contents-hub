@@ -1,22 +1,7 @@
-import { expect, test, type APIRequestContext } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+import { login } from './utils';
 
-const APP_ORIGIN = 'http://localhost:5175';
 const MATRIX_CONTENT_ID = '33333333-3333-3333-3333-333333333333';
-
-const login = async (request: APIRequestContext) => {
-  const response = await request.post('/login', {
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Origin: APP_ORIGIN,
-      Accept: 'application/json',
-    },
-    data: 'email=test1@example.com&password=password123',
-    maxRedirects: 0,
-  });
-
-  expect([200, 303]).toContain(response.status());
-  expect(response.headers()['set-cookie']).toContain('sb-');
-};
 
 test.describe('Content Detail API', () => {
   test('GET /contents/{id} exposes detail without internal video fields', async ({ request }) => {
@@ -29,7 +14,7 @@ test.describe('Content Detail API', () => {
     expect(html).toContain('マトリックス');
     expect(html).toContain('映画');
     expect(html).toContain('完了');
-    expect(html).toContain('4/5');
+    expect(html).toContain('value="4"');
     expect(html).toContain('1999-03-30');
     expect(html).toContain('The Matrix');
     expect(html).toContain('136分');

@@ -1,11 +1,13 @@
 import { env } from '$env/dynamic/private';
 import { dev } from '$app/environment';
-import { fail, redirect } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
+import { requireUser } from '$lib/server/auth';
 import { registerContentForUser } from '$lib/server/content-registration';
 import { createRakutenClient } from '$lib/server/external/rakuten';
 import { createTmdbClient } from '$lib/server/external/tmdb';
 import { createWatchmodeClient } from '$lib/server/external/watchmode';
+import { getUserSearchSettings } from '$lib/server/user-settings';
 import { contentRegistrationSchema, contentSearchSchema } from '$lib/validation/content';
 
 const getPrivateEnv = (platform: App.Platform | undefined, key: string): string | undefined => {
@@ -57,11 +59,7 @@ const buildRegistrationInput = (formData: FormData) => ({
 });
 
 export const load: PageServerLoad = async ({ locals, platform }) => {
-  const { user } = await locals.safeGetSession();
-
-  if (!user) {
-    redirect(303, '/login');
-  }
+  await requireUser(locals);
 
   return {
     showApiAvailability: dev,
@@ -77,10 +75,7 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 
 export const actions: Actions = {
   search: async ({ request, locals, platform }) => {
-    const { user } = await locals.safeGetSession();
-    if (!user) {
-      redirect(303, '/login');
-    }
+    const user = await requireUser(locals);
 
     const formData = await request.formData();
     const parsed = contentSearchSchema.safeParse({
@@ -96,6 +91,17 @@ export const actions: Actions = {
     }
 
     const { mediaType, query } = parsed.data;
+    const { searchMediaTypes } = await getUserSearchSettings(locals.supabase, user.id);
+
+    if (!searchMediaTypes.includes(mediaType)) {
+      return fail(400, {
+        kind: 'search',
+        mediaType,
+        query,
+        message: '選択できない検索対象です。',
+      });
+    }
+
     const origin = request.headers.get('origin') ?? new URL(request.url).origin;
     const kv = platform?.env?.EXTERNAL_API_CACHE;
 
@@ -131,11 +137,7 @@ export const actions: Actions = {
     }
   },
   register: async ({ request, locals, platform }) => {
-    const { user } = await locals.safeGetSession();
-
-    if (!user) {
-      redirect(303, '/login');
-    }
+    const user = await requireUser(locals);
 
     const formData = await request.formData();
     const parsed = contentRegistrationSchema.safeParse(buildRegistrationInput(formData));

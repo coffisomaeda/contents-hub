@@ -83,6 +83,17 @@ values
   );
 
 -- profiles はトリガーによって自動生成されるため省略
+update public.profiles
+set
+  search_media_types = array['book', 'game', 'movie', 'tv'],
+  settings_completed_at = now()
+where id = '00000000-0000-0000-0000-000000000001';
+
+update public.profiles
+set
+  search_media_types = array['book', 'game', 'movie', 'tv'],
+  settings_completed_at = null
+where id = '00000000-0000-0000-0000-000000000002';
 
 -- 2. コンテンツ (contents) の作成
 insert into public.contents (id, media_type, title, title_kana, description, image_url, release_date, item_url)

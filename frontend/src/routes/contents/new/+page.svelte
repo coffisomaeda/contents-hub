@@ -1,13 +1,14 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
   import { enhance } from '$app/forms';
+  import { searchMediaTypeMeta, type SearchMediaType } from '$lib/media-types';
   import type { ContentRegistrationInput } from '$lib/validation/content';
 
   let { data, form } = $props();
   let isSearching = $state(false);
   let isRegistering = $state(false);
   let selectedResult = $state<Partial<ContentRegistrationInput> | null>(null);
-  let selectedMediaType = $state('book');
+  let selectedMediaType = $state<SearchMediaType>('book');
 
   const value = (input: unknown) => (input === null || input === undefined ? '' : String(input));
   const searchResults = $derived(form?.kind === 'search' ? (form.results ?? []) : []);
@@ -21,29 +22,17 @@
       ? 'Watchmode API から配信サービス情報を取得しています。'
       : '登録内容を保存しています。',
   );
-  const mediaTypeMeta: Record<string, { label: string; iconPath: string }> = {
-    book: {
-      label: '書籍',
-      iconPath: '/icons/book.png',
-    },
-    game: {
-      label: 'ゲーム',
-      iconPath: '/icons/game.png',
-    },
-    movie: {
-      label: '映画',
-      iconPath: '/icons/movie.png',
-    },
-    tv: {
-      label: 'TV',
-      iconPath: '/icons/tv.png',
-    },
-  };
-  const mediaTypeOptions = Object.entries(mediaTypeMeta);
+  const mediaTypeOptions = $derived(
+    data.searchMediaTypes.map(
+      (mediaType: SearchMediaType) => [mediaType, searchMediaTypeMeta[mediaType]] as const,
+    ),
+  );
 
   $effect(() => {
-    if (form?.mediaType) {
+    if (form?.mediaType && data.searchMediaTypes.includes(form.mediaType)) {
       selectedMediaType = form.mediaType;
+    } else if (!data.searchMediaTypes.includes(selectedMediaType)) {
+      selectedMediaType = data.searchMediaTypes[0] ?? 'book';
     }
   });
 
@@ -66,7 +55,7 @@
       <div>
         <h1 class="text-display-md m-0 text-ink">コンテンツ登録</h1>
         <p class="text-ink-muted-80 mt-3 mb-0 max-w-[620px]">
-          書籍、ゲーム、映像作品をキーワード検索から登録します。
+          設定した検索対象をキーワード検索から登録します。
         </p>
       </div>
       <a
