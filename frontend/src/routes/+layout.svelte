@@ -5,8 +5,11 @@
   import { resolve } from '$app/paths';
   import favicon from '$lib/assets/favicon.svg';
   import { createClient } from '$lib/supabase/client';
+  import { pwaInfo } from 'virtual:pwa-info';
 
   let { children, data } = $props();
+
+  const webManifest = pwaInfo ? pwaInfo.webManifest.linkTag : '';
 
   $effect(() => {
     if (!browser) return;
@@ -22,6 +25,8 @@
 
 <svelte:head>
   <link rel="icon" href={favicon} />
+  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+  {@html webManifest}
 </svelte:head>
 
 <div class="min-h-screen bg-canvas-parchment text-ink flex flex-col">
