@@ -357,14 +357,40 @@ export type Database = {
         };
         Relationships: [];
       };
+      user_books: {
+        Row: {
+          current_volume: number | null;
+          is_ebook: boolean;
+          is_sold: boolean;
+          user_content_id: string;
+        };
+        Insert: {
+          current_volume?: number | null;
+          is_ebook?: boolean;
+          is_sold?: boolean;
+          user_content_id: string;
+        };
+        Update: {
+          current_volume?: number | null;
+          is_ebook?: boolean;
+          is_sold?: boolean;
+          user_content_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_books_user_content_id_fkey';
+            columns: ['user_content_id'];
+            isOneToOne: true;
+            referencedRelation: 'user_contents';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       user_contents: {
         Row: {
           content_id: string;
           created_at: string;
-          current_volume: number | null;
           id: string;
-          is_ebook: boolean;
-          is_sold: boolean;
           memo: string | null;
           rating: number | null;
           status: string;
@@ -374,10 +400,7 @@ export type Database = {
         Insert: {
           content_id: string;
           created_at?: string;
-          current_volume?: number | null;
           id?: string;
-          is_ebook?: boolean;
-          is_sold?: boolean;
           memo?: string | null;
           rating?: number | null;
           status?: string;
@@ -387,10 +410,7 @@ export type Database = {
         Update: {
           content_id?: string;
           created_at?: string;
-          current_volume?: number | null;
           id?: string;
-          is_ebook?: boolean;
-          is_sold?: boolean;
           memo?: string | null;
           rating?: number | null;
           status?: string;

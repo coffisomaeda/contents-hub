@@ -250,7 +250,7 @@
                   type="checkbox"
                   name="isEbook"
                   value="true"
-                  checked={data.userContent.is_ebook}
+                  checked={data.userBook?.is_ebook ?? false}
                   class="accent-primary"
                 />
                 電子書籍
@@ -260,8 +260,8 @@
                   type="checkbox"
                   name="isSold"
                   value="true"
-                  checked={data.userContent.is_sold}
-                  disabled={data.userContent.is_ebook}
+                  checked={data.userBook?.is_sold ?? false}
+                  disabled={data.userBook?.is_ebook ?? false}
                   class="accent-primary"
                 />
                 売却済み
@@ -276,7 +276,7 @@
                   type="number"
                   min="1"
                   class="input-standard text-caption"
-                  value={data.userContent.current_volume ?? ''}
+                  value={data.userBook?.current_volume ?? ''}
                 />
               </div>
             </div>

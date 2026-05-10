@@ -50,7 +50,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
   const content = userContent.contents;
 
-  const [bookResult, gameResult, videoResult, sourcesResult] = await Promise.all([
+  const [bookResult, gameResult, videoResult, sourcesResult, userBookResult] = await Promise.all([
     content.media_type === 'book'
       ? locals.supabase.from('books').select('*').eq('id', content.id).maybeSingle()
       : Promise.resolve({ data: null, error: null }),
@@ -67,15 +67,29 @@ export const load: PageServerLoad = async ({ locals, params }) => {
           .eq('video_id', content.id)
           .order('fetched_at', { ascending: false })
       : Promise.resolve({ data: [], error: null }),
+    content.media_type === 'book'
+      ? locals.supabase
+          .from('user_books')
+          .select('*')
+          .eq('user_content_id', userContent.id)
+          .maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
   ]);
 
-  if (bookResult.error || gameResult.error || videoResult.error || sourcesResult.error) {
+  if (
+    bookResult.error ||
+    gameResult.error ||
+    videoResult.error ||
+    sourcesResult.error ||
+    userBookResult.error
+  ) {
     error(500, 'コンテンツ詳細の取得に失敗しました。');
   }
 
   return {
     userContent: userContent as UserContent,
     content,
+    userBook: userBookResult.data as Tables<'user_books'> | null,
     book: bookResult.data as Tables<'books'> | null,
     game: gameResult.data as Tables<'games'> | null,
     video: videoResult.data as Tables<'videos'> | null,
@@ -106,24 +120,48 @@ export const actions: Actions = {
 
     const { status, rating, memo, isEbook, isSold, currentVolume } = parsed.data;
 
-    const { error: updateError } = await locals.supabase
+    const { data: uc, error: updateError } = await locals.supabase
       .from('user_contents')
       .update({
         status,
         rating: rating ?? null,
         memo: memo ?? null,
-        is_ebook: isEbook,
-        is_sold: isSold,
-        current_volume: currentVolume ?? null,
       })
       .eq('user_id', user.id)
-      .eq('content_id', params.id);
+      .eq('content_id', params.id)
+      .select('id')
+      .single();
 
-    if (updateError) {
+    if (updateError || !uc) {
       return fail(500, {
         kind: 'edit' as const,
         message: 'コンテンツの更新に失敗しました。',
       });
+    }
+
+    const { data: content } = await locals.supabase
+      .from('contents')
+      .select('media_type')
+      .eq('id', params.id)
+      .single();
+
+    if (content?.media_type === 'book') {
+      const { error: bookError } = await locals.supabase.from('user_books').upsert(
+        {
+          user_content_id: uc.id,
+          is_ebook: isEbook,
+          is_sold: isSold,
+          current_volume: currentVolume ?? null,
+        },
+        { onConflict: 'user_content_id' },
+      );
+
+      if (bookError) {
+        return fail(500, {
+          kind: 'edit' as const,
+          message: 'コンテンツの更新に失敗しました。',
+        });
+      }
     }
 
     return {

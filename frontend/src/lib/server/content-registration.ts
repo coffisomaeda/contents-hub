@@ -232,23 +232,38 @@ export const registerContentForUser = async (
   const existingContentId = await findExistingContent(supabase, input);
   const contentId = existingContentId ?? (await createContent(supabase, input, options));
 
-  const { error } = await supabase.from('user_contents').insert({
-    user_id: userId,
-    content_id: contentId,
-    status: input.status,
-    rating: toNull(input.rating),
-    memo: toNull(input.memo),
-    is_ebook: input.isEbook ?? false,
-    is_sold: input.isSold ?? false,
-    current_volume: toNull(input.currentVolume),
-  });
+  const { data: newUserContent, error } = await supabase
+    .from('user_contents')
+    .insert({
+      user_id: userId,
+      content_id: contentId,
+      status: input.status,
+      rating: toNull(input.rating),
+      memo: toNull(input.memo),
+    })
+    .select('id')
+    .single();
 
-  if (error) {
-    if (error.code === '23505') {
+  if (error || !newUserContent) {
+    if (error?.code === '23505') {
       throw new Error('このコンテンツはすでに登録されています。');
     }
 
-    throw new Error(error.message);
+    throw new Error(error?.message ?? 'コンテンツの登録に失敗しました。');
+  }
+
+  if (input.mediaType === 'book') {
+    const { error: bookError } = await supabase.from('user_books').insert({
+      user_content_id: newUserContent.id,
+      is_ebook: input.isEbook ?? false,
+      is_sold: input.isSold ?? false,
+      current_volume: toNull(input.currentVolume),
+    });
+
+    if (bookError) {
+      await supabase.from('user_contents').delete().eq('id', newUserContent.id);
+      throw new Error(bookError.message);
+    }
   }
 
   return {
