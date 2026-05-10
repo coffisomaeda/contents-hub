@@ -192,6 +192,7 @@ test.describe('Content Registration API (SvelteKit Form Actions)', () => {
       title: selectedTitle,
       isbn: `978${String(uniqueSuffix).slice(-10)}`,
       author: '漫画テスト著者',
+      rakutenGenreId: '001001001', // 少年コミック
       status: 'doing',
       isEbook: 'true',
       currentVolume: '5',
