@@ -2,7 +2,6 @@
   import { enhance } from '$app/forms';
   import { resolve } from '$app/paths';
   import type { SubmitFunction } from '@sveltejs/kit';
-  import { isMangaGenre } from '$lib/utils/books';
 
   let { data } = $props();
 
@@ -39,8 +38,6 @@
   const formatDate = (value: string | null) => value ?? '未設定';
   const formatDateTime = (value: string) => new Date(value).toLocaleString('ja-JP');
   const hasValue = (value: unknown) => value !== null && value !== undefined && value !== '';
-
-  const isManga = $derived(isMangaGenre(data.book?.rakuten_genre_id));
 
   let saving = $state(false);
   let editMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -247,7 +244,7 @@
           </div>
 
           {#if data.content.media_type === 'book'}
-            <div class="grid gap-4 {isManga ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}">
+            <div class="grid gap-4 sm:grid-cols-2">
               <label class="flex items-center gap-2 text-caption">
                 <input
                   type="checkbox"
@@ -269,21 +266,6 @@
                 />
                 売却済み
               </label>
-              {#if isManga}
-                <div class="grid gap-1">
-                  <label for="edit-current-volume" class="text-caption text-ink-muted-48"
-                    >読了巻数</label
-                  >
-                  <input
-                    id="edit-current-volume"
-                    name="currentVolume"
-                    type="number"
-                    min="1"
-                    class="input-standard text-caption"
-                    value={data.userBook?.current_volume ?? ''}
-                  />
-                </div>
-              {/if}
             </div>
           {/if}
 

@@ -32,7 +32,6 @@ const contentRegistrationObjectSchema = z.object({
   memo: optionalText,
   isEbook: optionalBoolean,
   isSold: optionalBoolean,
-  currentVolume: optionalInteger,
   isbn: optionalText,
   author: optionalText,
   authorKana: optionalText,

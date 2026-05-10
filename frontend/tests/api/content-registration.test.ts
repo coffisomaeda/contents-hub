@@ -195,7 +195,6 @@ test.describe('Content Registration API (SvelteKit Form Actions)', () => {
       rakutenGenreId: '001001001', // 少年コミック
       status: 'doing',
       isEbook: 'true',
-      currentVolume: '5',
     });
 
     const response = await request.post('/contents/new?/register', {

@@ -38,7 +38,6 @@ const buildRegistrationInput = (formData: FormData) => ({
   memo: formValue(formData, 'memo'),
   isEbook: formData.get('isEbook') === 'true' || formData.get('isEbook') === 'on',
   isSold: formData.get('isSold') === 'true' || formData.get('isSold') === 'on',
-  currentVolume: formValue(formData, 'currentVolume'),
   isbn: formValue(formData, 'isbn'),
   author: formValue(formData, 'author'),
   authorKana: formValue(formData, 'authorKana'),

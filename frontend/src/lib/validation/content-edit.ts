@@ -23,7 +23,6 @@ export const contentEditSchema = z
         v === 'true' || v === 'on' || v === true ? true : v === '' || v === undefined ? false : v,
       z.boolean().default(false),
     ),
-    currentVolume: z.preprocess(emptyToUndefined, z.coerce.number().int().min(1).optional()),
   })
   .refine((data) => !(data.isEbook && data.isSold), {
     message: '電子書籍は売却済みにできません。',

@@ -257,7 +257,6 @@ export const registerContentForUser = async (
       user_content_id: newUserContent.id,
       is_ebook: input.isEbook ?? false,
       is_sold: input.isSold ?? false,
-      current_volume: toNull(input.currentVolume),
     });
 
     if (bookError) {

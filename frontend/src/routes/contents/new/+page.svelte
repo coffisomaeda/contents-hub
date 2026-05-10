@@ -3,7 +3,6 @@
   import { enhance } from '$app/forms';
   import { searchMediaTypeMeta, type SearchMediaType } from '$lib/media-types';
   import type { ContentRegistrationInput } from '$lib/validation/content';
-  import { isMangaGenre } from '$lib/utils/books';
 
   let { data, form } = $props();
   let isSearching = $state(false);
@@ -38,8 +37,6 @@
       selectedMediaType = data.searchMediaTypes[0] ?? 'book';
     }
   });
-
-  const isSelectedManga = $derived(isMangaGenre(selectedResult?.rakutenGenreId));
 
   const selectResult = (result: Partial<ContentRegistrationInput>) => {
     selectedResult = {
@@ -385,7 +382,7 @@
               </label>
 
               {#if selectedResult.mediaType === 'book'}
-                <div class="grid gap-3 {isSelectedManga ? 'sm:grid-cols-2' : ''}">
+                <div class="grid gap-3">
                   <label class="flex items-center gap-2 text-caption">
                     <input
                       type="checkbox"
@@ -396,18 +393,6 @@
                     />
                     電子書籍
                   </label>
-                  {#if isSelectedManga}
-                    <label class="grid gap-1 text-body-strong">
-                      読了巻数
-                      <input
-                        class="input-standard"
-                        name="currentVolume"
-                        type="number"
-                        min="1"
-                        disabled={isRegistering}
-                      />
-                    </label>
-                  {/if}
                 </div>
               {/if}
             </div>

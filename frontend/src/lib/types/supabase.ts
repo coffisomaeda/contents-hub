@@ -359,19 +359,16 @@ export type Database = {
       };
       user_books: {
         Row: {
-          current_volume: number | null;
           is_ebook: boolean;
           is_sold: boolean;
           user_content_id: string;
         };
         Insert: {
-          current_volume?: number | null;
           is_ebook?: boolean;
           is_sold?: boolean;
           user_content_id: string;
         };
         Update: {
-          current_volume?: number | null;
           is_ebook?: boolean;
           is_sold?: boolean;
           user_content_id?: string;
