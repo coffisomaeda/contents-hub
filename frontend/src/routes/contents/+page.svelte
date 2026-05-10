@@ -183,4 +183,60 @@
       {/each}
     </div>
   {/if}
+
+  {#if data.sharedItems.length > 0}
+    <section class="grid gap-3 border-t border-hairline pt-6">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 class="text-tagline m-0">共有されたコンテンツ</h2>
+        {#if data.sharers.length > 0}
+          <div class="flex items-center gap-2 text-caption">
+            <span class="text-ink-muted-48">共有元:</span>
+            <a
+              href={resolve('/contents')}
+              class="text-primary no-underline hover:underline {!data.sharerFilter
+                ? 'font-semibold'
+                : ''}"
+            >
+              全て
+            </a>
+            {#each data.sharers as sharer (sharer.id)}
+              <a
+                href={resolve(`/contents?sharer=${sharer.id}`)}
+                class="text-primary no-underline hover:underline {data.sharerFilter === sharer.id
+                  ? 'font-semibold'
+                  : ''}"
+              >
+                {sharer.display_name ?? '不明'}
+              </a>
+            {/each}
+          </div>
+        {/if}
+      </div>
+      <div class="grid gap-2">
+        {#each data.sharedItems as share (share.id)}
+          {@const content = share.contents}
+          {#if content}
+            <div
+              class="flex items-center justify-between p-3 rounded-sm border border-hairline bg-canvas"
+            >
+              <div class="grid gap-1">
+                <a
+                  href={resolve(`/contents/${content.id}`)}
+                  class="text-ink no-underline font-semibold hover:text-primary"
+                >
+                  {content.title}
+                </a>
+                <span class="text-[12px] text-ink-muted-48">
+                  {share.profiles?.display_name ?? '不明'}から共有
+                  {#if share.message}
+                    — {share.message}
+                  {/if}
+                </span>
+              </div>
+            </div>
+          {/if}
+        {/each}
+      </div>
+    </section>
+  {/if}
 </section>

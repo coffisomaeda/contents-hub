@@ -41,6 +41,8 @@
 
   let saving = $state(false);
   let editMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
+  let showShareForm = $state(false);
+  let shareMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const handleSubmit: SubmitFunction = () => {
     saving = true;
@@ -53,6 +55,20 @@
         editMessage = { type: 'success', text: String(result.data.message ?? '') };
       } else if (result.type === 'failure' && result.data?.kind === 'edit') {
         editMessage = { type: 'error', text: String(result.data.message ?? '') };
+      }
+
+      await update();
+    };
+  };
+
+  const handleShare: SubmitFunction = () => {
+    shareMessage = null;
+
+    return async ({ update, result }) => {
+      if (result.type === 'success' && result.data?.kind === 'share') {
+        shareMessage = { type: 'success', text: String(result.data.message ?? '') };
+      } else if (result.type === 'failure' && result.data?.kind === 'share') {
+        shareMessage = { type: 'error', text: String(result.data.message ?? '') };
       }
 
       await update();
@@ -277,6 +293,55 @@
             </button>
           </div>
         </form>
+      </section>
+
+      <section class="grid gap-3 rounded-sm border border-hairline bg-canvas p-4 sm:p-5">
+        <div class="flex items-center justify-between">
+          <h3 class="text-caption text-ink-muted-48 m-0">共有</h3>
+          <button
+            type="button"
+            class="text-caption text-primary cursor-pointer bg-transparent border-none hover:underline"
+            onclick={() => (showShareForm = !showShareForm)}
+          >
+            {showShareForm ? '閉じる' : '共有する'}
+          </button>
+        </div>
+
+        {#if shareMessage}
+          <p
+            class="text-caption m-0 rounded-sm px-3 py-2 {shareMessage.type === 'error'
+              ? 'bg-[#fef2f2] text-[#991b1b]'
+              : 'bg-[#f0fdf4] text-[#166534]'}"
+          >
+            {shareMessage.text}
+          </p>
+        {/if}
+
+        {#if showShareForm}
+          <form method="POST" action="?/share" use:enhance={handleShare} class="grid gap-3">
+            <label class="grid gap-1 text-caption">
+              共有先メールアドレス
+              <input
+                type="email"
+                name="recipientEmail"
+                required
+                class="input-standard text-caption"
+                placeholder="user@example.com"
+              />
+            </label>
+            <label class="grid gap-1 text-caption">
+              メッセージ（任意）
+              <input
+                type="text"
+                name="message"
+                maxlength="500"
+                class="input-standard text-caption"
+                placeholder="おすすめです！"
+              />
+            </label>
+            <button type="submit" class="btn-secondary justify-self-start"> 共有する </button>
+          </form>
+        {/if}
       </section>
     </div>
   </article>

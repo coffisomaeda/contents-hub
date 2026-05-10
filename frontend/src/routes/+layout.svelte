@@ -44,6 +44,7 @@
       <nav aria-label="メインナビゲーション" class="hidden sm:flex items-center gap-4">
         <a href={resolve('/contents')} class="hover:text-body-muted transition-colors">一覧</a>
         <a href={resolve('/contents/new')} class="hover:text-body-muted transition-colors">登録</a>
+        <a href={resolve('/lists')} class="hover:text-body-muted transition-colors">リスト</a>
         <a href={resolve('/settings')} class="hover:text-body-muted transition-colors">設定</a>
         <span class="text-body-muted">{data.user.email}</span>
         <form method="POST" action={resolve('/logout')} class="m-0 flex">
@@ -125,6 +126,31 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
         登録
+      </a>
+      <a
+        href={resolve('/lists')}
+        class="flex-1 flex flex-col items-center gap-1 py-2 text-[11px] transition-colors {isActive(
+          '/lists',
+        )
+          ? 'text-primary-on-dark'
+          : 'text-body-muted'}"
+        aria-current={isActive('/lists') ? 'page' : undefined}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          class="w-6 h-6"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z"
+          />
+        </svg>
+        リスト
       </a>
       <a
         href={resolve('/settings')}

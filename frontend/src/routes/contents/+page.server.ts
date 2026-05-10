@@ -8,21 +8,47 @@ type UserContent = Tables<'user_contents'> & {
   contents: Tables<'contents'> | null;
 };
 
-export const load: PageServerLoad = async ({ locals }) => {
+type SharedContent = Tables<'content_shares'> & {
+  contents: Tables<'contents'> | null;
+  profiles: Tables<'profiles'> | null;
+};
+
+export const load: PageServerLoad = async ({ locals, url }) => {
   const user = await requireUser(locals);
+  const sharerFilter = url.searchParams.get('sharer');
 
-  const { data, error: listError } = await locals.supabase
-    .from('user_contents')
-    .select('*, contents(*)')
-    .eq('user_id', user.id)
-    .order('updated_at', { ascending: false });
+  const [itemsResult, sharedResult] = await Promise.all([
+    locals.supabase
+      .from('user_contents')
+      .select('*, contents(*)')
+      .eq('user_id', user.id)
+      .order('updated_at', { ascending: false }),
+    locals.supabase
+      .from('content_shares')
+      .select('*, contents(*), profiles!content_shares_sharer_id_fkey(*)')
+      .eq('recipient_id', user.id)
+      .order('created_at', { ascending: false }),
+  ]);
 
-  if (listError) {
+  if (itemsResult.error || sharedResult.error) {
     error(500, '登録済みコンテンツの取得に失敗しました。');
   }
 
+  const sharers = [
+    ...new Map(
+      (sharedResult.data ?? []).filter((s) => s.profiles).map((s) => [s.sharer_id, s.profiles!]),
+    ).values(),
+  ];
+
+  const sharedItems = sharerFilter
+    ? (sharedResult.data ?? []).filter((s) => s.sharer_id === sharerFilter)
+    : (sharedResult.data ?? []);
+
   return {
-    items: (data ?? []) as UserContent[],
+    items: (itemsResult.data ?? []) as UserContent[],
+    sharedItems: sharedItems as SharedContent[],
+    sharers,
+    sharerFilter,
   };
 };
 

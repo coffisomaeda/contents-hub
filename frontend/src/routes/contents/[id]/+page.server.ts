@@ -3,6 +3,7 @@ import type { Actions, PageServerLoad } from './$types';
 import type { Tables } from '$lib/types/supabase';
 import { requireUser } from '$lib/server/auth';
 import { contentEditSchema } from '$lib/validation/content-edit';
+import { shareContentSchema } from '$lib/validation/sharing';
 
 type UserContent = Tables<'user_contents'> & {
   contents: Tables<'contents'> | null;
@@ -129,6 +130,60 @@ export const actions: Actions = {
       kind: 'edit' as const,
       success: true,
       message: 'コンテンツを更新しました。',
+    };
+  },
+
+  share: async ({ request, locals, params }) => {
+    const user = await requireUser(locals);
+
+    const formData = await request.formData();
+    const parsed = shareContentSchema.safeParse({
+      recipientEmail: formData.get('recipientEmail'),
+      message: formData.get('message'),
+    });
+
+    if (!parsed.success) {
+      return fail(400, {
+        kind: 'share' as const,
+        message: parsed.error.issues[0].message,
+      });
+    }
+
+    const { data: recipientId } = await locals.supabase.rpc('find_user_id_by_email', {
+      target_email: parsed.data.recipientEmail,
+    });
+
+    if (!recipientId || recipientId === user.id) {
+      return fail(404, {
+        kind: 'share' as const,
+        message: '指定されたユーザーが見つかりません。',
+      });
+    }
+
+    const { error: shareError } = await locals.supabase.from('content_shares').insert({
+      sharer_id: user.id,
+      recipient_id: recipientId,
+      content_id: params.id,
+      message: parsed.data.message ?? null,
+    });
+
+    if (shareError) {
+      if (shareError.code === '23505') {
+        return fail(409, {
+          kind: 'share' as const,
+          message: 'このコンテンツは既に共有済みです。',
+        });
+      }
+      return fail(500, {
+        kind: 'share' as const,
+        message: 'コンテンツの共有に失敗しました。',
+      });
+    }
+
+    return {
+      kind: 'share' as const,
+      success: true,
+      message: 'コンテンツを共有しました。',
     };
   },
 };
