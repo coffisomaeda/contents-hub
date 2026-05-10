@@ -91,6 +91,9 @@ export const actions: Actions = {
       status: formData.get('status'),
       rating: formData.get('rating'),
       memo: formData.get('memo'),
+      isEbook: formData.get('isEbook') === 'true' || formData.get('isEbook') === 'on',
+      isSold: formData.get('isSold') === 'true' || formData.get('isSold') === 'on',
+      currentVolume: formData.get('currentVolume'),
     });
 
     if (!parsed.success) {
@@ -100,7 +103,7 @@ export const actions: Actions = {
       });
     }
 
-    const { status, rating, memo } = parsed.data;
+    const { status, rating, memo, isEbook, isSold, currentVolume } = parsed.data;
 
     const { error: updateError } = await locals.supabase
       .from('user_contents')
@@ -108,6 +111,9 @@ export const actions: Actions = {
         status,
         rating: rating ?? null,
         memo: memo ?? null,
+        is_ebook: isEbook,
+        is_sold: isSold,
+        current_volume: currentVolume ?? null,
       })
       .eq('user_id', user.id)
       .eq('content_id', params.id);

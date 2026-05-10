@@ -227,6 +227,45 @@
             >
           </div>
 
+          {#if data.content.media_type === 'book'}
+            <div class="grid gap-4 sm:grid-cols-3">
+              <label class="flex items-center gap-2 text-caption">
+                <input
+                  type="checkbox"
+                  name="isEbook"
+                  value="true"
+                  checked={data.userContent.is_ebook}
+                  class="accent-primary"
+                />
+                電子書籍
+              </label>
+              <label class="flex items-center gap-2 text-caption">
+                <input
+                  type="checkbox"
+                  name="isSold"
+                  value="true"
+                  checked={data.userContent.is_sold}
+                  disabled={data.userContent.is_ebook}
+                  class="accent-primary"
+                />
+                売却済み
+              </label>
+              <div class="grid gap-1">
+                <label for="edit-current-volume" class="text-caption text-ink-muted-48"
+                  >読了巻数</label
+                >
+                <input
+                  id="edit-current-volume"
+                  name="currentVolume"
+                  type="number"
+                  min="1"
+                  class="input-standard text-caption"
+                  value={data.userContent.current_volume ?? ''}
+                />
+              </div>
+            </div>
+          {/if}
+
           <div class="flex items-center gap-4">
             <button
               type="submit"

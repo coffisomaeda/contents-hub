@@ -8,14 +8,18 @@ import { createRakutenClient } from '$lib/server/external/rakuten';
 import { createTmdbClient } from '$lib/server/external/tmdb';
 import { createWatchmodeClient } from '$lib/server/external/watchmode';
 import { getUserSearchSettings } from '$lib/server/user-settings';
-import { contentRegistrationSchema, contentSearchSchema } from '$lib/validation/content';
+import {
+  contentRegistrationSchema,
+  contentRegistrationFields,
+  contentSearchSchema,
+} from '$lib/validation/content';
 
 const getPrivateEnv = (platform: App.Platform | undefined, key: string): string | undefined => {
   const platformEnv = platform?.env as Record<string, string | undefined> | undefined;
   return env[key] ?? platformEnv?.[key];
 };
 
-type RegistrationFormKey = keyof typeof contentRegistrationSchema.shape;
+type RegistrationFormKey = keyof typeof contentRegistrationFields;
 
 const formValue = (formData: FormData, key: RegistrationFormKey) =>
   formData.get(String(key)) ?? undefined;
@@ -31,6 +35,9 @@ const buildRegistrationInput = (formData: FormData) => ({
   status: formValue(formData, 'status') ?? 'want',
   rating: formValue(formData, 'rating'),
   memo: formValue(formData, 'memo'),
+  isEbook: formData.get('isEbook') === 'true' || formData.get('isEbook') === 'on',
+  isSold: formData.get('isSold') === 'true' || formData.get('isSold') === 'on',
+  currentVolume: formValue(formData, 'currentVolume'),
   isbn: formValue(formData, 'isbn'),
   author: formValue(formData, 'author'),
   authorKana: formValue(formData, 'authorKana'),

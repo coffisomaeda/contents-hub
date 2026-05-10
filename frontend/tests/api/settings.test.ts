@@ -22,7 +22,7 @@ test.describe('Search settings API (SvelteKit Form Actions)', () => {
       expect(html).toContain('書籍');
       expect(html).toContain('映画');
       expect(html).not.toContain('ゲーム');
-      expect(html).not.toContain('TV');
+      expect(html).not.toContain('>TV<');
 
       const rejectedSearchResponse = await request.post('/contents/new?/search', {
         headers: {

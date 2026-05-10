@@ -13,7 +13,13 @@ export const contentSearchSchema = z.object({
   query: z.string().trim().min(1, '検索キーワードを入力してください。'),
 });
 
-export const contentRegistrationSchema = z.object({
+const optionalBoolean = z.preprocess(
+  (v) =>
+    v === 'true' || v === 'on' || v === true ? true : v === '' || v === undefined ? false : v,
+  z.boolean().default(false),
+);
+
+const contentRegistrationObjectSchema = z.object({
   mediaType: mediaTypeSchema,
   title: z.string().trim().min(1, 'タイトルを入力してください。'),
   titleKana: optionalText,
@@ -24,6 +30,9 @@ export const contentRegistrationSchema = z.object({
   status: contentStatusSchema.default('want'),
   rating: optionalInteger,
   memo: optionalText,
+  isEbook: optionalBoolean,
+  isSold: optionalBoolean,
+  currentVolume: optionalInteger,
   isbn: optionalText,
   author: optionalText,
   authorKana: optionalText,
@@ -50,6 +59,16 @@ export const contentRegistrationSchema = z.object({
   imdbId: optionalText,
   watchmodeId: optionalInteger,
 });
+
+export const contentRegistrationFields = contentRegistrationObjectSchema.shape;
+
+export const contentRegistrationSchema = contentRegistrationObjectSchema.refine(
+  (data) => !(data.isEbook && data.isSold),
+  {
+    message: '電子書籍は売却済みにできません。',
+    path: ['isSold'],
+  },
+);
 
 export type ContentSearchInput = z.infer<typeof contentSearchSchema>;
 export type ContentRegistrationInput = z.infer<typeof contentRegistrationSchema>;

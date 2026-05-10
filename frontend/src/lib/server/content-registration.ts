@@ -225,6 +225,9 @@ export const registerContentForUser = async (
     status: input.status,
     rating: toNull(input.rating),
     memo: toNull(input.memo),
+    is_ebook: input.isEbook ?? false,
+    is_sold: input.isSold ?? false,
+    current_volume: toNull(input.currentVolume),
   });
 
   if (error) {

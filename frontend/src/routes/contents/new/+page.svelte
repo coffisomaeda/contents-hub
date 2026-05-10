@@ -378,6 +378,31 @@
                   >{value(selectedResult.memo)}</textarea
                 >
               </label>
+
+              {#if selectedResult.mediaType === 'book'}
+                <div class="grid gap-3 sm:grid-cols-3">
+                  <label class="flex items-center gap-2 text-caption">
+                    <input
+                      type="checkbox"
+                      name="isEbook"
+                      value="true"
+                      disabled={isRegistering}
+                      class="accent-primary"
+                    />
+                    電子書籍
+                  </label>
+                  <label class="grid gap-1 text-body-strong">
+                    読了巻数
+                    <input
+                      class="input-standard"
+                      name="currentVolume"
+                      type="number"
+                      min="1"
+                      disabled={isRegistering}
+                    />
+                  </label>
+                </div>
+              {/if}
             </div>
 
             {#if isRegistering}

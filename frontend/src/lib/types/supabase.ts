@@ -189,7 +189,10 @@ export type Database = {
         Row: {
           content_id: string;
           created_at: string;
+          current_volume: number | null;
           id: string;
+          is_ebook: boolean;
+          is_sold: boolean;
           memo: string | null;
           rating: number | null;
           status: string;
@@ -199,7 +202,10 @@ export type Database = {
         Insert: {
           content_id: string;
           created_at?: string;
+          current_volume?: number | null;
           id?: string;
+          is_ebook?: boolean;
+          is_sold?: boolean;
           memo?: string | null;
           rating?: number | null;
           status?: string;
@@ -209,7 +215,10 @@ export type Database = {
         Update: {
           content_id?: string;
           created_at?: string;
+          current_volume?: number | null;
           id?: string;
+          is_ebook?: boolean;
+          is_sold?: boolean;
           memo?: string | null;
           rating?: number | null;
           status?: string;
