@@ -6,12 +6,14 @@
 
   let { data, form } = $props();
   let isSearching = $state(false);
+  let isFuzzySearching = $state(false);
   let isRegistering = $state(false);
   let selectedResult = $state<Partial<ContentRegistrationInput> | null>(null);
   let selectedMediaType = $state<SearchMediaType>('book');
 
   const value = (input: unknown) => (input === null || input === undefined ? '' : String(input));
   const searchResults = $derived(form?.kind === 'search' ? (form.results ?? []) : []);
+  const fuzzyResults = $derived(form?.kind === 'fuzzySearch' ? (form.fuzzyResults ?? []) : []);
   const messageTone = $derived(form?.success ? 'success' : 'error');
   const isVideoRegistration = $derived(
     selectedResult?.mediaType === 'movie' || selectedResult?.mediaType === 'tv',
@@ -484,6 +486,81 @@
             </article>
           {/each}
         </div>
+      {/if}
+    </section>
+
+    <section class="grid gap-4">
+      <h2 class="text-tagline m-0">あいまい検索（登録済みコンテンツ）</h2>
+      <form
+        method="POST"
+        action="?/fuzzySearch"
+        class="grid gap-3 sm:grid-cols-[1fr_auto]"
+        use:enhance={() => {
+          isFuzzySearching = true;
+
+          return async ({ update }) => {
+            await update();
+            isFuzzySearching = false;
+          };
+        }}
+      >
+        <input
+          class="input-standard"
+          name="query"
+          type="search"
+          value={form?.kind === 'fuzzySearch' ? (form.query ?? '') : ''}
+          placeholder="タイトルであいまい検索"
+          required
+          disabled={isFuzzySearching}
+        />
+        <button
+          type="submit"
+          class="btn-primary rounded-sm w-full sm:w-auto sm:min-w-[88px]"
+          disabled={isFuzzySearching}
+        >
+          {isFuzzySearching ? '検索中' : '検索'}
+        </button>
+      </form>
+
+      {#if fuzzyResults.length > 0}
+        <div class="grid gap-2">
+          {#each fuzzyResults as result (result.contentId)}
+            <a
+              href={resolve(`/contents/${result.contentId}`)}
+              class="flex items-center gap-3 rounded-sm border border-hairline bg-canvas p-3 hover:bg-surface-warm transition-colors text-ink no-underline"
+            >
+              {#if result.imageUrl}
+                <img
+                  src={result.imageUrl}
+                  alt=""
+                  class="h-12 w-9 rounded-sm object-cover bg-canvas-parchment shrink-0"
+                />
+              {:else}
+                <div class="h-12 w-9 rounded-sm bg-canvas-parchment shrink-0"></div>
+              {/if}
+              <div class="min-w-0">
+                <p class="m-0 font-semibold line-clamp-1">{result.title}</p>
+                <p class="m-0 text-caption text-ink-muted-48">
+                  {result.mediaType === 'book'
+                    ? '書籍'
+                    : result.mediaType === 'game'
+                      ? 'ゲーム'
+                      : result.mediaType === 'movie'
+                        ? '映画'
+                        : 'TV'}
+                  {#if result.releaseDate}
+                    · {result.releaseDate}
+                  {/if}
+                  {#if 'similarity' in result && result.similarity}
+                    · 類似度 {Math.round(Number(result.similarity) * 100)}%
+                  {/if}
+                </p>
+              </div>
+            </a>
+          {/each}
+        </div>
+      {:else if form?.kind === 'fuzzySearch' && !form?.message}
+        <p class="text-caption text-ink-muted-48 m-0">該当するコンテンツが見つかりません。</p>
       {/if}
     </section>
   </div>

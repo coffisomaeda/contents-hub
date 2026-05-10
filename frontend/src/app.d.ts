@@ -32,6 +32,7 @@ declare global {
         WATCHMODE_API_KEY?: string;
         WATCHMODE_API_BASE_URL?: string;
         EXTERNAL_API_CACHE: KVNamespace;
+        AI?: Ai;
       };
       ctx: {
         waitUntil: (promise: Promise<unknown>) => void;
