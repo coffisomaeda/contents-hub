@@ -11,17 +11,17 @@ create extension if not exists vector with schema extensions;
 -- 2. contents テーブルに embedding カラムを追加
 -- ---------------------------------------------------------------------------
 alter table public.contents
-  add column title_embedding vector(1024);
+  add column title_embedding extensions.vector(1024);
 
 create index idx_contents_title_embedding
   on public.contents
-  using hnsw (title_embedding vector_cosine_ops);
+  using hnsw (title_embedding extensions.vector_cosine_ops);
 
 -- ---------------------------------------------------------------------------
 -- 3. ベクトル類似検索 RPC 関数
 -- ---------------------------------------------------------------------------
 create or replace function public.match_contents(
-  query_embedding vector(1024),
+  query_embedding extensions.vector(1024),
   match_threshold float default 0.5,
   match_count int default 10
 )
