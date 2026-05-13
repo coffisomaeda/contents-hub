@@ -105,11 +105,6 @@
         {#if data.content.title_kana}
           <p class="text-caption text-ink-muted-48 m-0 mt-2">{data.content.title_kana}</p>
         {/if}
-        {#if data.content.description}
-          <p class="text-body text-ink-muted-80 m-0 mt-4 whitespace-pre-wrap">
-            {data.content.description}
-          </p>
-        {/if}
       </div>
 
       <section class="grid gap-4 rounded-sm border border-hairline bg-canvas p-4 sm:gap-5 sm:p-5">
