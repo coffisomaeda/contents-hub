@@ -1,5 +1,10 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { defaultSearchMediaTypes, type SearchMediaType } from '$lib/media-types';
+import { error } from '@sveltejs/kit';
+import {
+  defaultSearchMediaTypes,
+  searchMediaTypeValues,
+  type SearchMediaType,
+} from '$lib/media-types';
 import type { Database } from '$lib/types/supabase';
 import { requireUser } from '$lib/server/auth';
 import { searchSettingsSchema } from '$lib/validation/settings';
@@ -14,18 +19,27 @@ const normalizeSearchMediaTypes = (value: unknown): SearchMediaType[] => {
     return defaultSearchMediaTypes;
   }
 
-  return value as SearchMediaType[];
+  const normalized = value.filter(
+    (item): item is SearchMediaType =>
+      typeof item === 'string' && searchMediaTypeValues.includes(item as SearchMediaType),
+  );
+
+  return normalized.length > 0 ? normalized : defaultSearchMediaTypes;
 };
 
 export const getUserSearchSettings = async (
   supabase: SupabaseClient<Database>,
   userId: string,
 ): Promise<UserSearchSettings> => {
-  const { data } = await supabase
+  const { data, error: dbError } = await supabase
     .from('profiles')
     .select('search_media_types, settings_completed_at')
     .eq('id', userId)
     .maybeSingle();
+
+  if (dbError) {
+    error(500, '検索設定の取得に失敗しました。');
+  }
 
   return {
     searchMediaTypes: normalizeSearchMediaTypes(data?.search_media_types),

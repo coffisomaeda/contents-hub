@@ -49,8 +49,6 @@
     editMessage = null;
 
     return async ({ update, result }) => {
-      saving = false;
-
       if (result.type === 'success' && result.data?.kind === 'edit') {
         editMessage = { type: 'success', text: String(result.data.message ?? '') };
       } else if (result.type === 'failure' && result.data?.kind === 'edit') {
@@ -58,6 +56,7 @@
       }
 
       await update();
+      saving = false;
     };
   };
 
@@ -205,6 +204,7 @@
                 name="status"
                 class="input-standard text-caption"
                 value={data.userContent.status}
+                disabled={saving}
               >
                 {#each statusOptions as option (option.value)}
                   <option value={option.value}>{option.label}</option>
@@ -219,6 +219,7 @@
                 name="rating"
                 class="input-standard text-caption"
                 value={data.userContent.rating?.toString() ?? ''}
+                disabled={saving}
               >
                 {#each ratingOptions as option (option.value)}
                   <option value={option.value}>{option.label}</option>
@@ -234,7 +235,8 @@
               name="memo"
               rows="4"
               class="input-standard text-caption resize-y"
-              placeholder="感想やメモを自由に入力...">{data.userContent.memo ?? ''}</textarea
+              placeholder="感想やメモを自由に入力..."
+              disabled={saving}>{data.userContent.memo ?? ''}</textarea
             >
           </div>
 
@@ -246,6 +248,7 @@
                   name="isEbook"
                   value="true"
                   checked={data.userBook?.is_ebook ?? false}
+                  disabled={saving}
                   class="accent-primary"
                 />
                 電子書籍
@@ -256,7 +259,7 @@
                   name="isSold"
                   value="true"
                   checked={data.userBook?.is_sold ?? false}
-                  disabled={data.userBook?.is_ebook ?? false}
+                  disabled={saving || (data.userBook?.is_ebook ?? false)}
                   class="accent-primary"
                 />
                 売却済み
