@@ -205,7 +205,6 @@ export type Database = {
           media_type: string;
           release_date: string | null;
           title: string;
-          title_embedding: string | null;
           title_kana: string | null;
           updated_at: string;
         };
@@ -218,7 +217,6 @@ export type Database = {
           media_type: string;
           release_date?: string | null;
           title: string;
-          title_embedding?: string | null;
           title_kana?: string | null;
           updated_at?: string;
         };
@@ -231,7 +229,6 @@ export type Database = {
           media_type?: string;
           release_date?: string | null;
           title?: string;
-          title_embedding?: string | null;
           title_kana?: string | null;
           updated_at?: string;
         };
@@ -559,24 +556,6 @@ export type Database = {
     };
     Functions: {
       find_user_id_by_email: { Args: { target_email: string }; Returns: string };
-      match_contents: {
-        Args: {
-          match_count?: number;
-          match_threshold?: number;
-          query_embedding: string;
-        };
-        Returns: {
-          description: string;
-          id: string;
-          image_url: string;
-          item_url: string;
-          media_type: string;
-          release_date: string;
-          similarity: number;
-          title: string;
-          title_kana: string;
-        }[];
-      };
     };
     Enums: {
       [_ in never]: never;

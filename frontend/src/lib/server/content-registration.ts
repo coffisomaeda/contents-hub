@@ -2,7 +2,6 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ContentRegistrationInput } from '$lib/validation/content';
 import type { Database, Json } from '$lib/types/supabase';
 import type { WatchmodeSource, WatchmodeTitleResult } from './external/watchmode';
-import { generateEmbedding } from './embedding';
 
 type RegisterResult = {
   contentId: string;
@@ -17,11 +16,8 @@ type WatchmodeClient = {
   getStreamingSources: (watchmodeId: number, regions?: string) => Promise<WatchmodeSource[]>;
 };
 
-type AiBinding = Parameters<typeof generateEmbedding>[0];
-
 type RegisterContentOptions = {
   watchmode?: WatchmodeClient;
-  ai?: AiBinding;
 };
 
 const toNull = <T>(value: T | undefined) => value ?? null;
@@ -163,15 +159,6 @@ const createContent = async (
     }
 
     await saveWatchmodeSources(supabase, content.id, watchmodeId, options.watchmode);
-  }
-
-  // Generate and store title embedding (non-blocking)
-  const embedding = await generateEmbedding(options.ai, input.title);
-  if (embedding) {
-    await supabase
-      .from('contents')
-      .update({ title_embedding: JSON.stringify(embedding) } as never)
-      .eq('id', content.id);
   }
 
   return content.id;
