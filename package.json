@@ -9,11 +9,6 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "docker:check": "docker info",
-    "supabase:start": "docker info && supabase start",
-    "supabase:status": "supabase status",
-    "supabase:reset": "docker info && supabase db reset",
-    "supabase:stop": "supabase stop --project-id contents-hub",
     "prepare": "husky"
   },
   "keywords": [],
