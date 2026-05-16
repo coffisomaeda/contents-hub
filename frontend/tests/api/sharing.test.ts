@@ -17,7 +17,7 @@ const postForm = (
     data: new URLSearchParams(data).toString(),
   });
 
-test.describe('Sharing & Lists API', () => {
+test.describe('Sharing API', () => {
   test.describe.configure({ mode: 'serial' });
 
   test('POST /contents/{id}?/share shares content with another user', async ({ request }) => {
@@ -58,67 +58,5 @@ test.describe('Sharing & Lists API', () => {
     expect(html).toContain('共有されたコンテンツ');
     expect(html).toContain('進撃の巨人');
     expect(html).toContain('おすすめ！');
-  });
-
-  test('POST /lists?/create creates a new list', async ({ request }) => {
-    await login(request, 'test1@example.com');
-
-    const response = await postForm(request, '/lists?/create', {
-      name: 'テストリスト',
-      description: 'テスト用の説明',
-    });
-
-    expect(response.status()).toBe(200);
-    const body = await response.json();
-    expect(body.type).toBe('success');
-    expect(JSON.stringify(body.data)).toContain('リストを作成しました。');
-
-    const listsResponse = await request.get('/lists');
-    expect(listsResponse.status()).toBe(200);
-    const html = await listsResponse.text();
-    expect(html).toContain('テストリスト');
-    expect(html).toContain('テスト用の説明');
-  });
-
-  test('list item add/remove and list sharing flow', async ({ request }) => {
-    await login(request, 'test1@example.com');
-
-    const createResponse = await postForm(request, '/lists?/create', {
-      name: '共有用リスト',
-    });
-    expect((await createResponse.json()).type).toBe('success');
-
-    const listsHtml = await (await request.get('/lists')).text();
-    const listIdMatch = listsHtml.match(/\/lists\/([0-9a-f-]{36})/);
-    expect(listIdMatch).toBeTruthy();
-    const listId = listIdMatch![1];
-
-    const addResponse = await postForm(request, `/lists/${listId}?/addItem`, {
-      contentId: SEED_CONTENT_ID,
-    });
-    expect(addResponse.status()).toBe(200);
-    expect((await addResponse.json()).type).toBe('success');
-
-    const detailHtml = await (await request.get(`/lists/${listId}`)).text();
-    expect(detailHtml).toContain('進撃の巨人');
-
-    const shareResponse = await postForm(request, `/lists/${listId}?/share`, {
-      recipientEmail: 'test2@example.com',
-    });
-    expect(shareResponse.status()).toBe(200);
-    expect((await shareResponse.json()).type).toBe('success');
-
-    await login(request, 'test2@example.com');
-    await saveSearchSettings(request, ['book'], '/settings/onboarding');
-
-    const recipientListsHtml = await (await request.get('/lists')).text();
-    expect(recipientListsHtml).toContain('共有されたリスト');
-    expect(recipientListsHtml).toContain('共有用リスト');
-  });
-
-  test('GET /lists redirects unauthenticated user to login', async ({ request }) => {
-    const response = await request.get('/lists', { maxRedirects: 0 });
-    expect(response.status()).toBe(303);
-    expect(response.headers()['location']).toBe('/login');
   });
 });

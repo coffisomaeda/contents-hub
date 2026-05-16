@@ -10,17 +10,13 @@ create table public.user_books (
   user_content_id uuid primary key references public.user_contents (id) on delete cascade,
   is_ebook        boolean not null default false,
   is_sold         boolean not null default false,
-  current_volume  integer,
   constraint user_books_not_ebook_and_sold
-    check (not (is_ebook and is_sold)),
-  constraint user_books_current_volume_positive
-    check (current_volume is null or current_volume >= 1)
+    check (not (is_ebook and is_sold))
 );
 
-comment on table public.user_books is 'ユーザー×書籍固有の情報（電子書籍フラグ・売却フラグ・読了巻数）';
+comment on table public.user_books is 'ユーザー×書籍固有の情報（電子書籍フラグ・売却フラグ）';
 comment on column public.user_books.is_ebook is '電子書籍かどうか';
 comment on column public.user_books.is_sold is 'メルカリ等で売却済みかどうか（物理書籍のみ）';
-comment on column public.user_books.current_volume is '読了巻数（漫画・シリーズ向け）';
 
 -- 書籍コンテンツにのみ user_books を許可するトリガー
 create or replace function public.check_user_books_media_type()
@@ -98,12 +94,11 @@ create policy "自分のデータを削除できる"
 -- ---------------------------------------------------------------------------
 -- 3. 既存データの移行（書籍コンテンツのみ）
 -- ---------------------------------------------------------------------------
-insert into public.user_books (user_content_id, is_ebook, is_sold, current_volume)
+insert into public.user_books (user_content_id, is_ebook, is_sold)
 select
   user_contents.id,
   user_contents.is_ebook,
-  user_contents.is_sold,
-  user_contents.current_volume
+  user_contents.is_sold
 from public.user_contents
 join public.contents on user_contents.content_id = contents.id
 where contents.media_type = 'book';

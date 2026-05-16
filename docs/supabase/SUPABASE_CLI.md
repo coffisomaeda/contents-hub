@@ -218,6 +218,55 @@ supabase db push --dry-run
 supabase db push
 ```
 
+## migration repair
+
+`supabase migration repair` は、リモートDBの migration 管理テーブル（`supabase_migrations.schema_migrations`）とローカルファイルの状態を合わせるコマンド。
+
+Supabase はファイル名とファイル内容のチェックサムで「適用済みか否か」を管理している。ローカルファイルを直接編集・削除した場合はこのテーブルとの不整合が生じるため repair が必要になる。
+
+### migration ファイルを削除したとき
+
+ローカルからファイルを消したが、リモートには適用済みとして残っている場合:
+
+```bash
+supabase migration repair --status reverted <migration_version>
+```
+
+複数まとめて指定できる:
+
+```bash
+supabase migration repair --status reverted 20260511010000 20260516000000
+```
+
+### migration ファイルの内容を書き換えたとき
+
+既に適用済みのファイルを書き換えるとチェックサムが変わり `db push` がエラーになる。  
+DB上のスキーマはすでに正しい状態である前提で、チェックサムだけ更新する:
+
+```bash
+supabase migration repair --status applied <migration_version>
+```
+
+### 典型的な手順（ファイル削除 + 元ファイル書き換えをした場合）
+
+```bash
+# 1. 削除したファイルをリモート履歴から除外
+supabase migration repair --status reverted 20260511010000 20260516000000
+
+# 2. 書き換えたファイルのチェックサムを更新
+supabase migration repair --status applied 20260510120000 20260511000000
+
+# 3. 状態確認
+supabase db push  # "Remote database is up to date." になればOK
+```
+
+### 注意事項
+
+- `repair` は管理テーブルを書き換えるだけで、**DBのスキーマ自体は変更しない**
+- この手法が安全なのは **本番にそのテーブルのデータがない場合のみ**
+- 本番にデータがある場合は `ALTER TABLE` や `DROP TABLE` の migration を素直に追加するほうが安全
+- `supabase db reset`（ローカルのフルリセット）は repair 不要で常に全ファイルを再実行する
+
 ## よくあるトラブル
 
 ### `container name ... is already in use`
