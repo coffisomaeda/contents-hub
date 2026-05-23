@@ -31,7 +31,7 @@ jobs:
 
       - name: Type check (frontend)
         run: |
-          pnpm exec wrangler types
+          cp .env.example .env
           pnpm run check
         working-directory: frontend
 
