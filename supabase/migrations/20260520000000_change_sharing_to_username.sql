@@ -4,7 +4,7 @@ alter table public.profiles add column username text;
 -- 2. 既存の profiles の行に対し、IDをベースにした暫定的な username を設定
 -- (ハイフンを除去し、長さを調整してフォーマット制約を満たすようにする)
 update public.profiles
-set username = 'user_' || substring(replace(id::text, '-', ''), 1, 15);
+set username = 'user_' || right(replace(id::text, '-', ''), 15);
 
 -- 3. NOT NULL, UNIQUE, および CHECK 制約を追加
 alter table public.profiles alter column username set not null;
@@ -26,7 +26,7 @@ begin
     coalesce(new.raw_user_meta_data ->> 'display_name', new.email, 'User'),
     coalesce(
       new.raw_user_meta_data ->> 'username',
-      'user_' || substring(replace(new.id::text, '-', ''), 1, 15)
+      'user_' || right(replace(new.id::text, '-', ''), 15)
     ),
     new.raw_user_meta_data ->> 'avatar_url'
   );

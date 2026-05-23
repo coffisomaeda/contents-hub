@@ -58,7 +58,8 @@ values
     '',
     '',
     ''
-  );
+  )
+on conflict (id) do nothing;
 
 -- 1b. テストユーザーの auth.identities 作成（signInWithPassword に必要）
 insert into auth.identities (
@@ -80,7 +81,8 @@ values
     'email',
     '00000000-0000-0000-0000-000000000002',
     now(), now(), now()
-  );
+  )
+on conflict (provider_id, provider) do nothing;
 
 -- profiles はトリガーによって自動生成されるため省略
 update public.profiles

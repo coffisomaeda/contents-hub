@@ -5,9 +5,10 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
-  test:
+  lint-and-check:
     runs-on: ubuntu-latest
 
     steps:
@@ -35,6 +36,26 @@ jobs:
           pnpm run check
         working-directory: frontend
 
+  e2e-test:
+    needs: lint-and-check
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.head_commit.message, '[run-e2e]') ||
+      contains(github.event.pull_request.title, '[run-e2e]') ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: jdx/mise-action@v2
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Frontend install
+        run: pnpm install
+        working-directory: frontend
+
       - name: Start Supabase
         run: supabase start
 
@@ -43,6 +64,13 @@ jobs:
           pnpm run gen:types
           git diff --exit-code src/lib/types/supabase.ts || (echo "::error::Supabase types are out of sync. Please run 'pnpm run gen:types' locally and commit the changes." && exit 1)
         working-directory: frontend
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
