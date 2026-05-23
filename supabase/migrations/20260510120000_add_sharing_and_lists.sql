@@ -60,24 +60,3 @@ create policy "共有者は自分の共有を削除できる"
   to authenticated
   using (auth.uid() = sharer_id);
 
--- ---------------------------------------------------------------------------
--- 4. ユーティリティ関数
--- ---------------------------------------------------------------------------
-
--- メールアドレスからユーザーIDを取得する（auth.usersへのアクセスが必要なためsecurity definer）
-create or replace function public.find_user_id_by_email(target_email text)
-returns uuid
-language plpgsql
-security definer set search_path = ''
-as $$
-declare
-  found_id uuid;
-begin
-  select id into found_id
-  from auth.users
-  where email = target_email
-  limit 1;
-
-  return found_id;
-end;
-$$;

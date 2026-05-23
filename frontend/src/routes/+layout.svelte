@@ -45,7 +45,9 @@
         <a href={resolve('/contents')} class="hover:text-body-muted transition-colors">一覧</a>
         <a href={resolve('/contents/new')} class="hover:text-body-muted transition-colors">登録</a>
         <a href={resolve('/settings')} class="hover:text-body-muted transition-colors">設定</a>
-        <span class="text-body-muted">{data.user.email}</span>
+        <span class="text-body-muted"
+          >{data.profile?.display_name ?? data.profile?.username ?? data.user.email}</span
+        >
         <form method="POST" action={resolve('/logout')} class="m-0 flex">
           <button
             type="submit"

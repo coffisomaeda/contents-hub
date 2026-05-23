@@ -45,7 +45,9 @@ export const saveSearchSettings = async (
   const formData = new URLSearchParams();
   searchMediaTypes.forEach((mediaType) => formData.append('searchMediaTypes', mediaType));
 
-  const response = await request.post(path, {
+  const targetPath = path === '/settings' ? '/settings?/updateSettings' : path;
+
+  const response = await request.post(targetPath, {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
       Origin: APP_ORIGIN,

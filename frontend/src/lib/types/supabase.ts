@@ -72,80 +72,6 @@ export type Database = {
           },
         ];
       };
-      content_list_items: {
-        Row: {
-          content_id: string;
-          created_at: string;
-          id: string;
-          list_id: string;
-          position: number;
-        };
-        Insert: {
-          content_id: string;
-          created_at?: string;
-          id?: string;
-          list_id: string;
-          position?: number;
-        };
-        Update: {
-          content_id?: string;
-          created_at?: string;
-          id?: string;
-          list_id?: string;
-          position?: number;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'content_list_items_content_id_fkey';
-            columns: ['content_id'];
-            isOneToOne: false;
-            referencedRelation: 'contents';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'content_list_items_list_id_fkey';
-            columns: ['list_id'];
-            isOneToOne: false;
-            referencedRelation: 'content_lists';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
-      content_lists: {
-        Row: {
-          created_at: string;
-          description: string | null;
-          id: string;
-          name: string;
-          owner_id: string;
-          updated_at: string;
-        };
-        Insert: {
-          created_at?: string;
-          description?: string | null;
-          id?: string;
-          name: string;
-          owner_id: string;
-          updated_at?: string;
-        };
-        Update: {
-          created_at?: string;
-          description?: string | null;
-          id?: string;
-          name?: string;
-          owner_id?: string;
-          updated_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'content_lists_owner_id_fkey';
-            columns: ['owner_id'];
-            isOneToOne: false;
-            referencedRelation: 'profiles';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
       content_shares: {
         Row: {
           content_id: string;
@@ -278,52 +204,6 @@ export type Database = {
           },
         ];
       };
-      list_shares: {
-        Row: {
-          created_at: string;
-          id: string;
-          list_id: string;
-          recipient_id: string;
-          sharer_id: string;
-        };
-        Insert: {
-          created_at?: string;
-          id?: string;
-          list_id: string;
-          recipient_id: string;
-          sharer_id: string;
-        };
-        Update: {
-          created_at?: string;
-          id?: string;
-          list_id?: string;
-          recipient_id?: string;
-          sharer_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'list_shares_list_id_fkey';
-            columns: ['list_id'];
-            isOneToOne: false;
-            referencedRelation: 'content_lists';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'list_shares_recipient_id_fkey';
-            columns: ['recipient_id'];
-            isOneToOne: false;
-            referencedRelation: 'profiles';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'list_shares_sharer_id_fkey';
-            columns: ['sharer_id'];
-            isOneToOne: false;
-            referencedRelation: 'profiles';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
       profiles: {
         Row: {
           avatar_url: string | null;
@@ -333,6 +213,7 @@ export type Database = {
           search_media_types: string[];
           settings_completed_at: string | null;
           updated_at: string;
+          username: string;
         };
         Insert: {
           avatar_url?: string | null;
@@ -342,6 +223,7 @@ export type Database = {
           search_media_types?: string[];
           settings_completed_at?: string | null;
           updated_at?: string;
+          username: string;
         };
         Update: {
           avatar_url?: string | null;
@@ -351,6 +233,7 @@ export type Database = {
           search_media_types?: string[];
           settings_completed_at?: string | null;
           updated_at?: string;
+          username?: string;
         };
         Relationships: [];
       };
@@ -555,7 +438,7 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      find_user_id_by_email: { Args: { target_email: string }; Returns: string };
+      [_ in never]: never;
     };
     Enums: {
       [_ in never]: never;

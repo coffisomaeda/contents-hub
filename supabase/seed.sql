@@ -85,12 +85,14 @@ values
 -- profiles はトリガーによって自動生成されるため省略
 update public.profiles
 set
+  username = 'user1',
   search_media_types = array['book', 'game', 'movie', 'tv'],
   settings_completed_at = now()
 where id = '00000000-0000-0000-0000-000000000001';
 
 update public.profiles
 set
+  username = 'user2',
   search_media_types = array['book', 'game', 'movie', 'tv'],
   settings_completed_at = null
 where id = '00000000-0000-0000-0000-000000000002';

@@ -174,7 +174,7 @@ export const actions: Actions = {
 
     const formData = await request.formData();
     const parsed = shareContentSchema.safeParse({
-      recipientEmail: formData.get('recipientEmail'),
+      recipientUsername: formData.get('recipientUsername'),
       message: formData.get('message'),
     });
 
@@ -185,9 +185,20 @@ export const actions: Actions = {
       });
     }
 
-    const { data: recipientId } = await locals.supabase.rpc('find_user_id_by_email', {
-      target_email: parsed.data.recipientEmail,
-    });
+    const { data: recipientProfile, error: profileError } = await locals.supabase
+      .from('profiles')
+      .select('id')
+      .eq('username', parsed.data.recipientUsername)
+      .maybeSingle();
+
+    if (profileError) {
+      return fail(500, {
+        kind: 'share' as const,
+        message: 'ユーザーの検索に失敗しました。',
+      });
+    }
+
+    const recipientId = recipientProfile?.id;
 
     if (!recipientId || recipientId === user.id) {
       return fail(404, {

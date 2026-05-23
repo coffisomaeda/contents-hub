@@ -24,7 +24,7 @@ test.describe('Sharing API', () => {
     await login(request, 'test1@example.com');
 
     const response = await postForm(request, `/contents/${SEED_CONTENT_ID}?/share`, {
-      recipientEmail: 'test2@example.com',
+      recipientUsername: 'user2',
       message: 'おすすめ！',
     });
 
@@ -38,7 +38,7 @@ test.describe('Sharing API', () => {
     await login(request, 'test1@example.com');
 
     const response = await postForm(request, `/contents/${SEED_CONTENT_ID}?/share`, {
-      recipientEmail: 'test1@example.com',
+      recipientUsername: 'user1',
     });
 
     expect(response.status()).toBe(200);

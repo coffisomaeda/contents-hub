@@ -11,9 +11,20 @@ export const load: LayoutServerLoad = async ({ depends, locals }) => {
     ? await getUserSearchSettings(locals.supabase, user.id)
     : { searchMediaTypes: [], settingsCompletedAt: null };
 
+  const profile = user
+    ? (
+        await locals.supabase
+          .from('profiles')
+          .select('display_name, username')
+          .eq('id', user.id)
+          .maybeSingle()
+      ).data
+    : null;
+
   return {
     session,
     user,
+    profile,
     searchMediaTypes: searchSettings.searchMediaTypes,
     settingsCompletedAt: searchSettings.settingsCompletedAt,
   };

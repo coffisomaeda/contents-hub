@@ -194,11 +194,12 @@ export const actions: Actions = {
       });
     }
 
-    // text-based ILIKE search
+    // text-based ILIKE search (escape LIKE wildcards to prevent pattern injection)
+    const escaped = query.trim().replace(/[%_\\]/g, '\\$&');
     const { data, error: searchError } = await locals.supabase
       .from('contents')
       .select('id, title, media_type, image_url, release_date')
-      .ilike('title', `%${query.trim()}%`)
+      .ilike('title', `%${escaped}%`)
       .limit(10);
 
     if (searchError) {

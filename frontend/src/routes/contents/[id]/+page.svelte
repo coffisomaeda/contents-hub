@@ -44,6 +44,15 @@
   let showShareForm = $state(false);
   let shareMessage = $state<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  let isEbookChecked = $state(data.userBook?.is_ebook ?? false);
+  let isSoldChecked = $state(data.userBook?.is_sold ?? false);
+
+  $effect(() => {
+    if (isEbookChecked) {
+      isSoldChecked = false;
+    }
+  });
+
   const handleSubmit: SubmitFunction = () => {
     saving = true;
     editMessage = null;
@@ -247,7 +256,7 @@
                   type="checkbox"
                   name="isEbook"
                   value="true"
-                  checked={data.userBook?.is_ebook ?? false}
+                  bind:checked={isEbookChecked}
                   disabled={saving}
                   class="accent-primary"
                 />
@@ -258,8 +267,8 @@
                   type="checkbox"
                   name="isSold"
                   value="true"
-                  checked={data.userBook?.is_sold ?? false}
-                  disabled={saving || (data.userBook?.is_ebook ?? false)}
+                  bind:checked={isSoldChecked}
+                  disabled={saving || isEbookChecked}
                   class="accent-primary"
                 />
                 売却済み
@@ -305,13 +314,13 @@
         {#if showShareForm}
           <form method="POST" action="?/share" use:enhance={handleShare} class="grid gap-3">
             <label class="grid gap-1 text-caption">
-              共有先メールアドレス
+              共有先ユーザー名
               <input
-                type="email"
-                name="recipientEmail"
+                type="text"
+                name="recipientUsername"
                 required
                 class="input-standard text-caption"
-                placeholder="user@example.com"
+                placeholder="ユーザー名を入力"
               />
             </label>
             <label class="grid gap-1 text-caption">

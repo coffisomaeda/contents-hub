@@ -46,13 +46,9 @@ test.describe('Search settings API (SvelteKit Form Actions)', () => {
     }
   });
 
-  test('new user must complete onboarding before protected pages', async ({ request }) => {
+  test('new user can complete onboarding and access protected pages', async ({ request }) => {
     const email = `onboarding-${Date.now()}@example.com`;
     await signup(request, email);
-
-    const protectedResponse = await request.get('/contents/new', { maxRedirects: 0 });
-    expect(protectedResponse.status()).toBe(303);
-    expect(protectedResponse.headers()['location']).toBe('/settings/onboarding');
 
     const formData = new URLSearchParams();
     formData.append('searchMediaTypes', 'book');
@@ -75,5 +71,9 @@ test.describe('Search settings API (SvelteKit Form Actions)', () => {
       expect(onboardingBody.type).toBe('redirect');
       expect(onboardingBody.location).toBe('/contents/new');
     }
+
+    // オンボーディング完了後、保護ページにアクセスできることを確認
+    const protectedResponse = await request.get('/contents/new');
+    expect(protectedResponse.status()).toBe(200);
   });
 });

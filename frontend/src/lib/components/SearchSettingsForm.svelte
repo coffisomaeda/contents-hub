@@ -26,6 +26,7 @@
 
 <form
   method="POST"
+  action="?/updateSettings"
   class="grid gap-5"
   use:enhance={() => {
     isSaving = true;
