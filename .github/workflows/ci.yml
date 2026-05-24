@@ -63,6 +63,7 @@ jobs:
       - name: Verify generated types
         run: |
           pnpm run gen:types
+          pnpm run format
           git diff --exit-code src/lib/types/supabase.ts || (echo "::error::Supabase types are out of sync. Please run 'pnpm run gen:types' locally and commit the changes." && exit 1)
         working-directory: frontend
 
