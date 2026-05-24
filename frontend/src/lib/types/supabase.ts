@@ -113,10 +113,24 @@ export type Database = {
             referencedColumns: ['id'];
           },
           {
+            foreignKeyName: 'content_shares_recipient_id_fkey';
+            columns: ['recipient_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_public_view';
+            referencedColumns: ['id'];
+          },
+          {
             foreignKeyName: 'content_shares_sharer_id_fkey';
             columns: ['sharer_id'];
             isOneToOne: false;
             referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'content_shares_sharer_id_fkey';
+            columns: ['sharer_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_public_view';
             referencedColumns: ['id'];
           },
         ];
@@ -309,6 +323,13 @@ export type Database = {
             referencedRelation: 'profiles';
             referencedColumns: ['id'];
           },
+          {
+            foreignKeyName: 'user_contents_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_public_view';
+            referencedColumns: ['id'];
+          },
         ];
       };
       video_sources: {
@@ -435,7 +456,27 @@ export type Database = {
       };
     };
     Views: {
-      [_ in never]: never;
+      profiles_public_view: {
+        Row: {
+          avatar_url: string | null;
+          display_name: string | null;
+          id: string | null;
+          username: string | null;
+        };
+        Insert: {
+          avatar_url?: string | null;
+          display_name?: string | null;
+          id?: string | null;
+          username?: string | null;
+        };
+        Update: {
+          avatar_url?: string | null;
+          display_name?: string | null;
+          id?: string | null;
+          username?: string | null;
+        };
+        Relationships: [];
+      };
     };
     Functions: {
       [_ in never]: never;
