@@ -27,6 +27,7 @@ frontend/build/
 .serena/
 .antigravitycli/
 .agents/
+.codex
 
 # document
 docs/
