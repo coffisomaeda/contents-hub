@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { optionalBoolean } from './helpers';
 
 const emptyToUndefined = (value: unknown) => (value === '' ? undefined : value);
 const optionalText = z.preprocess(emptyToUndefined, z.string().trim().optional());
@@ -12,12 +13,6 @@ export const contentSearchSchema = z.object({
   mediaType: mediaTypeSchema,
   query: z.string().trim().min(1, '検索キーワードを入力してください。'),
 });
-
-const optionalBoolean = z.preprocess(
-  (v) =>
-    v === 'true' || v === 'on' || v === true ? true : v === '' || v === undefined ? false : v,
-  z.boolean().default(false),
-);
 
 const contentRegistrationObjectSchema = z.object({
   mediaType: mediaTypeSchema,

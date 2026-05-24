@@ -10,7 +10,7 @@ type UserContent = Tables<'user_contents'> & {
 
 type SharedContent = Tables<'content_shares'> & {
   contents: Tables<'contents'> | null;
-  profiles: Tables<'profiles'> | null;
+  profiles: Pick<Tables<'profiles'>, 'id' | 'display_name' | 'avatar_url'> | null;
 };
 
 export const load: PageServerLoad = async ({ locals, url }) => {
@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
       .order('updated_at', { ascending: false }),
     locals.supabase
       .from('content_shares')
-      .select('*, contents(*), profiles!content_shares_sharer_id_fkey(*)')
+      .select('*, contents(*), profiles!content_shares_sharer_id_fkey(id, display_name, avatar_url)')
       .eq('recipient_id', user.id)
       .order('created_at', { ascending: false }),
   ]);

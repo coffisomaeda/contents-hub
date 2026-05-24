@@ -18,8 +18,6 @@ const postForm = (
   });
 
 test.describe('Sharing API', () => {
-  test.describe.configure({ mode: 'serial' });
-
   test('POST /contents/{id}?/share shares content with another user', async ({ request }) => {
     await login(request, 'test1@example.com');
 
@@ -31,7 +29,7 @@ test.describe('Sharing API', () => {
     expect(response.status()).toBe(200);
     const body = await response.json();
     expect(body.type).toBe('success');
-    expect(JSON.stringify(body.data)).toContain('コンテンツを共有しました。');
+    expect(body.data.message).toBe('コンテンツを共有しました。');
   });
 
   test('POST /contents/{id}?/share rejects sharing to self', async ({ request }) => {

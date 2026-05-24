@@ -48,6 +48,11 @@
   let isSoldChecked = $state(data.userBook?.is_sold ?? false);
 
   $effect(() => {
+    isEbookChecked = data.userBook?.is_ebook ?? false;
+    isSoldChecked = data.userBook?.is_sold ?? false;
+  });
+
+  $effect(() => {
     if (isEbookChecked) {
       isSoldChecked = false;
     }
@@ -199,6 +204,8 @@
               ? 'bg-[#fef2f2] text-[#991b1b]'
               : 'bg-[#f0fdf4] text-[#166534]'}"
             id="edit-message"
+            aria-live="polite"
+            role={editMessage.type === 'error' ? 'alert' : 'status'}
           >
             {editMessage.text}
           </p>
@@ -306,6 +313,8 @@
             class="text-caption m-0 rounded-sm px-3 py-2 {shareMessage.type === 'error'
               ? 'bg-[#fef2f2] text-[#991b1b]'
               : 'bg-[#f0fdf4] text-[#166534]'}"
+            aria-live="polite"
+            role={shareMessage.type === 'error' ? 'alert' : 'status'}
           >
             {shareMessage.text}
           </p>

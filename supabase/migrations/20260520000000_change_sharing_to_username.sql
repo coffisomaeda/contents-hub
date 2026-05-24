@@ -19,15 +19,24 @@ returns trigger
 language plpgsql
 security definer set search_path = ''
 as $$
+declare
+  raw_username text;
+  final_username text;
 begin
+  raw_username := new.raw_user_meta_data ->> 'username';
+
+  -- Validate username against expected format
+  if raw_username is not null and raw_username ~* '^[A-Za-z0-9_]{1,30}$' then
+    final_username := raw_username;
+  else
+    final_username := 'user_' || right(replace(new.id::text, '-', ''), 15);
+  end if;
+
   insert into public.profiles (id, display_name, username, avatar_url)
   values (
     new.id,
     coalesce(new.raw_user_meta_data ->> 'display_name', new.email, 'User'),
-    coalesce(
-      new.raw_user_meta_data ->> 'username',
-      'user_' || right(replace(new.id::text, '-', ''), 15)
-    ),
+    final_username,
     new.raw_user_meta_data ->> 'avatar_url'
   );
   return new;

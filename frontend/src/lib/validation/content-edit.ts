@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { optionalBoolean } from './helpers';
 
 const emptyToUndefined = (value: unknown) =>
   value === '' || value === null || value === undefined ? undefined : value;
@@ -13,16 +14,8 @@ export const contentEditSchema = z
     status: z.enum(['want', 'doing', 'done']),
     rating: optionalRating,
     memo: optionalText,
-    isEbook: z.preprocess(
-      (v) =>
-        v === 'true' || v === 'on' || v === true ? true : v === '' || v === undefined ? false : v,
-      z.boolean().default(false),
-    ),
-    isSold: z.preprocess(
-      (v) =>
-        v === 'true' || v === 'on' || v === true ? true : v === '' || v === undefined ? false : v,
-      z.boolean().default(false),
-    ),
+    isEbook: optionalBoolean,
+    isSold: optionalBoolean,
   })
   .refine((data) => !(data.isEbook && data.isSold), {
     message: '電子書籍は売却済みにできません。',

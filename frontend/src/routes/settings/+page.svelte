@@ -18,8 +18,11 @@
   const handleProfileSubmit: SubmitFunction = () => {
     isSavingProfile = true;
     return async ({ update }) => {
-      await update();
-      isSavingProfile = false;
+      try {
+        await update();
+      } finally {
+        isSavingProfile = false;
+      }
     };
   };
 </script>

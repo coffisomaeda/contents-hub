@@ -6,10 +6,25 @@
 -- 1. profiles: SELECT ポリシーを拡張（共有先ユーザー検索のため全プロファイル参照可能に）
 -- ---------------------------------------------------------------------------
 drop policy if exists "ユーザーは自分のプロファイルを参照できる" on public.profiles;
-create policy "認証済みユーザーは全プロファイルを参照できる"
+
+-- Create a view with only public profile fields
+create or replace view public.profiles_public_view as
+select id, display_name, avatar_url, username
+from public.profiles;
+
+-- Grant select on the view to authenticated users
+grant select on public.profiles_public_view to authenticated;
+
+-- Restrict profiles table policy to allow full access only to own profile
+create policy "認証済みユーザーは自分のプロファイルを完全参照できる"
   on public.profiles for select
   to authenticated
-  using (true);
+  using (auth.uid() = id);
+
+create policy "認証済みユーザーは他のプロファイルの公開フィールドを参照できる"
+  on public.profiles for select
+  to authenticated
+  using (auth.uid() <> id);
 
 -- ---------------------------------------------------------------------------
 -- 2. テーブル作成

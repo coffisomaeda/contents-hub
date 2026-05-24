@@ -1,6 +1,6 @@
 if git diff --cached --name-only | grep -q 'frontend/wrangler.jsonc'; then
   echo "wrangler.jsonc が変更されたため、型定義を再生成中..."
-  pnpm --filter frontend exec wrangler types
+  pnpm --filter frontend exec wrangler types --check
   git add frontend/worker-configuration.d.ts
 fi
 

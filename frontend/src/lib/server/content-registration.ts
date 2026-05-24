@@ -242,12 +242,15 @@ export const registerContentForUser = async (
   if (input.mediaType === 'book') {
     const { error: bookError } = await supabase.from('user_books').insert({
       user_content_id: newUserContent.id,
-      is_ebook: input.isEbook ?? false,
-      is_sold: input.isSold ?? false,
+      is_ebook: input.isEbook,
+      is_sold: input.isSold,
     });
 
     if (bookError) {
-      await supabase.from('user_contents').delete().eq('id', newUserContent.id);
+      const { error: rollbackError } = await supabase.from('user_contents').delete().eq('id', newUserContent.id);
+      if (rollbackError) {
+        console.error('Failed to rollback user_contents:', rollbackError);
+      }
       throw new Error(bookError.message);
     }
   }

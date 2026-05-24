@@ -207,6 +207,21 @@ export const actions: Actions = {
       });
     }
 
+    // Verify ownership before sharing
+    const { data: ownership, error: ownershipError } = await locals.supabase
+      .from('user_contents')
+      .select('id')
+      .eq('content_id', params.id)
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (ownershipError || !ownership) {
+      return fail(403, {
+        kind: 'share' as const,
+        message: 'このコンテンツを共有する権限がありません。',
+      });
+    }
+
     const { error: shareError } = await locals.supabase.from('content_shares').insert({
       sharer_id: user.id,
       recipient_id: recipientId,

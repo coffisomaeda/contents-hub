@@ -21,57 +21,62 @@ test.describe('Content Edit API', () => {
   test('POST /contents/{id}?/edit updates status, rating, and memo', async ({ request }) => {
     await login(request);
 
-    const editResponse = await request.post(`/contents/${EDIT_TARGET_ID}?/edit`, {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        Origin: APP_ORIGIN,
-        Accept: 'application/json',
-      },
-      data: 'status=doing&rating=3&memo=編集テスト用メモ',
-    });
+    try {
+      const editResponse = await request.post(`/contents/${EDIT_TARGET_ID}?/edit`, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Origin: APP_ORIGIN,
+          Accept: 'application/json',
+        },
+        data: 'status=doing&rating=3&memo=編集テスト用メモ',
+      });
 
-    expect(editResponse.status()).toBe(200);
+      expect(editResponse.status()).toBe(200);
 
-    const body = await editResponse.json();
-    expect(body.type).toBe('success');
+      const body = await editResponse.json();
+      expect(body.type).toBe('success');
 
-    const bodyText = JSON.stringify(body);
-    expect(bodyText).toContain('コンテンツを更新しました。');
+      const bodyText = JSON.stringify(body);
+      expect(bodyText).toContain('コンテンツを更新しました。');
 
-    const detailResponse = await request.get(`/contents/${EDIT_TARGET_ID}`);
-    expect(detailResponse.status()).toBe(200);
+      const detailResponse = await request.get(`/contents/${EDIT_TARGET_ID}`);
+      expect(detailResponse.status()).toBe(200);
 
-    const html = await detailResponse.text();
-    expect(html).toContain('進撃の巨人');
-    expect(html).toContain('編集テスト用メモ');
-
-    // restore seed data
-    await restoreSeedData(request);
+      const html = await detailResponse.text();
+      expect(html).toContain('進撃の巨人');
+      expect(html).toContain('編集テスト用メモ');
+    } finally {
+      // restore seed data
+      await restoreSeedData(request);
+    }
   });
 
   test('POST /contents/{id}?/edit clears rating when empty', async ({ request }) => {
     await login(request);
 
-    const editResponse = await request.post(`/contents/${EDIT_TARGET_ID}?/edit`, {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        Origin: APP_ORIGIN,
-        Accept: 'application/json',
-      },
-      data: 'status=want&rating=&memo=',
-    });
+    try {
+      const editResponse = await request.post(`/contents/${EDIT_TARGET_ID}?/edit`, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Origin: APP_ORIGIN,
+          Accept: 'application/json',
+        },
+        data: 'status=want&rating=&memo=',
+      });
 
-    expect(editResponse.status()).toBe(200);
+      expect(editResponse.status()).toBe(200);
 
-    const body = await editResponse.json();
-    expect(body.type).toBe('success');
+      const body = await editResponse.json();
+      expect(body.type).toBe('success');
 
-    const detailResponse = await request.get(`/contents/${EDIT_TARGET_ID}`);
-    const html = await detailResponse.text();
-    expect(html).toContain('進撃の巨人');
-
-    // restore seed data
-    await restoreSeedData(request);
+      const detailResponse = await request.get(`/contents/${EDIT_TARGET_ID}`);
+      const html = await detailResponse.text();
+      expect(html).toContain('進撃の巨人');
+      expect(html).toContain('未評価');
+    } finally {
+      // restore seed data
+      await restoreSeedData(request);
+    }
   });
 
   test('GET /contents/{id} redirects unauthenticated user to login', async ({ request }) => {
