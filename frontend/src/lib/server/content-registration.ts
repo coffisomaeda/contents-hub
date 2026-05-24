@@ -247,7 +247,10 @@ export const registerContentForUser = async (
     });
 
     if (bookError) {
-      const { error: rollbackError } = await supabase.from('user_contents').delete().eq('id', newUserContent.id);
+      const { error: rollbackError } = await supabase
+        .from('user_contents')
+        .delete()
+        .eq('id', newUserContent.id);
       if (rollbackError) {
         console.error('Failed to rollback user_contents:', rollbackError);
       }

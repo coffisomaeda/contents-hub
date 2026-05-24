@@ -215,7 +215,14 @@ export const actions: Actions = {
       .eq('user_id', user.id)
       .maybeSingle();
 
-    if (ownershipError || !ownership) {
+    if (ownershipError) {
+      return fail(500, {
+        kind: 'share' as const,
+        message: '所有権の検証に失敗しました。',
+      });
+    }
+
+    if (!ownership) {
       return fail(403, {
         kind: 'share' as const,
         message: 'このコンテンツを共有する権限がありません。',

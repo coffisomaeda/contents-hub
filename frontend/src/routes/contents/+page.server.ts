@@ -25,7 +25,9 @@ export const load: PageServerLoad = async ({ locals, url }) => {
       .order('updated_at', { ascending: false }),
     locals.supabase
       .from('content_shares')
-      .select('*, contents(*), profiles!content_shares_sharer_id_fkey(id, display_name, avatar_url)')
+      .select(
+        '*, contents(*), profiles!content_shares_sharer_id_fkey(id, display_name, avatar_url)',
+      )
       .eq('recipient_id', user.id)
       .order('created_at', { ascending: false }),
   ]);

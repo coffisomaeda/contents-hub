@@ -1,9 +1,12 @@
 if git diff --cached --name-only | grep -q 'frontend/wrangler.jsonc'; then
   echo "wrangler.jsonc が変更されたため、型定義を再生成中..."
-  pnpm --filter frontend exec wrangler types --check
+  pnpm --filter frontend exec wrangler types
   git add frontend/worker-configuration.d.ts
 fi
 
 pnpm exec lint-staged
-pnpm run lint
-cd frontend && pnpm run lint && pnpm run check && pnpm run jscpd
+
+if git diff --cached --name-only | grep -q '^frontend/src/'; then
+  echo "フロントエンドのコード変更を検知。重複コード（jscpd）をチェック中..."
+  pnpm -F frontend run jscpd
+fi

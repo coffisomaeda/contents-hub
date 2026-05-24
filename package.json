@@ -25,6 +25,10 @@
     "vite": "^8.0.10"
   },
   "lint-staged": {
-    "*": "prettier --write --ignore-unknown"
+    "*.{js,ts,svelte}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "!(*.{js,ts,svelte})": "prettier --write --ignore-unknown"
   }
 }
