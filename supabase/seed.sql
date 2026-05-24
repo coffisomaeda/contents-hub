@@ -333,3 +333,15 @@ values
     null,
     '周りが絶賛しているので観たい。'
   );
+
+-- 8. コンテンツ共有 (content_shares)
+insert into public.content_shares (id, sharer_id, recipient_id, content_id, message)
+values
+  (
+    '88888888-8888-8888-8888-888888888888',
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000002',
+    '11111111-1111-1111-1111-111111111111',
+    'これ、本当におすすめなのでぜひ読んでみて！'
+  )
+on conflict (sharer_id, recipient_id, content_id) do nothing;
