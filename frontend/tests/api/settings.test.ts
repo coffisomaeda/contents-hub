@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { login, saveSearchSettings, signup } from './utils';
+import { APP_ORIGIN, login, saveSearchSettings, signup } from './utils';
 
 test.describe('Search settings API (SvelteKit Form Actions)', () => {
   test('POST /settings saves selected media types and filters /contents/new choices', async ({
@@ -27,7 +27,7 @@ test.describe('Search settings API (SvelteKit Form Actions)', () => {
       const rejectedSearchResponse = await request.post('/contents/new?/search', {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          Origin: 'http://localhost:5175',
+          Origin: APP_ORIGIN,
           Accept: 'application/json',
         },
         data: new URLSearchParams({
@@ -57,7 +57,7 @@ test.describe('Search settings API (SvelteKit Form Actions)', () => {
     const onboardingResponse = await request.post('/settings/onboarding', {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        Origin: 'http://localhost:5175',
+        Origin: APP_ORIGIN,
       },
       data: formData.toString(),
       maxRedirects: 0,

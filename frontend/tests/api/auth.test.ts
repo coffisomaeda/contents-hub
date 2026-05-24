@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test';
-
-const APP_ORIGIN = 'http://localhost:5175';
+import { APP_ORIGIN } from './utils';
 
 test.describe('Auth API (SvelteKit Form Actions)', () => {
   // 1. ログイン失敗（存在しないユーザーや誤ったパスワード）のテスト

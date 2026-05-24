@@ -16,9 +16,10 @@ export default defineConfig({
     },
     {
       command: 'pnpm dev --host 127.0.0.1 --port 5175',
-      url: 'http://127.0.0.1:5175',
+      url: 'http://127.0.0.1:5175/health',
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,
+      stdout: 'pipe',
       env: {
         PUBLIC_SUPABASE_URL: 'http://127.0.0.1:54321',
         PUBLIC_SUPABASE_ANON_KEY: 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH',

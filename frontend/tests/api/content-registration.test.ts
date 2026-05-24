@@ -1,6 +1,5 @@
 import { expect, test } from '@playwright/test';
-
-const APP_ORIGIN = 'http://localhost:5175';
+import { APP_ORIGIN } from './utils';
 
 const extractContentId = (body: unknown) => {
   const bodyText = JSON.stringify(body);
