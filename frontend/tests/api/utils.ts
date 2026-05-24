@@ -2,6 +2,8 @@ import { expect, type APIRequestContext } from '@playwright/test';
 
 export const APP_ORIGIN = 'http://localhost:5175';
 export const DEFAULT_SEARCH_MEDIA_TYPES = ['book', 'game', 'movie', 'tv'];
+export const SUPABASE_URL = 'http://127.0.0.1:54321';
+export const SUPABASE_ANON_KEY = 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH';
 
 export const login = async (request: APIRequestContext, email = 'test1@example.com') => {
   const response = await request.post('/login', {
@@ -35,6 +37,25 @@ export const signup = async (request: APIRequestContext, email: string) => {
 
   expect([200, 303]).toContain(response.status());
   expect(response.headers()['set-cookie']).toContain('sb-');
+};
+
+export const getSupabaseAccessToken = async (
+  request: APIRequestContext,
+  email = 'test1@example.com',
+) => {
+  const response = await request.post(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      'Content-Type': 'application/json',
+    },
+    data: {
+      email,
+      password: 'password123',
+    },
+  });
+
+  expect(response.status()).toBe(200);
+  return (await response.json()).access_token as string;
 };
 
 export const saveSearchSettings = async (
