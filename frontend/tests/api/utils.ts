@@ -1,6 +1,6 @@
 import { expect, type APIRequestContext } from '@playwright/test';
 
-export const APP_ORIGIN = 'http://localhost:5175';
+export const APP_ORIGIN = 'http://127.0.0.1:5175';
 export const DEFAULT_SEARCH_MEDIA_TYPES = ['book', 'game', 'movie', 'tv'];
 export const SUPABASE_URL = 'http://127.0.0.1:54321';
 export const SUPABASE_ANON_KEY = 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH';

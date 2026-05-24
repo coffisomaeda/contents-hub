@@ -16,7 +16,7 @@ export default defineConfig({
     },
     {
       command: 'pnpm dev --host 127.0.0.1 --port 5175',
-      url: 'http://localhost:5175',
+      url: 'http://127.0.0.1:5175',
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,
       env: {
@@ -29,7 +29,7 @@ export default defineConfig({
   ],
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://localhost:5175',
+    baseURL: 'http://127.0.0.1:5175',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
