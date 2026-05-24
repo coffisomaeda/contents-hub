@@ -46,3 +46,8 @@ $$;
 -- 5. 不要な関数の削除 (クリーンアップ)
 drop function if exists public.find_user_id_by_email(text);
 drop table if exists public.share_rate_limits cascade;
+
+-- 6. profiles_public_view を再定義（username カラムを追加）
+create or replace view public.profiles_public_view as
+select id, display_name, avatar_url, username
+from public.profiles;

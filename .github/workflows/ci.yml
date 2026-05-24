@@ -10,9 +10,19 @@ on:
 jobs:
   lint-and-check:
     runs-on: ubuntu-latest
+    outputs:
+      run-e2e: ${{ steps.check-e2e.outputs.run-e2e }}
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Check for [run-e2e] in commit message
+        id: check-e2e
+        run: |
+          COMMIT_MSG=$(git log -1 --format='%s')
+          if [[ "$COMMIT_MSG" == *"[run-e2e]"* ]]; then
+            echo "run-e2e=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - uses: jdx/mise-action@v2
 
@@ -41,9 +51,8 @@ jobs:
     needs: lint-and-check
     if: |
       github.event_name == 'workflow_dispatch' ||
-      contains(github.event.head_commit.message, '[run-e2e]') ||
+      needs.lint-and-check.outputs.run-e2e == 'true' ||
       contains(github.event.pull_request.title, '[run-e2e]') ||
-      contains(github.head_ref, 'feature/issues-15-16-17') ||
       (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     steps:

@@ -9,7 +9,7 @@ drop policy if exists "ユーザーは自分のプロファイルを参照でき
 
 -- Create a view with only public profile fields
 create or replace view public.profiles_public_view as
-select id, display_name, avatar_url, username
+select id, display_name, avatar_url
 from public.profiles;
 
 -- Grant select on the view to authenticated users
