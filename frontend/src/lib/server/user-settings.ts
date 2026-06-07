@@ -14,7 +14,7 @@ export type UserSearchSettings = {
   settingsCompletedAt: string | null;
 };
 
-const normalizeSearchMediaTypes = (value: unknown): SearchMediaType[] => {
+export const normalizeSearchMediaTypes = (value: unknown): SearchMediaType[] => {
   if (!Array.isArray(value) || value.length === 0) {
     return defaultSearchMediaTypes;
   }
