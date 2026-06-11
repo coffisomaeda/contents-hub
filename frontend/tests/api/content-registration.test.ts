@@ -193,6 +193,7 @@ test.describe('Content Registration API (SvelteKit Form Actions)', () => {
       author: '漫画テスト著者',
       rakutenGenreId: '001001001', // 少年コミック
       status: 'doing',
+      rating: '5',
       isEbook: 'true',
     });
 

@@ -26,7 +26,7 @@ begin
   raw_username := new.raw_user_meta_data ->> 'username';
 
   -- Validate username against expected format
-  if raw_username is not null and raw_username ~* '^[A-Za-z0-9_]{1,30}$' then
+  if raw_username is not null and raw_username ~* '^[a-zA-Z0-9_]{3,20}$' then
     final_username := raw_username;
   else
     final_username := 'user_' || right(replace(new.id::text, '-', ''), 15);

@@ -200,10 +200,17 @@ export const actions: Actions = {
 
     const recipientId = recipientProfile?.id;
 
-    if (!recipientId || recipientId === user.id) {
+    if (!recipientId) {
       return fail(404, {
         kind: 'share' as const,
         message: '指定されたユーザーが見つかりません。',
+      });
+    }
+
+    if (recipientId === user.id) {
+      return fail(400, {
+        kind: 'share' as const,
+        message: '自分自身には共有できません。',
       });
     }
 

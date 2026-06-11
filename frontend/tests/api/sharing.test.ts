@@ -76,7 +76,7 @@ test.describe('Sharing API', () => {
     expect(response.status()).toBe(200);
     const body = await response.json();
     expect(body.type).toBe('failure');
-    expect(body.status).toBe(404);
+    expect(body.status).toBe(400);
   });
 
   test('GET /contents shows shared content for recipient', async ({ request }) => {

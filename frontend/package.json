@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "svelte-kit sync && vite build && wrangler types --check",
+    "build": "svelte-kit sync && wrangler types --check && vite build",
     "preview": "wrangler dev .svelte-kit/cloudflare/_worker.js --port 4173",
     "prepare": "svelte-kit sync || echo ''",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && wrangler types --check",
+    "check": "svelte-kit sync && wrangler types --check && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "lint": "prettier --check . && eslint .",
     "format": "prettier --write .",
@@ -41,11 +41,13 @@
     "typescript-eslint": "^8.58.1",
     "vite": "^8.0.7",
     "vite-plugin-pwa": "^1.3.0",
-    "wrangler": "4.86.0"
+    "wrangler": "^4.86.0"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.68",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.105.1",
+    "ai": "^6.0.198",
     "zod": "^4.4.1"
   }
 }

@@ -393,6 +393,16 @@
                     />
                     電子書籍
                   </label>
+                  <label class="flex items-center gap-2 text-caption">
+                    <input
+                      type="checkbox"
+                      name="isSold"
+                      value="true"
+                      disabled={isRegistering}
+                      class="accent-primary"
+                    />
+                    売却済み
+                  </label>
                 </div>
               {/if}
             </div>

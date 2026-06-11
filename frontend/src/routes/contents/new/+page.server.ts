@@ -35,8 +35,14 @@ const buildRegistrationInput = (formData: FormData) => ({
   status: formValue(formData, 'status') ?? 'want',
   rating: formValue(formData, 'rating'),
   memo: formValue(formData, 'memo'),
-  isEbook: formData.get('isEbook') === 'true' || formData.get('isEbook') === 'on',
-  isSold: formData.get('isSold') === 'true' || formData.get('isSold') === 'on',
+  isEbook: (() => {
+    const val = formData.get('isEbook');
+    return typeof val === 'string' && (val === 'true' || val === 'on');
+  })(),
+  isSold: (() => {
+    const val = formData.get('isSold');
+    return typeof val === 'string' && (val === 'true' || val === 'on');
+  })(),
   isbn: formValue(formData, 'isbn'),
   author: formValue(formData, 'author'),
   authorKana: formValue(formData, 'authorKana'),
