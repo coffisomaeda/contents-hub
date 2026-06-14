@@ -52,6 +52,7 @@
     <legend class="text-body-strong">検索対象</legend>
     <div class="grid gap-2 grid-cols-2">
       {#each searchMediaTypeValues as mediaType (mediaType)}
+        {@const Icon = searchMediaTypeMeta[mediaType].icon}
         <label
           class={`flex cursor-pointer items-center gap-3 rounded-sm border bg-canvas px-3 py-3.5 text-caption transition-colors min-h-[48px] ${
             selectedMediaTypes.includes(mediaType)
@@ -66,12 +67,7 @@
             bind:group={selectedMediaTypes}
             disabled={isSaving}
           />
-          <img
-            src={searchMediaTypeMeta[mediaType].iconPath}
-            alt=""
-            class="h-7 w-7 shrink-0 rounded-full object-cover"
-            loading="lazy"
-          />
+          <Icon class="h-7 w-7 shrink-0" aria-hidden="true" />
           <span class="font-semibold">{searchMediaTypeMeta[mediaType].label}</span>
         </label>
       {/each}

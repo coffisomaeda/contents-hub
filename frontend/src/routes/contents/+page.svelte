@@ -1,27 +1,32 @@
 <script lang="ts">
+  import type { Component } from 'svelte';
+  import { BookOpen, Gamepad2, Film, Tv, type IconProps } from '@lucide/svelte';
   import { resolve } from '$app/paths';
 
   let { data, form } = $props();
 
-  const mediaTypeMeta: Record<string, { label: string; iconPath: string; className: string }> = {
+  const mediaTypeMeta: Record<
+    string,
+    { label: string; icon: Component<IconProps>; className: string }
+  > = {
     book: {
       label: '書籍',
-      iconPath: '/icons/book.png',
+      icon: BookOpen,
       className: 'border-primary/30 bg-primary/10 text-primary',
     },
     game: {
       label: 'ゲーム',
-      iconPath: '/icons/game.png',
+      icon: Gamepad2,
       className: 'border-[#2f7d32]/30 bg-[#2f7d32]/10 text-[#2f7d32]',
     },
     movie: {
       label: '映画',
-      iconPath: '/icons/movie.png',
+      icon: Film,
       className: 'border-[#7b3fb6]/30 bg-[#7b3fb6]/10 text-[#6f35a8]',
     },
     tv: {
       label: 'TV',
-      iconPath: '/icons/tv.png',
+      icon: Tv,
       className: 'border-[#bf5b00]/30 bg-[#bf5b00]/10 text-[#9a4600]',
     },
   };
@@ -105,12 +110,8 @@
                   class={`inline-flex w-fit items-center gap-1.5 rounded-pill border px-2 py-0.5 text-[12px] font-semibold sm:gap-2 sm:px-3 sm:py-1 sm:text-caption ${mediaType?.className ?? 'border-hairline bg-canvas-parchment text-ink-muted-80'}`}
                 >
                   {#if mediaType}
-                    <img
-                      src={mediaType.iconPath}
-                      alt=""
-                      class="h-5 w-5 rounded-full bg-canvas object-cover sm:h-6 sm:w-6"
-                      loading="lazy"
-                    />
+                    {@const Icon = mediaType.icon}
+                    <Icon class="h-4 w-4 shrink-0 sm:h-5 sm:w-5" aria-hidden="true" />
                   {:else}
                     <span
                       class="grid h-4 min-w-4 place-items-center rounded-full bg-canvas px-0.5 text-[10px] font-semibold leading-none sm:h-5 sm:min-w-5 sm:px-1 sm:text-[11px]"

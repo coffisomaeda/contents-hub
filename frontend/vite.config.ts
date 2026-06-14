@@ -38,26 +38,11 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // 静的アセット（JS/CSS/画像）の precache のみ。
+        // ナビゲーション(HTML)や /__data.json は認証状態でリダイレクト/中身が変わるため
+        // runtimeCaching の対象にしない（未ログイン時のリダイレクトや古い session を
+        // キャッシュしてしまい、ログイン後にトップへ遷移できなくなるのを防ぐ）。
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        runtimeCaching: [
-          {
-            urlPattern: ({ request }) => request.mode === 'navigate',
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'ch-pages',
-              networkTimeoutSeconds: 3,
-              expiration: { maxEntries: 30 },
-            },
-          },
-          {
-            urlPattern: ({ url }) => url.pathname.endsWith('/__data.json'),
-            handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'ch-data',
-              expiration: { maxEntries: 60 },
-            },
-          },
-        ],
       },
     }),
   ],

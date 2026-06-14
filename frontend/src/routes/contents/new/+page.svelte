@@ -116,6 +116,7 @@
           <legend class="text-body-strong">種別</legend>
           <div class="grid grid-cols-2 gap-2">
             {#each mediaTypeOptions as [mediaType, mediaTypeOption] (mediaType)}
+              {@const Icon = mediaTypeOption.icon}
               <label
                 class={`flex cursor-pointer items-center gap-2 rounded-sm border bg-canvas px-3 py-2.5 text-caption transition-colors ${
                   selectedMediaType === mediaType
@@ -131,12 +132,7 @@
                   bind:group={selectedMediaType}
                   disabled={isSearching}
                 />
-                <img
-                  src={mediaTypeOption.iconPath}
-                  alt=""
-                  class="h-7 w-7 shrink-0 rounded-full object-cover"
-                  loading="lazy"
-                />
+                <Icon class="h-7 w-7 shrink-0" aria-hidden="true" />
                 <span class="font-semibold">{mediaTypeOption.label}</span>
               </label>
             {/each}
