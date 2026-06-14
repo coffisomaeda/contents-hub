@@ -37,6 +37,28 @@ export default defineConfig({
           },
         ],
       },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'ch-pages',
+              networkTimeoutSeconds: 3,
+              expiration: { maxEntries: 30 },
+            },
+          },
+          {
+            urlPattern: ({ url }) => url.pathname.endsWith('/__data.json'),
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'ch-data',
+              expiration: { maxEntries: 60 },
+            },
+          },
+        ],
+      },
     }),
   ],
   server: {

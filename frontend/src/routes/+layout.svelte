@@ -1,5 +1,6 @@
 <script lang="ts">
   import '../app.css';
+  import { untrack } from 'svelte';
   import { browser } from '$app/environment';
   import { invalidate } from '$app/navigation';
   import { page } from '$app/state';
@@ -18,9 +19,21 @@
   $effect(() => {
     if (!browser) return;
 
+    let currentToken = untrack(() => data.session?.access_token ?? null);
+
     const supabase = createClient();
-    const { data: listener } = supabase.auth.onAuthStateChange(() => {
-      invalidate('supabase:auth');
+    const { data: listener } = supabase.auth.onAuthStateChange((event, newSession) => {
+      if (event === 'SIGNED_OUT' && 'caches' in window) {
+        for (const name of ['ch-pages', 'ch-data']) {
+          caches.delete(name).catch((err) => console.warn(`キャッシュ ${name} の削除に失敗:`, err));
+        }
+      }
+
+      const next = newSession?.access_token ?? null;
+      if (next !== currentToken) {
+        currentToken = next;
+        invalidate('supabase:auth');
+      }
     });
 
     return () => listener.subscription.unsubscribe();
