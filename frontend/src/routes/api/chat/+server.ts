@@ -2,6 +2,7 @@ import { env } from '$env/dynamic/private';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { createOpenAI } from '@ai-sdk/openai';
+import { createWorkersAI } from 'workers-ai-provider';
 import { generateText, tool, type ModelMessage, stepCountIs } from 'ai';
 import { z } from 'zod';
 import { createRakutenClient } from '$lib/server/external/rakuten';
@@ -41,14 +42,16 @@ const chatRequestSchema = z.object({
 const bookToolParams = z.object({
   query: z.string().describe('検索キーワード（例: 本のタイトルや著者名）'),
   status: z.enum(['want', 'doing', 'done']).describe('読書ステータス'),
-  rating: z.number().optional().describe('評価（1〜5の数値、任意）'),
+  // 数値を文字列で返すモデル（例: llama-3.3）にも耐えるよう coerce する
+  rating: z.coerce.number().min(1).max(5).optional().describe('評価（1〜5の数値、任意）'),
   memo: z.string().optional().describe('感想やメモ（任意）'),
 });
 
 const gameToolParams = z.object({
   query: z.string().describe('検索キーワード（例: ゲームのタイトル）'),
   status: z.enum(['want', 'doing', 'done']).describe('プレイステータス'),
-  rating: z.number().optional().describe('評価（1〜5の数値、任意）'),
+  // 数値を文字列で返すモデル（例: llama-3.3）にも耐えるよう coerce する
+  rating: z.coerce.number().min(1).max(5).optional().describe('評価（1〜5の数値、任意）'),
   memo: z.string().optional().describe('感想やメモ（任意）'),
 });
 
@@ -58,7 +61,8 @@ const videoToolParams = z.object({
     .enum(['movie', 'tv'])
     .describe('メディア種別（movie: 映画, tv: TV番組・アニメなど）'),
   status: z.enum(['want', 'doing', 'done']).describe('視聴ステータス'),
-  rating: z.number().optional().describe('評価（1〜5の数値、任意）'),
+  // 数値を文字列で返すモデル（例: llama-3.3）にも耐えるよう coerce する
+  rating: z.coerce.number().min(1).max(5).optional().describe('評価（1〜5の数値、任意）'),
   memo: z.string().optional().describe('感想やメモ（任意）'),
 });
 
@@ -75,14 +79,21 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
   }
   const userId = user.id;
 
-  // 環境変数から OpenAI 互換の設定を取得
+  // 使用する LLM を決定する。
+  // 優先: Cloudflare Workers AI バインディング（platform.env.AI）。本番でも local dev(remote) でも動き、
+  //       API キー不要で content フォーマットも Cloudflare 仕様で正しく送られる。
+  // 代替: OpenAI 互換エンドポイント（Gemini や任意の互換 API）。AI_API_KEY で認証。
+  //       ※ @ai-sdk/openai は openai.chat() を使うこと。openai() は Responses API になり
+  //         Cloudflare/Gemini の互換エンドポイント（/chat/completions のみ対応）で失敗する。
+  const aiBinding = platform?.env?.AI;
   const apiKey = getPrivateEnv(platform, 'AI_API_KEY') ?? getPrivateEnv(platform, 'GEMINI_API_KEY');
-  const baseURL = getPrivateEnv(platform, 'AI_BASE_URL');
-  const modelName = getPrivateEnv(platform, 'AI_MODEL') ?? 'gemini-2.0-flash';
+  const modelName =
+    getPrivateEnv(platform, 'AI_MODEL') ??
+    (aiBinding ? '@cf/qwen/qwen3-30b-a3b-fp8' : 'gemini-2.0-flash');
 
-  if (!apiKey) {
+  if (!aiBinding && !apiKey) {
     return json(
-      { error: 'AI_API_KEY または GEMINI_API_KEY が設定されていません。' },
+      { error: 'AI バインディング、または AI_API_KEY / GEMINI_API_KEY のいずれかが必要です。' },
       { status: 500 },
     );
   }
@@ -97,11 +108,13 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
   }
   const { message, history } = parsed.data;
 
-  // OpenAI 互換プロバイダーの作成
-  const openai = createOpenAI({
-    apiKey,
-    baseURL: baseURL || undefined,
-  });
+  // モデルの作成（バインディング優先、なければ OpenAI 互換）
+  const model = aiBinding
+    ? createWorkersAI({ binding: aiBinding })(modelName)
+    : createOpenAI({
+        apiKey,
+        baseURL: getPrivateEnv(platform, 'AI_BASE_URL') || undefined,
+      }).chat(modelName);
 
   // 登録されたコンテンツの情報をフロントエンドに返すための変数
   let registeredContentInfo: RegisteredContentInfo | null = null;
@@ -136,7 +149,7 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
 
   try {
     const result = await generateText({
-      model: openai(modelName),
+      model,
       system: `あなたは優秀なコンテンツ管理アシスタントです。
 ユーザーの指示に従って、本、ゲーム、映像作品（映画やTV番組、アニメ）をライブラリに登録したり、登録されたコンテンツを検索したりします。
 コンテンツの登録時には、自動的に適切な検索ツールを呼び出してください。

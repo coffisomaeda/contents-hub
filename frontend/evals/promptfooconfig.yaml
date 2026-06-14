@@ -1,0 +1,130 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+#
+# /api/chat の「意図 → ツール呼び出し」精度を評価し、モデルを横並び比較する eval。
+# 実行: pnpm eval   （= npx promptfoo eval -c evals/promptfooconfig.yaml）
+#
+# 必要な環境変数（評価したいプロバイダーの分だけ設定すればよい。frontend/.env から読まれる）:
+#   GEMINI_API_KEY ... Google AI Studio のキー（gemini プロバイダー用）
+#   AI_API_KEY     ... Cloudflare Workers AI のトークン（cf プロバイダー用）
+#   AI_BASE_URL    ... Cloudflare の OpenAI 互換エンドポイント
+#                      （例: https://api.cloudflare.com/client/v4/accounts/<ACCOUNT_ID>/ai/v1）
+
+description: contents-hub チャットのツール呼び出し精度
+
+prompts:
+  - file://prompt.yaml
+
+providers:
+  # --- Google Gemini（現行） ---
+  - id: openai:chat:gemini-2.0-flash
+    label: gemini-2.0-flash
+    config:
+      apiBaseUrl: https://generativelanguage.googleapis.com/v1beta/openai
+      apiKeyEnvar: GEMINI_API_KEY
+      tools: file://tools.yaml
+      tool_choice: auto
+      temperature: 0
+
+  # --- Cloudflare Workers AI（比較候補） ---
+  # アプリと同じ .env の AI_API_KEY / AI_BASE_URL を使う（= 本番と同じ認証・エンドポイント）。
+  - id: openai:chat:@cf/meta/llama-3.3-70b-instruct-fp8-fast
+    label: cf-llama-3.3-70b
+    config:
+      apiBaseUrl: '{{ env.AI_BASE_URL }}'
+      apiKeyEnvar: AI_API_KEY
+      tools: file://tools.yaml
+      tool_choice: auto
+      temperature: 0
+
+  - id: openai:chat:@cf/qwen/qwen3-30b-a3b-fp8
+    label: cf-qwen3-30b
+    config:
+      apiBaseUrl: '{{ env.AI_BASE_URL }}'
+      apiKeyEnvar: AI_API_KEY
+      tools: file://tools.yaml
+      tool_choice: auto
+      temperature: 0
+
+# 合否は assert.js を正とする。
+# is-valid-openai-tools-call（JSONスキーマ厳格検証）は、アプリが z.coerce.number() で
+# 数値を矯正受理する実挙動より厳しい（"5" を不合格にする）ため、ここでは使わない。
+
+tests:
+  - description: 本を want で登録
+    vars:
+      message: ハリー・ポッターと賢者の石の本を気になるで登録して
+      expected:
+        tool: search_and_add_book
+        args: { status: want }
+    assert:
+      - type: javascript
+        value: file://assert.js
+
+  - description: ゲームを done + 評価5 + メモ付きで登録
+    vars:
+      message: マリオオデッセイのゲームを完了で登録、評価は5、メモは「最高のアクションゲーム」
+      expected:
+        tool: search_and_add_game
+        args: { status: done, rating: 5 }
+    assert:
+      - type: javascript
+        value: file://assert.js
+
+  - description: 映画を doing で登録（media_type=movie）
+    vars:
+      message: 映画インセプションを視聴中で登録して
+      expected:
+        tool: search_and_add_video
+        args: { media_type: movie, status: doing }
+    assert:
+      - type: javascript
+        value: file://assert.js
+
+  - description: アニメは tv に振り分けられる
+    vars:
+      message: 進撃の巨人のアニメを気になるで登録して
+      expected:
+        tool: search_and_add_video
+        args: { media_type: tv, status: want }
+    assert:
+      - type: javascript
+        value: file://assert.js
+
+  - description: ステータス未指定はデフォルト want になる
+    vars:
+      message: ゼルダの伝説 ティアーズ オブ ザ キングダムを登録して
+      expected:
+        tool: search_and_add_game
+        args: { status: want }
+    assert:
+      - type: javascript
+        value: file://assert.js
+
+  - description: 「読了」は done にマップされる
+    vars:
+      message: 鬼滅の刃の本を読了で登録して
+      expected:
+        tool: search_and_add_book
+        args: { status: done }
+    assert:
+      - type: javascript
+        value: file://assert.js
+
+  - description: 「クリア」は done にマップされる
+    vars:
+      message: ティアキンをクリアしたので完了で登録、評価4
+      expected:
+        tool: search_and_add_game
+        args: { status: done, rating: 4 }
+    assert:
+      - type: javascript
+        value: file://assert.js
+
+  - description: ライブラリ検索（登録ではない）
+    vars:
+      message: ライブラリからハリーポッターを検索して
+      expected:
+        tool: search_my_library
+    assert:
+      - type: javascript
+        value: file://assert.js

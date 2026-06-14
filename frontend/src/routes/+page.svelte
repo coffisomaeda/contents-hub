@@ -3,25 +3,21 @@
   import { resolve } from '$app/paths';
 
   // メディア種別のメタデータ
-  const mediaTypeMeta: Record<string, { label: string; iconPath: string; className: string }> = {
+  const mediaTypeMeta: Record<string, { label: string; className: string }> = {
     book: {
       label: '書籍',
-      iconPath: '/icons/book.png',
       className: 'border-primary/30 bg-primary/10 text-primary',
     },
     game: {
       label: 'ゲーム',
-      iconPath: '/icons/game.png',
       className: 'border-[#2f7d32]/30 bg-[#2f7d32]/10 text-[#2f7d32]',
     },
     movie: {
       label: '映画',
-      iconPath: '/icons/movie.png',
       className: 'border-[#7b3fb6]/30 bg-[#7b3fb6]/10 text-[#6f35a8]',
     },
     tv: {
       label: 'TV',
-      iconPath: '/icons/tv.png',
       className: 'border-[#bf5b00]/30 bg-[#bf5b00]/10 text-[#9a4600]',
     },
   };
@@ -62,14 +58,7 @@
     } | null;
   }
 
-  let messages = $state<Message[]>([
-    {
-      id: 'welcome',
-      role: 'model',
-      content:
-        'こんにちは！私はあなたのコンテンツ管理アシスタントです。登録したい本、ゲーム、映画、TV番組について話しかけてください。「○○を登録して」「ライブラリから○○を検索して」などと指示できます。',
-    },
-  ]);
+  let messages = $state<Message[]>([]);
 
   let inputVal = $state('');
   let isLoading = $state(false);
@@ -94,8 +83,8 @@
         },
         body: JSON.stringify({
           message: text,
-          // ウェルカムメッセージ(先頭)と、今回送信したメッセージ(末尾)を除いて履歴として送信
-          history: messages.slice(1, -1).map((m) => ({ role: m.role, content: m.content })),
+          // 今回送信したメッセージ(末尾)を除いて履歴として送信
+          history: messages.slice(0, -1).map((m) => ({ role: m.role, content: m.content })),
         }),
       });
 
@@ -142,12 +131,6 @@
     chatEndEl?.scrollIntoView({ behavior: 'smooth' });
   }
 
-  const quickPrompts = [
-    'ハリー・ポッターと賢者の石の本を気になるで登録して',
-    'マリオオデッセイのゲームを完了で登録、評価は5、メモは「最高のアクションゲーム」',
-    '映画インセプションを視聴中で登録して',
-    'ライブラリからハリーポッターを検索して',
-  ];
 </script>
 
 <svelte:head>
@@ -281,23 +264,6 @@
 
       <div bind:this={chatEndEl}></div>
     </div>
-
-    <!-- クイックプロンプトの提案表示 -->
-    {#if messages.length === 1 && !isLoading}
-      <div transition:slide class="p-3 bg-surface-pearl border-t border-hairline">
-        <p class="text-[13px] text-ink-muted-48 m-0 mb-2 font-semibold">クイック提案から試す:</p>
-        <div class="flex flex-wrap gap-2">
-          {#each quickPrompts as prompt (prompt)}
-            <button
-              onclick={() => sendMessage(prompt)}
-              class="text-caption bg-canvas border border-hairline text-primary rounded-sm px-3 py-1.5 hover:border-primary hover:bg-primary/5 transition-all text-left cursor-pointer active:scale-98"
-            >
-              {prompt}
-            </button>
-          {/each}
-        </div>
-      </div>
-    {/if}
 
     <!-- 入力フォーム -->
     <div class="p-3 bg-canvas-parchment border-t border-hairline flex items-center gap-2">
