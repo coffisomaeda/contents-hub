@@ -39,31 +39,27 @@ const chatRequestSchema = z.object({
     .default([]),
 });
 
-const bookToolParams = z.object({
-  query: z.string().describe('検索キーワード（例: 本のタイトルや著者名）'),
-  status: z.enum(['want', 'doing', 'done']).describe('読書ステータス'),
-  // 数値を文字列で返すモデル（例: llama-3.3）にも耐えるよう coerce する
-  rating: z.coerce.number().min(1).max(5).optional().describe('評価（1〜5の数値、任意）'),
-  memo: z.string().optional().describe('感想やメモ（任意）'),
-});
+// 登録系ツールの共通パラメータ。query / status の説明だけ各ツールで差し替える。
+// rating は数値を文字列で返すモデル（例: llama-3.3）にも耐えるよう coerce し、1〜5 に制限する。
+const registerToolParams = (queryDesc: string, statusDesc: string) =>
+  z.object({
+    query: z.string().describe(queryDesc),
+    status: z.enum(['want', 'doing', 'done']).describe(statusDesc),
+    rating: z.coerce.number().min(1).max(5).optional().describe('評価（1〜5の数値、任意）'),
+    memo: z.string().optional().describe('感想やメモ（任意）'),
+  });
 
-const gameToolParams = z.object({
-  query: z.string().describe('検索キーワード（例: ゲームのタイトル）'),
-  status: z.enum(['want', 'doing', 'done']).describe('プレイステータス'),
-  // 数値を文字列で返すモデル（例: llama-3.3）にも耐えるよう coerce する
-  rating: z.coerce.number().min(1).max(5).optional().describe('評価（1〜5の数値、任意）'),
-  memo: z.string().optional().describe('感想やメモ（任意）'),
-});
+const bookToolParams = registerToolParams('検索キーワード（例: 本のタイトルや著者名）', '読書ステータス');
 
-const videoToolParams = z.object({
-  query: z.string().describe('検索キーワード（例: 映画やアニメのタイトル）'),
+const gameToolParams = registerToolParams('検索キーワード（例: ゲームのタイトル）', 'プレイステータス');
+
+const videoToolParams = registerToolParams(
+  '検索キーワード（例: 映画やアニメのタイトル）',
+  '視聴ステータス',
+).extend({
   media_type: z
     .enum(['movie', 'tv'])
     .describe('メディア種別（movie: 映画, tv: TV番組・アニメなど）'),
-  status: z.enum(['want', 'doing', 'done']).describe('視聴ステータス'),
-  // 数値を文字列で返すモデル（例: llama-3.3）にも耐えるよう coerce する
-  rating: z.coerce.number().min(1).max(5).optional().describe('評価（1〜5の数値、任意）'),
-  memo: z.string().optional().describe('感想やメモ（任意）'),
 });
 
 const getPrivateEnv = (platform: App.Platform | undefined, key: string): string | undefined => {
