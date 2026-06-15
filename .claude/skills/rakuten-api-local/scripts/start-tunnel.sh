@@ -58,8 +58,11 @@ fi
 
 HOST="${URL#https://}"
 
-# vite.config.ts の allowedHosts をこの hostname だけに更新
-node -e '
+# vite.config.ts の allowedHosts をこの hostname だけに更新。
+# 失敗時は起動済みの cloudflared を孤児にしないよう必ず止めてから終了する。
+# （node は読み込み→置換→書き込みの順で、allowedHosts 不検出時は writeFileSync 前に
+#  exit するため、ファイルは未変更のまま。部分書き込みの心配はない。）
+if ! node -e '
 const fs = require("fs");
 const [file, host] = process.argv.slice(1);
 let s = fs.readFileSync(file, "utf8");
@@ -67,7 +70,11 @@ const re = /allowedHosts:\s*\[[^\]]*\]/;
 if (!re.test(s)) { console.error("allowedHosts が " + file + " に見つかりません"); process.exit(1); }
 s = s.replace(re, `allowedHosts: ['${host}']`);
 fs.writeFileSync(file, s);
-' "$VITE_CONFIG" "$HOST"
+' "$VITE_CONFIG" "$HOST"; then
+  echo "ERROR: vite.config.ts の allowedHosts 更新に失敗しました。" >&2
+  kill "$TUNNEL_PID" 2>/dev/null || true
+  exit 1
+fi
 
 echo "TUNNEL_PID=$TUNNEL_PID"
 echo "TUNNEL_URL=$URL"
