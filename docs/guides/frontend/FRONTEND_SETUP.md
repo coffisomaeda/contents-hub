@@ -1,8 +1,19 @@
 # フロントエンド セットアップガイド
 
-フェーズ 3-1 で構築したフロントエンド環境のセットアップ手順です。
+フロントエンド開発を始めるための**オンボーディング + 開発リファレンス**です。
+clone 後に開発できる状態にする手順（依存インストール・環境変数・型生成）、日常の開発コマンド、
+構成・ディレクトリの参照をまとめています。
+
+関連ドキュメント / スキルとの役割分担:
+
+- **本番デプロイ**: 初回は [PRODUCTION_DEPLOY.md](./PRODUCTION_DEPLOY.md)、再デプロイは `deploy-production` スキル
+- **楽天 API のローカル確認**: `rakuten-api-local` スキル
+- **アプリのローカル起動 / スクショ**: `run-contents-hub` / `screenshot-docs` スキル
 
 ## 構成
+
+なぜ SvelteKit を採用したか（候補比較・判断基準）は設計判断の記録
+[FRONTEND_FRAMEWORK_RESEARCH.md](../../decisions/FRONTEND_FRAMEWORK_RESEARCH.md) を参照してください。
 
 | 項目                  | 技術                                      |
 | --------------------- | ----------------------------------------- |
@@ -81,132 +92,22 @@ supabase gen types typescript --local > frontend/src/lib/database.types.ts
 
 ## 楽天ブックス API をローカルで確認する
 
-楽天 Web Service の新しい API エンドポイントでは `Application ID` と `Access Key` に加えて、リクエスト元の Web サイト制限が使われます。`localhost` や `127.0.0.1` は Allowed websites に登録できない場合があるため、ローカル開発では Cloudflare Tunnel の Quick Tunnel を使って公開 URL を作ります。
+楽天 Web Service の新しい API エンドポイントは `Application ID` / `Access Key` に加えて
+リクエスト元ホストの制限（Allowed websites）を使います。`localhost` や `127.0.0.1` は
+楽天側で無効な値として拒否されるため、ローカル確認では Cloudflare Quick Tunnel で公開 URL を
+作り、その hostname を vite の `allowedHosts` と楽天の Allowed websites に登録します。
 
-### 1. 環境変数を設定する
-
-`frontend/.env` に以下を設定します。
-
-```env
-RAKUTEN_APP_ID=your-rakuten-application-id
-RAKUTEN_ACCESS_KEY=your-rakuten-access-key
-```
-
-`Application ID` と `Access Key` は楽天 Web Service のアプリ情報画面で確認します。Affiliate ID や Client Secret ではありません。
-
-環境変数を追加・変更したら型を再生成します。
-
-```bash
-cd frontend
-pnpm gen
-```
-
-### 2. 開発サーバーを起動する
-
-```bash
-cd frontend
-pnpm dev --host 127.0.0.1
-```
-
-### 3. Cloudflare Tunnel を起動する
-
-別ターミナルで実行します。
-
-```bash
-cloudflared tunnel --url http://127.0.0.1:5173
-```
-
-`cloudflared` が未インストールの場合は、Cloudflare の公式手順に従ってインストールします。
-
-実行後、以下のような URL が表示されます。
-
-```txt
-https://example-words.trycloudflare.com
-```
-
-Quick Tunnel の URL は起動するたびに変わります。固定 URL が必要な場合は、Cloudflare に管理させている独自ドメインで固定 hostname の Tunnel を作成します。
-
-### 4. Vite の allowedHosts に Tunnel hostname を追加する
-
-Tunnel 経由で Vite dev server にアクセスすると、未許可ホストとしてブロックされることがあります。その場合は `frontend/vite.config.ts` の `server.allowedHosts` に Tunnel の hostname を追加します。
-
-```typescript
-export default defineConfig({
-  plugins: [tailwindcss(), sveltekit()],
-  server: {
-    allowedHosts: ['example-words.trycloudflare.com'],
-  },
-});
-```
-
-Quick Tunnel の URL が変わった場合は、この hostname も更新して dev server を再起動します。
-
-### 5. 楽天 Allowed websites に登録する
-
-楽天 Web Service のアプリ設定で、Allowed websites に Tunnel の hostname を登録します。
-
-```txt
-example-words.trycloudflare.com
-```
-
-`https://` やポート番号は付けません。`localhost`、`127.0.0.1`、`http://localhost:5173` は楽天側で無効な値として拒否される場合があります。
-
-### 6. Tunnel URL から動作確認する
-
-ブラウザで Tunnel URL を開きます。
-
-```txt
-https://example-words.trycloudflare.com
-```
-
-テストユーザーでログインします。
-
-```txt
-email: test1@example.com
-password: password123
-```
-
-`/contents/new` で書籍またはゲームを選択し、キーワード検索します。検索に成功すると楽天ブックス API の結果が表示されます。
+具体的な手順（Tunnel 起動 → `allowedHosts` 更新 → 楽天登録 → 検索確認）は
+`rakuten-api-local` スキルが対応します（Tunnel 起動と `allowedHosts` 書き換えは自動化済み）。
+固定 URL が必要な場合は、Cloudflare 管理の独自ドメインで固定 hostname の Tunnel を作ります。
 
 ## Cloudflare へのデプロイ
 
-本番ビルド・デプロイの詳細手順は [本番ビルド・デプロイ手順](./PRODUCTION_DEPLOY.md) を参照してください。
+- **初回の本番デプロイ**（一度きりのセットアップを含む）: [本番ビルド・デプロイ手順](./PRODUCTION_DEPLOY.md)
+- **2 回目以降の通常リリース**（build → deploy → 動作確認）: `deploy-production` スキル
 
-### 前提
-
-- Cloudflare アカウントが必要です
-- `wrangler login` で認証済みであること
-
-### デプロイ手順
-
-```bash
-cd frontend
-pnpm build
-npx wrangler deploy
-```
-
-### wrangler.jsonc の設定
-
-| 項目                 | 現在の値                            | 説明                       |
-| -------------------- | ----------------------------------- | -------------------------- |
-| `name`               | `contents-hub`                      | Workers のサービス名       |
-| `compatibility_date` | `2026-04-30`                        | Workers ランタイムの互換日 |
-| `main`               | `.svelte-kit/cloudflare/_worker.js` | エントリーポイント         |
-
-> **カスタムドメイン**: 必要に応じて `wrangler.jsonc` に `routes` を追加するか、Cloudflare ダッシュボードから設定してください。
-
-### サーバー側の環境変数（シークレット）
-
-フェーズ 4 で使う外部 API キーは、Cloudflare Workers のシークレットとして設定します。
-
-```bash
-npx wrangler secret put RAKUTEN_APP_ID
-npx wrangler secret put RAKUTEN_ACCESS_KEY
-npx wrangler secret put TMDB_API_KEY
-npx wrangler secret put WATCHMODE_API_KEY
-```
-
-> ローカル開発では `frontend/.env` から読み込まれます。本番では `wrangler secret` で設定した値が使われます。
+外部 API キーは本番では Cloudflare Workers のシークレット（`wrangler secret put`）、
+ローカルでは `frontend/.env` から読み込まれます。詳細は上記を参照してください。
 
 ## ディレクトリ構成
 

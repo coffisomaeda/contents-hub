@@ -1,5 +1,6 @@
 ---
 name: screenshot-docs
+disable-model-invocation: true
 description: >
   contents-hub アプリをローカルで起動し、Playwright でスクリーンショットを撮影して
   coffisomaeda/docs の Mintlify ドキュメントを画像付きで更新するスキル。

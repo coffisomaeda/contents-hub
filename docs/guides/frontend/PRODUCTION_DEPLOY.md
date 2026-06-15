@@ -2,6 +2,9 @@
 
 Cloudflare Workers に本番デプロイするための手順です。実行場所は、特に指定がない限り `frontend/` です。
 
+> このドキュメントは **初回の本番デプロイ（一度きりのセットアップを含む）** の runbook です。
+> 2 回目以降の通常リリース（build → deploy → 動作確認）は `deploy-production` スキルが対応します。
+
 ## 前提
 
 - Cloudflare アカウントにログイン済み

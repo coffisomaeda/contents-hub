@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+#
+# Cloudflare Quick Tunnel をローカル dev server に張り、公開 URL を取得して
+# frontend/vite.config.ts の server.allowedHosts をその hostname に書き換える。
+#
+# 楽天 Web Service の新エンドポイントは localhost / 127.0.0.1 を Allowed websites
+# として受け付けないため、ローカル確認には公開 URL（*.trycloudflare.com）が要る。
+# Quick Tunnel の URL は起動ごとに変わるので、毎回この置き換えが必要になる。
+#
+# 使い方:  start-tunnel.sh [port]   (デフォルト 5173)
+# 出力:    TUNNEL_PID / TUNNEL_URL / TUNNEL_HOST / LOG を stdout に出す。
+#          allowedHosts への登録のため TUNNEL_HOST をユーザーに渡すこと。
+#
+set -euo pipefail
+
+REPO_ROOT="/home/maeda/private/contents-hub"
+VITE_CONFIG="$REPO_ROOT/frontend/vite.config.ts"
+PORT="${1:-5173}"
+LOG="$(mktemp /tmp/cloudflared-XXXXXX.log)"
+
+if ! command -v cloudflared >/dev/null 2>&1; then
+  echo "ERROR: cloudflared が見つかりません。Cloudflare 公式手順でインストールしてください。" >&2
+  exit 1
+fi
+
+# Quick Tunnel をバックグラウンドで起動（ログはファイルへ）
+cloudflared tunnel --url "http://127.0.0.1:${PORT}" >"$LOG" 2>&1 &
+TUNNEL_PID=$!
+
+# 公開 URL が出るまで最大 ~30 秒待つ
+URL=""
+for _ in $(seq 1 30); do
+  URL="$(grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' "$LOG" | head -1 || true)"
+  [ -n "$URL" ] && break
+  sleep 1
+done
+
+if [ -z "$URL" ]; then
+  echo "ERROR: Tunnel URL を取得できませんでした。cloudflared ログ:" >&2
+  cat "$LOG" >&2
+  kill "$TUNNEL_PID" 2>/dev/null || true
+  exit 1
+fi
+
+HOST="${URL#https://}"
+
+# vite.config.ts の allowedHosts をこの hostname だけに更新
+node -e '
+const fs = require("fs");
+const [file, host] = process.argv.slice(1);
+let s = fs.readFileSync(file, "utf8");
+const re = /allowedHosts:\s*\[[^\]]*\]/;
+if (!re.test(s)) { console.error("allowedHosts が " + file + " に見つかりません"); process.exit(1); }
+s = s.replace(re, `allowedHosts: ['${host}']`);
+fs.writeFileSync(file, s);
+' "$VITE_CONFIG" "$HOST"
+
+echo "TUNNEL_PID=$TUNNEL_PID"
+echo "TUNNEL_URL=$URL"
+echo "TUNNEL_HOST=$HOST"
+echo "LOG=$LOG"
