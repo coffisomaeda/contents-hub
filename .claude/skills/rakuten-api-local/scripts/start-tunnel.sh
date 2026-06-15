@@ -62,6 +62,13 @@ if [ -z "$URL" ]; then
   exit 1
 fi
 
+# 念のため抽出値が想定形式（https://…trycloudflare.com）か検証する
+if [[ ! "$URL" =~ ^https://[a-z0-9-]+\.trycloudflare\.com$ ]]; then
+  echo "ERROR: 抽出した URL の形式が不正です: $URL" >&2
+  kill "$TUNNEL_PID" 2>/dev/null || true
+  exit 1
+fi
+
 HOST="${URL#https://}"
 
 # vite.config.ts の allowedHosts をこの hostname だけに更新。
