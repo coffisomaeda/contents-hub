@@ -37,9 +37,10 @@ Quick Tunnel の URL は **起動するたびに変わる**ので、毎回 `allo
 ### 1. Tunnel を張って allowedHosts を更新する
 
 dev server を**起動する前に**実行する（allowedHosts を先に更新しておけば dev の再起動が不要）。
+リポジトリルートから実行する（スクリプトは自身の位置からルートを解決する）。
 
 ```bash
-bash /home/maeda/private/contents-hub/.claude/skills/rakuten-api-local/scripts/start-tunnel.sh
+bash .claude/skills/rakuten-api-local/scripts/start-tunnel.sh
 ```
 
 出力の `TUNNEL_URL`（`https://xxxx.trycloudflare.com`）と `TUNNEL_HOST`（`xxxx.trycloudflare.com`）、
@@ -51,7 +52,7 @@ bash /home/maeda/private/contents-hub/.claude/skills/rakuten-api-local/scripts/s
 ### 2. dev server を起動する
 
 ```bash
-cd /home/maeda/private/contents-hub/frontend && pnpm dev --host 127.0.0.1
+cd frontend && pnpm dev --host 127.0.0.1
 ```
 
 （ローカル起動の一般的な面倒を見るのは `run-contents-hub` スキル。ここでは Tunnel が

@@ -13,7 +13,10 @@
 #
 set -euo pipefail
 
-REPO_ROOT="/home/maeda/private/contents-hub"
+# スクリプト自身の位置からリポジトリルートを解決する
+# （.claude/skills/rakuten-api-local/scripts/ の 4 階層上がルート）
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
 VITE_CONFIG="$REPO_ROOT/frontend/vite.config.ts"
 PORT="${1:-5173}"
 LOG="$(mktemp /tmp/cloudflared-XXXXXX.log)"
@@ -23,13 +26,24 @@ if ! command -v cloudflared >/dev/null 2>&1; then
   exit 1
 fi
 
+if [ ! -f "$VITE_CONFIG" ]; then
+  echo "ERROR: $VITE_CONFIG が見つかりません。リポジトリ構成を確認してください。" >&2
+  exit 1
+fi
+
 # Quick Tunnel をバックグラウンドで起動（ログはファイルへ）
 cloudflared tunnel --url "http://127.0.0.1:${PORT}" >"$LOG" 2>&1 &
 TUNNEL_PID=$!
 
-# 公開 URL が出るまで最大 ~30 秒待つ
+# 公開 URL が出るまで最大 ~30 秒待つ。
+# cloudflared が起動直後にクラッシュした場合は待たずに即エラーにする。
 URL=""
 for _ in $(seq 1 30); do
+  if ! kill -0 "$TUNNEL_PID" 2>/dev/null; then
+    echo "ERROR: cloudflared プロセスが終了しました。ログ:" >&2
+    cat "$LOG" >&2
+    exit 1
+  fi
   URL="$(grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' "$LOG" | head -1 || true)"
   [ -n "$URL" ] && break
   sleep 1
