@@ -26,6 +26,12 @@ if ! command -v cloudflared >/dev/null 2>&1; then
   exit 1
 fi
 
+# allowedHosts の書き換えに node を使う（mise 管理: node 24.x）
+if ! command -v node >/dev/null 2>&1; then
+  echo "ERROR: node が見つかりません。mise install で導入してください。" >&2
+  exit 1
+fi
+
 if [ ! -f "$VITE_CONFIG" ]; then
   echo "ERROR: $VITE_CONFIG が見つかりません。リポジトリ構成を確認してください。" >&2
   exit 1

@@ -95,15 +95,23 @@ supabase db push
 
 ## 型生成
 
+このリポジトリの型ファイルは **`frontend/src/lib/types/supabase.ts`**（コードはここから import する）。
+通常は frontend 側の `pnpm gen:types` を使うのが正（出力先がこのパスに固定されている）:
+
 ```bash
-supabase gen types --local --lang typescript     # ローカル DB から
-supabase gen types --linked --lang typescript    # リモート project から
-# このリポジトリでの保存先:
-supabase gen types --local --lang typescript > frontend/src/lib/database.types.ts
+cd frontend && pnpm gen:types
+# = supabase gen types typescript --local > src/lib/types/supabase.ts
 ```
 
-> frontend 側には `pnpm gen:types`（= `supabase gen types typescript --local > src/lib/types/supabase.ts`）
-> もある。出力先が異なるので、どちらの型ファイルを使っているか確認してから実行する。
+直接 CLI を使う場合も同じ出力先に揃える:
+
+```bash
+supabase gen types --local --lang typescript > frontend/src/lib/types/supabase.ts   # ローカル DB から
+supabase gen types --linked --lang typescript > frontend/src/lib/types/supabase.ts  # リモート project から
+```
+
+> スキーマを変更したら型を再生成する。出力先を別パスにすると import 元（`$lib/types/supabase`）と
+> ずれて型が効かなくなるので、上記パスに統一すること。
 
 ## seed について
 
