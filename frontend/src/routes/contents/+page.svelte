@@ -48,6 +48,11 @@
 
   const formatDate = (value: string | null) => value?.slice(0, 10) ?? '未設定';
   const formatRating = (value: number | null) => (value ? `${value}/5` : '未評価');
+
+  const filters = $derived(data.filters);
+  const hasActiveFilters = $derived(
+    Boolean(filters.q || filters.type || filters.status || filters.from || filters.to),
+  );
 </script>
 
 <section class="mx-auto grid max-w-[1120px] gap-6">
@@ -58,6 +63,85 @@
     </div>
     <a class="btn-primary rounded-sm text-center" href={resolve('/contents/new')}>登録する</a>
   </div>
+
+  <form
+    method="GET"
+    class="grid gap-3 rounded-sm border border-hairline bg-canvas p-3 sm:p-4"
+    data-sveltekit-keepfocus
+  >
+    {#if data.sharerFilter}
+      <input type="hidden" name="sharer" value={data.sharerFilter} />
+    {/if}
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <label class="grid gap-1 text-caption">
+        <span class="text-ink-muted-48">タイトル</span>
+        <input
+          type="search"
+          name="q"
+          value={filters.q}
+          placeholder="タイトルで絞り込む"
+          class="rounded-sm border border-hairline bg-canvas px-3 py-2 text-body"
+        />
+      </label>
+      <label class="grid gap-1 text-caption">
+        <span class="text-ink-muted-48">ジャンル</span>
+        <select
+          name="type"
+          value={filters.type}
+          class="rounded-sm border border-hairline bg-canvas px-3 py-2 text-body"
+        >
+          <option value="">すべて</option>
+          {#each Object.entries(mediaTypeMeta) as [value, meta] (value)}
+            <option {value}>{meta.label}</option>
+          {/each}
+        </select>
+      </label>
+      <label class="grid gap-1 text-caption">
+        <span class="text-ink-muted-48">ステータス</span>
+        <select
+          name="status"
+          value={filters.status}
+          class="rounded-sm border border-hairline bg-canvas px-3 py-2 text-body"
+        >
+          <option value="">すべて</option>
+          {#each Object.entries(statusMeta) as [value, meta] (value)}
+            <option {value}>{meta.label}</option>
+          {/each}
+        </select>
+      </label>
+      <div class="grid grid-cols-2 gap-2">
+        <label class="grid gap-1 text-caption">
+          <span class="text-ink-muted-48">登録日（開始）</span>
+          <input
+            type="date"
+            name="from"
+            value={filters.from}
+            class="rounded-sm border border-hairline bg-canvas px-2 py-2 text-body"
+          />
+        </label>
+        <label class="grid gap-1 text-caption">
+          <span class="text-ink-muted-48">登録日（終了）</span>
+          <input
+            type="date"
+            name="to"
+            value={filters.to}
+            class="rounded-sm border border-hairline bg-canvas px-2 py-2 text-body"
+          />
+        </label>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <button type="submit" class="btn-primary rounded-sm">絞り込む</button>
+      {#if hasActiveFilters}
+        <a
+          href={data.sharerFilter
+            ? resolve(`/contents?sharer=${data.sharerFilter}`)
+            : resolve('/contents')}
+          class="text-caption text-primary no-underline hover:underline">クリア</a
+        >
+      {/if}
+    </div>
+  </form>
 
   {#if form?.kind === 'delete' && form.message}
     <div
@@ -70,7 +154,14 @@
     </div>
   {/if}
 
-  {#if data.items.length === 0}
+  {#if data.items.length === 0 && hasActiveFilters}
+    <div class="grid gap-4 rounded-sm border border-hairline bg-canvas p-5">
+      <h2 class="text-tagline m-0">該当なし</h2>
+      <p class="text-body text-ink-muted-80 m-0">
+        条件に一致する登録済みコンテンツが見つからなかった。
+      </p>
+    </div>
+  {:else if data.items.length === 0}
     <div class="grid gap-4 rounded-sm border border-hairline bg-canvas p-5">
       <h2 class="text-tagline m-0">まだ登録なし</h2>
       <p class="text-body text-ink-muted-80 m-0">
