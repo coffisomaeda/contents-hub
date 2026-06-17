@@ -33,6 +33,7 @@ declare global {
         WATCHMODE_API_BASE_URL?: string;
         EXTERNAL_API_CACHE: KVNamespace;
         AI?: Ai;
+        DB?: D1Database;
       };
       ctx: {
         waitUntil: (promise: Promise<unknown>) => void;

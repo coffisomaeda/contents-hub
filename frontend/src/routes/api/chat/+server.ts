@@ -37,7 +37,47 @@ const chatRequestSchema = z.object({
     )
     .optional()
     .default([]),
+  // 1 回の会話をまとめる ID（フロントがページ表示ごとに発行）。
+  // 後方互換のため任意。未指定なら単発会話として扱う。
+  conversationId: z.string().optional(),
 });
+
+// チャット履歴を D1 に保存する（ベストエフォート。失敗してもチャット応答は止めない）。
+const saveChatHistory = async (
+  db: D1Database | undefined,
+  params: {
+    userId: string;
+    conversationId: string;
+    userMessage: string;
+    assistantReply: string;
+    registeredContent: RegisteredContentInfo | null;
+  },
+): Promise<void> => {
+  if (!db) return;
+  const { userId, conversationId, userMessage, assistantReply, registeredContent } = params;
+  const now = Date.now();
+  try {
+    const stmt = db.prepare(
+      `INSERT INTO chat_messages (id, user_id, conversation_id, role, content, registered_content, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    );
+    await db.batch([
+      stmt.bind(crypto.randomUUID(), userId, conversationId, 'user', userMessage, null, now),
+      stmt.bind(
+        crypto.randomUUID(),
+        userId,
+        conversationId,
+        'assistant',
+        assistantReply,
+        registeredContent ? JSON.stringify(registeredContent) : null,
+        // ユーザー発言より後に並ぶよう +1ms。
+        now + 1,
+      ),
+    ]);
+  } catch (error) {
+    console.error('chat history save error:', error);
+  }
+};
 
 // 登録系ツールの共通パラメータ。query / status の説明だけ各ツールで差し替える。
 // rating は数値を文字列で返すモデル（例: llama-3.3）にも耐えるよう coerce し、1〜5 に制限する。
@@ -102,7 +142,7 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
       { status: 400 },
     );
   }
-  const { message, history } = parsed.data;
+  const { message, history, conversationId } = parsed.data;
 
   // モデルの作成（バインディング優先、なければ OpenAI 互換）
   const model = aiBinding
@@ -146,6 +186,9 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
   try {
     const result = await generateText({
       model,
+      // 出力を決定的にしてトークン崩壊（fp8 量子化モデルでまれに起きる生成破綻）を抑える。
+      // eval（temperature:0 で 8/8）と同条件に揃える意味もある。
+      temperature: 0,
       system: `あなたは優秀なコンテンツ管理アシスタントです。
 ユーザーの指示に従って、本、ゲーム、映像作品（映画やTV番組、アニメ）をライブラリに登録したり、登録されたコンテンツを検索したりします。
 コンテンツの登録時には、自動的に適切な検索ツールを呼び出してください。
@@ -393,6 +436,21 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
         }),
       },
     });
+
+    // チャット履歴を D1 に保存（応答をブロックしないよう waitUntil に委ねる。
+    // ctx が無い環境では即時 await）。
+    const savePromise = saveChatHistory(platform?.env?.DB, {
+      userId,
+      conversationId: conversationId ?? crypto.randomUUID(),
+      userMessage: message,
+      assistantReply: result.text,
+      registeredContent: registeredContentInfo,
+    });
+    if (platform?.ctx?.waitUntil) {
+      platform.ctx.waitUntil(savePromise);
+    } else {
+      await savePromise;
+    }
 
     return json({
       reply: result.text,

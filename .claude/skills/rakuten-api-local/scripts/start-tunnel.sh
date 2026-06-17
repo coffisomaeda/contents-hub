@@ -81,7 +81,8 @@ const [file, host] = process.argv.slice(1);
 let s = fs.readFileSync(file, "utf8");
 const re = /allowedHosts:\s*\[[^\]]*\]/;
 if (!re.test(s)) { console.error("allowedHosts が " + file + " に見つかりません"); process.exit(1); }
-s = s.replace(re, `allowedHosts: ['${host}']`);
+const q = String.fromCharCode(39);
+s = s.replace(re, "allowedHosts: [" + q + host + q + "]");
 fs.writeFileSync(file, s);
 ' "$VITE_CONFIG" "$HOST"; then
   echo "ERROR: vite.config.ts の allowedHosts 更新に失敗しました。" >&2

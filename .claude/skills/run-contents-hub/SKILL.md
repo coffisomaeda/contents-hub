@@ -39,14 +39,30 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:5173/ 2>/dev/null
 ```
 
 - `200` または `302` → 起動済み。そのまま使う。
-- 接続失敗 → バックグラウンドで起動し、ポートが応答するまで待つ：
+- 接続失敗 → **起動前に既存プロセスの残骸を掃除してから**バックグラウンドで起動し、ポートが応答するまで待つ：
 
 ```bash
+# 既存の dev サーバー / 孤児プロセスを掃除する。
+# vite を kill しても workerd（Cloudflare ランタイム）が孤児として残ることがあるため両方落とす。
+# パターンは自分自身のシェルコマンドに誤マッチしないよう具体的に指定する。
+for p in $(lsof -ti:5173 2>/dev/null); do kill -9 "$p" 2>/dev/null; done   # ポート占有プロセス
+pkill -9 -f "vite/bin/vite" 2>/dev/null                                    # vite 本体
+pkill -9 -f "workerd serve" 2>/dev/null                                    # 残った workerd
+sleep 2
+
+# 残骸が無いことを確認（0 件であること）
+ps -eo args | grep -E "vite/bin/vite|workerd serve" | grep -v grep | wc -l
+
 cd frontend && pnpm dev --port 5173 &
 timeout 30 bash -c 'until curl -sf http://localhost:5173/health >/dev/null 2>&1; do sleep 1; done'
 ```
 
-停止するには `pkill -f "vite"` または `kill $(lsof -ti:5173)`。
+停止するときも同様に **vite と workerd の両方**を落とす（workerd の孤児を残さない）：
+
+```bash
+for p in $(lsof -ti:5173 2>/dev/null); do kill -9 "$p"; done
+pkill -9 -f "vite/bin/vite"; pkill -9 -f "workerd serve"
+```
 
 ### 2. ドライバーで操作
 
@@ -112,5 +128,6 @@ cd frontend && pnpm check
 
 - **`Chromium not found`**: `cd frontend && npx playwright install chromium` を実行。
 - **ログイン後に `/login` のまま**: Supabase が起動していない。`supabase start` を実行してから再試行。
-- **`EADDRINUSE`**: ポート 5173 が使われている。`pkill -f "vite"` で停止してから再起動。
+- **`EADDRINUSE`**: ポート 5173 が使われている。「1. dev サーバーの起動確認」の掃除スニペット（vite と workerd の両方を kill）を実行してから再起動。
+- **`workerd` が大量に残る / メモリを食う**: dev サーバーを vite だけ落として workerd が孤児化したケース。`pkill -9 -f "workerd serve"` で掃除する。
 - **ページが空白**: Supabase の環境変数（`PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`）が未設定。`frontend/.env` を確認。

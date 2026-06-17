@@ -60,6 +60,9 @@
 
   let messages = $state<Message[]>([]);
 
+  // 1 回の会話をまとめる ID。ページ表示ごとに発行し、サーバの履歴保存でグルーピングに使う。
+  const conversationId = crypto.randomUUID();
+
   let inputVal = $state('');
   let isLoading = $state(false);
   let chatEndEl = $state<HTMLElement | null>(null);
@@ -85,6 +88,7 @@
           message: text,
           // 今回送信したメッセージ(末尾)を除いて履歴として送信
           history: messages.slice(0, -1).map((m) => ({ role: m.role, content: m.content })),
+          conversationId,
         }),
       });
 
