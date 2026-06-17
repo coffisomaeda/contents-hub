@@ -42,3 +42,15 @@ if [ "$failed" = "1" ]; then
 fi
 
 echo "✅ gitleaks: シークレットは検出されませんでした。"
+
+# 未使用コード（未使用ファイル・export・依存）を knip で検出し、あれば push を中止する。
+# 設定は frontend/knip.json。誤検知は同ファイルの ignore / entry で調整する。
+echo "🔍 knip: 未使用コードをチェック中..."
+if ! pnpm --filter frontend run knip; then
+  echo ""
+  echo "❌ 未使用コードが検出されました。push を中止します。"
+  echo "   削除するか、意図的な場合は frontend/knip.json で除外してください。"
+  exit 1
+fi
+
+echo "✅ knip: 未使用コードはありません。"

@@ -12,5 +12,3 @@ export const shareContentSchema = z.object({
     z.string().trim().max(500).optional(),
   ),
 });
-
-export type ShareContentInput = z.infer<typeof shareContentSchema>;

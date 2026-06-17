@@ -1,0 +1,11 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "tests/**/*.{test,spec}.{js,ts,mjs}",
+    "tests/api/watchmode-mock-server.mjs",
+    "evals/**/*.{js,ts,mjs}",
+    "playwright.config.{js,ts}"
+  ],
+  "ignore": ["src/lib/types/supabase.ts"],
+  "ignoreBinaries": ["supabase"]
+}

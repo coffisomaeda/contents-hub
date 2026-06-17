@@ -1,11 +1,11 @@
 import { expect, type APIRequestContext } from '@playwright/test';
 
 export const APP_ORIGIN = process.env.APP_ORIGIN || 'http://127.0.0.1:5175';
-export const DEFAULT_SEARCH_MEDIA_TYPES = ['book', 'game', 'movie', 'tv'];
+const DEFAULT_SEARCH_MEDIA_TYPES = ['book', 'game', 'movie', 'tv'];
 export const SUPABASE_URL = process.env.SUPABASE_URL || 'http://127.0.0.1:54321';
 export const SUPABASE_ANON_KEY =
   process.env.SUPABASE_ANON_KEY || 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH';
-export const TEST_PASSWORD = 'password123';
+const TEST_PASSWORD = 'password123';
 
 export const login = async (request: APIRequestContext, email = 'test1@example.com') => {
   const response = await request.post('/login', {

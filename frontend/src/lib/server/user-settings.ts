@@ -47,7 +47,7 @@ export const getUserSearchSettings = async (
   };
 };
 
-export const saveUserSearchSettings = async (
+const saveUserSearchSettings = async (
   supabase: SupabaseClient<Database>,
   userId: string,
   searchMediaTypes: SearchMediaType[],

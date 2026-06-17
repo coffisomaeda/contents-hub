@@ -21,5 +21,3 @@ export const contentEditSchema = z
     message: '電子書籍は売却済みにできません。',
     path: ['isSold'],
   });
-
-export type ContentEditInput = z.infer<typeof contentEditSchema>;

@@ -7,5 +7,3 @@ export const searchSettingsSchema = z.object({
     .min(1, '検索対象を1つ以上選択してください。')
     .transform((mediaTypes) => [...new Set(mediaTypes)]),
 });
-
-export type SearchSettingsInput = z.infer<typeof searchSettingsSchema>;

@@ -8,7 +8,7 @@ import { z } from 'zod';
  * - // で始まるプロトコル相対URLではないこと
  * - /\ で始まる回避パターン（WHATWG URL正規化を利用したバイパス）ではないこと
  */
-export const redirectSchema = z
+const redirectSchema = z
   .string()
   .startsWith('/')
   .refine((val) => !val.startsWith('//') && !val.startsWith('/\\'), {

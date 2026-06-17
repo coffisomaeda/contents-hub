@@ -16,5 +16,3 @@ export const profileSchema = z.object({
       '英数字で開始・終了し、連続アンダースコアは不可',
     ),
 });
-
-export type ProfileInput = z.infer<typeof profileSchema>;
