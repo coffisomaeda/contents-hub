@@ -19,6 +19,8 @@ Thumbs.db
 .env.*
 !.env.example
 !.env.test
+# sops + age で暗号化済み。値は暗号化されているのでコミットしてよい。
+!.env.enc
 
 # Vite
 vite.config.js.timestamp-*
