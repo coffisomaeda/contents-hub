@@ -48,6 +48,9 @@ drop function if exists public.find_user_id_by_email(text);
 drop table if exists public.share_rate_limits cascade;
 
 -- 6. profiles_public_view を再定義（username カラムを追加）
-create or replace view public.profiles_public_view as
+-- create or replace view はビューオプションを引き継がないため、
+-- security_invoker = on を改めて指定する（呼び出し元の RLS を尊重）。
+create or replace view public.profiles_public_view
+with (security_invoker = on) as
 select id, display_name, avatar_url, username
 from public.profiles;

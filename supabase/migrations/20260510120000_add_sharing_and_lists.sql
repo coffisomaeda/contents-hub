@@ -7,8 +7,11 @@
 -- ---------------------------------------------------------------------------
 drop policy if exists "ユーザーは自分のプロファイルを参照できる" on public.profiles;
 
--- Create a view with only public profile fields
-create or replace view public.profiles_public_view as
+-- Create a view with only public profile fields.
+-- security_invoker = on にして、呼び出し元ユーザーの RLS を尊重させる
+-- （公開読み取りは下の SELECT ポリシーで明示している）。
+create or replace view public.profiles_public_view
+with (security_invoker = on) as
 select id, display_name, avatar_url
 from public.profiles;
 
