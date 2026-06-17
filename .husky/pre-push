@@ -1,0 +1,44 @@
+# push される新規コミットに含まれるシークレットを gitleaks で検出し、
+# 検出された場合は push を中止する。設定は .gitleaks.toml。
+#
+# gitleaks の解決: 素の PATH に無くても mise 経由で実行できるようにする。
+if command -v gitleaks >/dev/null 2>&1; then
+  GITLEAKS="gitleaks"
+elif command -v mise >/dev/null 2>&1; then
+  GITLEAKS="mise exec -- gitleaks"
+else
+  echo "⚠️  gitleaks が見つかりません（mise install を実行してください）。シークレットチェックをスキップします。"
+  exit 0
+fi
+
+ZERO="0000000000000000000000000000000000000000"
+failed=0
+
+# git は push 対象 ref を 1 行ずつ stdin に渡す:
+#   <local ref> <local sha> <remote ref> <remote sha>
+while read -r local_ref local_sha remote_ref remote_sha; do
+  # ブランチ削除（local_sha が全ゼロ）はスキャン不要。
+  [ "$local_sha" = "$ZERO" ] && continue
+
+  if [ "$remote_sha" = "$ZERO" ]; then
+    # 新規ブランチ: まだ origin に無いコミットのみを対象にする。
+    range="$local_sha --not --remotes=origin"
+  else
+    # 既存ブランチ: 今回追加されるコミット範囲のみ。
+    range="$remote_sha..$local_sha"
+  fi
+
+  echo "🔍 gitleaks: 新規コミットをスキャン中 ($range)..."
+  if ! $GITLEAKS git --no-banner --redact -l error --log-opts="$range" .; then
+    failed=1
+  fi
+done
+
+if [ "$failed" = "1" ]; then
+  echo ""
+  echo "❌ シークレットが検出されました。push を中止します。"
+  echo "   誤検知の場合は .gitleaks.toml の allowlist に追加してください。"
+  exit 1
+fi
+
+echo "✅ gitleaks: シークレットは検出されませんでした。"
