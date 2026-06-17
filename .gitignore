@@ -25,3 +25,6 @@ frontend/build/
 
 # AI tools
 .serena/
+.antigravitycli/
+.agents/
+.codex

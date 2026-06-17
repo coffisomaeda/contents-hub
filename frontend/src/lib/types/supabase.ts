@@ -72,6 +72,69 @@ export type Database = {
           },
         ];
       };
+      content_shares: {
+        Row: {
+          content_id: string;
+          created_at: string;
+          id: string;
+          message: string | null;
+          recipient_id: string;
+          sharer_id: string;
+        };
+        Insert: {
+          content_id: string;
+          created_at?: string;
+          id?: string;
+          message?: string | null;
+          recipient_id: string;
+          sharer_id: string;
+        };
+        Update: {
+          content_id?: string;
+          created_at?: string;
+          id?: string;
+          message?: string | null;
+          recipient_id?: string;
+          sharer_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'content_shares_content_id_fkey';
+            columns: ['content_id'];
+            isOneToOne: false;
+            referencedRelation: 'contents';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'content_shares_recipient_id_fkey';
+            columns: ['recipient_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'content_shares_recipient_id_fkey';
+            columns: ['recipient_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_public_view';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'content_shares_sharer_id_fkey';
+            columns: ['sharer_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'content_shares_sharer_id_fkey';
+            columns: ['sharer_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_public_view';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       contents: {
         Row: {
           created_at: string;
@@ -161,23 +224,58 @@ export type Database = {
           created_at: string;
           display_name: string | null;
           id: string;
+          search_media_types: string[];
+          settings_completed_at: string | null;
           updated_at: string;
+          username: string;
         };
         Insert: {
           avatar_url?: string | null;
           created_at?: string;
           display_name?: string | null;
           id: string;
+          search_media_types?: string[];
+          settings_completed_at?: string | null;
           updated_at?: string;
+          username: string;
         };
         Update: {
           avatar_url?: string | null;
           created_at?: string;
           display_name?: string | null;
           id?: string;
+          search_media_types?: string[];
+          settings_completed_at?: string | null;
           updated_at?: string;
+          username?: string;
         };
         Relationships: [];
+      };
+      user_books: {
+        Row: {
+          is_ebook: boolean;
+          is_sold: boolean;
+          user_content_id: string;
+        };
+        Insert: {
+          is_ebook?: boolean;
+          is_sold?: boolean;
+          user_content_id: string;
+        };
+        Update: {
+          is_ebook?: boolean;
+          is_sold?: boolean;
+          user_content_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_books_user_content_id_fkey';
+            columns: ['user_content_id'];
+            isOneToOne: true;
+            referencedRelation: 'user_contents';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       user_contents: {
         Row: {
@@ -223,6 +321,13 @@ export type Database = {
             columns: ['user_id'];
             isOneToOne: false;
             referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'user_contents_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles_public_view';
             referencedColumns: ['id'];
           },
         ];
@@ -351,7 +456,27 @@ export type Database = {
       };
     };
     Views: {
-      [_ in never]: never;
+      profiles_public_view: {
+        Row: {
+          avatar_url: string | null;
+          display_name: string | null;
+          id: string | null;
+          username: string | null;
+        };
+        Insert: {
+          avatar_url?: string | null;
+          display_name?: string | null;
+          id?: string | null;
+          username?: string | null;
+        };
+        Update: {
+          avatar_url?: string | null;
+          display_name?: string | null;
+          id?: string | null;
+          username?: string | null;
+        };
+        Relationships: [];
+      };
     };
     Functions: {
       [_ in never]: never;

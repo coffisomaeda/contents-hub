@@ -1,6 +1,5 @@
 import { expect, test } from '@playwright/test';
-
-const APP_ORIGIN = 'http://localhost:5175';
+import { APP_ORIGIN } from './utils';
 
 const extractContentId = (body: unknown) => {
   const bodyText = JSON.stringify(body);
@@ -159,7 +158,10 @@ test.describe('Content Registration API (SvelteKit Form Actions)', () => {
     expect(detailHtml).toContain('https://www.netflix.com/jp/title/watchmode-playwright');
     expect(detailHtml).toContain('Amazon Prime Video');
     expect(detailHtml).toContain('レンタル');
-    expect(detailHtml.match(/<p class="m-0">Amazon Prime Video<\/p>/g) ?? []).toHaveLength(1);
+    expect(
+      detailHtml.match(/<p class="m-0 font-semibold sm:font-normal">Amazon Prime Video<\/p>/g) ??
+        [],
+    ).toHaveLength(1);
     expect(detailHtml).not.toContain('TMDB ID');
     expect(detailHtml).not.toContain('投票平均');
     expect(detailHtml).not.toContain('ジャンル');
@@ -167,6 +169,58 @@ test.describe('Content Registration API (SvelteKit Form Actions)', () => {
     expect(detailHtml).not.toContain('シーズン数');
     expect(detailHtml).not.toContain('エピソード数');
     expect(detailHtml).not.toContain('地域');
+  });
+
+  test('POST /contents/new?/register registers ebook with current volume', async ({ request }) => {
+    const loginResponse = await request.post('/login', {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Origin: APP_ORIGIN,
+        Accept: 'application/json',
+      },
+      data: 'email=test1@example.com&password=password123',
+      maxRedirects: 0,
+    });
+
+    expect([200, 303]).toContain(loginResponse.status());
+
+    const uniqueSuffix = Date.now();
+    const selectedTitle = `電子書籍テスト漫画 ${uniqueSuffix}`;
+    const formData = new URLSearchParams({
+      mediaType: 'book',
+      title: selectedTitle,
+      isbn: `978${String(uniqueSuffix).slice(-10)}`,
+      author: '漫画テスト著者',
+      rakutenGenreId: '001001001', // 少年コミック
+      status: 'doing',
+      rating: '5',
+      isEbook: 'true',
+    });
+
+    const response = await request.post('/contents/new?/register', {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Origin: APP_ORIGIN,
+        Accept: 'application/json',
+      },
+      data: formData.toString(),
+    });
+
+    expect(response.status()).toBe(200);
+
+    const body = await response.json();
+    expect(body.type).toBe('success');
+
+    const contentId = extractContentId(body);
+    expect(contentId).toBeTruthy();
+
+    const detailResponse = await request.get(`/contents/${contentId}`);
+    expect(detailResponse.status()).toBe(200);
+
+    const detailHtml = await detailResponse.text();
+    expect(detailHtml).toContain(selectedTitle);
+    expect(detailHtml).toContain('電子書籍');
+    expect(detailHtml).toContain('value="5"');
   });
 
   test('GET /contents redirects unauthenticated user to login', async ({ request }) => {

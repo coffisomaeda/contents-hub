@@ -1,19 +1,25 @@
 import { env } from '$env/dynamic/private';
 import { dev } from '$app/environment';
-import { fail, redirect } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
+import { requireUser } from '$lib/server/auth';
 import { registerContentForUser } from '$lib/server/content-registration';
 import { createRakutenClient } from '$lib/server/external/rakuten';
 import { createTmdbClient } from '$lib/server/external/tmdb';
 import { createWatchmodeClient } from '$lib/server/external/watchmode';
-import { contentRegistrationSchema, contentSearchSchema } from '$lib/validation/content';
+import { getUserSearchSettings } from '$lib/server/user-settings';
+import {
+  contentRegistrationSchema,
+  contentRegistrationFields,
+  contentSearchSchema,
+} from '$lib/validation/content';
 
 const getPrivateEnv = (platform: App.Platform | undefined, key: string): string | undefined => {
   const platformEnv = platform?.env as Record<string, string | undefined> | undefined;
   return env[key] ?? platformEnv?.[key];
 };
 
-type RegistrationFormKey = keyof typeof contentRegistrationSchema.shape;
+type RegistrationFormKey = keyof typeof contentRegistrationFields;
 
 const formValue = (formData: FormData, key: RegistrationFormKey) =>
   formData.get(String(key)) ?? undefined;
@@ -29,6 +35,14 @@ const buildRegistrationInput = (formData: FormData) => ({
   status: formValue(formData, 'status') ?? 'want',
   rating: formValue(formData, 'rating'),
   memo: formValue(formData, 'memo'),
+  isEbook: (() => {
+    const val = formData.get('isEbook');
+    return typeof val === 'string' && (val === 'true' || val === 'on');
+  })(),
+  isSold: (() => {
+    const val = formData.get('isSold');
+    return typeof val === 'string' && (val === 'true' || val === 'on');
+  })(),
   isbn: formValue(formData, 'isbn'),
   author: formValue(formData, 'author'),
   authorKana: formValue(formData, 'authorKana'),
@@ -57,11 +71,7 @@ const buildRegistrationInput = (formData: FormData) => ({
 });
 
 export const load: PageServerLoad = async ({ locals, platform }) => {
-  const { user } = await locals.safeGetSession();
-
-  if (!user) {
-    redirect(303, '/login');
-  }
+  await requireUser(locals);
 
   return {
     showApiAvailability: dev,
@@ -77,10 +87,7 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 
 export const actions: Actions = {
   search: async ({ request, locals, platform }) => {
-    const { user } = await locals.safeGetSession();
-    if (!user) {
-      redirect(303, '/login');
-    }
+    const user = await requireUser(locals);
 
     const formData = await request.formData();
     const parsed = contentSearchSchema.safeParse({
@@ -96,6 +103,17 @@ export const actions: Actions = {
     }
 
     const { mediaType, query } = parsed.data;
+    const { searchMediaTypes } = await getUserSearchSettings(locals.supabase, user.id);
+
+    if (!searchMediaTypes.includes(mediaType)) {
+      return fail(400, {
+        kind: 'search',
+        mediaType,
+        query,
+        message: '選択できない検索対象です。',
+      });
+    }
+
     const origin = request.headers.get('origin') ?? new URL(request.url).origin;
     const kv = platform?.env?.EXTERNAL_API_CACHE;
 
@@ -131,11 +149,7 @@ export const actions: Actions = {
     }
   },
   register: async ({ request, locals, platform }) => {
-    const { user } = await locals.safeGetSession();
-
-    if (!user) {
-      redirect(303, '/login');
-    }
+    const user = await requireUser(locals);
 
     const formData = await request.formData();
     const parsed = contentRegistrationSchema.safeParse(buildRegistrationInput(formData));
@@ -171,5 +185,47 @@ export const actions: Actions = {
         message: error instanceof Error ? error.message : 'コンテンツ登録に失敗しました。',
       });
     }
+  },
+
+  fuzzySearch: async ({ request, locals }) => {
+    await requireUser(locals);
+
+    const formData = await request.formData();
+    const query = formData.get('query');
+
+    if (!query || typeof query !== 'string' || query.trim().length === 0) {
+      return fail(400, {
+        kind: 'fuzzySearch',
+        message: '検索キーワードを入力してください。',
+      });
+    }
+
+    // text-based ILIKE search (escape LIKE wildcards to prevent pattern injection)
+    const escaped = query.trim().replace(/[%_\\]/g, '\\$&');
+    const { data, error: searchError } = await locals.supabase
+      .from('contents')
+      .select('id, title, media_type, image_url, release_date')
+      .ilike('title', `%${escaped}%`)
+      .limit(10);
+
+    if (searchError) {
+      return fail(500, {
+        kind: 'fuzzySearch' as const,
+        query: query.trim(),
+        message: '検索に失敗しました。',
+      });
+    }
+
+    return {
+      kind: 'fuzzySearch' as const,
+      query: query.trim(),
+      fuzzyResults: (data ?? []).map((item) => ({
+        title: item.title,
+        mediaType: item.media_type,
+        imageUrl: item.image_url,
+        releaseDate: item.release_date,
+        contentId: item.id,
+      })),
+    };
   },
 };

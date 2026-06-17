@@ -27,4 +27,15 @@
       "preview_id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
     },
   ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "contents-hub-chat",
+      "database_id": "9a120be7-e78c-493a-80b3-6d3cac4232b3",
+      "migrations_dir": "migrations",
+    },
+  ],
+  "ai": {
+    "binding": "AI",
+  },
 }

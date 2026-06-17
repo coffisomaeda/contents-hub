@@ -1,0 +1,13 @@
+# gitleaks 設定。デフォルトルールを継承しつつ、誤検知を除外する。
+# pre-push フック（.husky/pre-push）から呼ばれ、push 対象コミットをスキャンする。
+[extend]
+useDefault = true
+
+[allowlist]
+description = "プロジェクト固有の除外"
+paths = [
+  # sops + age で暗号化済み。base64 暗号文を高エントロピー検知させない。
+  '''.*\.env\.enc$''',
+  # 公開してよい鍵やサンプルのみを含むファイル。
+  '''.*\.env\.example$''',
+]

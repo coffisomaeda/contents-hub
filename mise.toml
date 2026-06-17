@@ -1,5 +1,30 @@
 [tools]
+age = "1.3.1"
+gitleaks = "8.24.3"
 node = "24.15.0"
 pnpm = "10.33.2"
+sops = "3.13.1"
 supabase = "2.95.6"
 terraform = "1.14.9"
+
+[tasks."docker:check"]
+description = "Dockerの起動確認"
+run = "docker info"
+
+[tasks."supabase:start"]
+description = "Supabaseローカル環境の起動"
+depends = ["docker:check"]
+run = "supabase start"
+
+[tasks."supabase:status"]
+description = "Supabaseのステータス確認"
+run = "supabase status"
+
+[tasks."supabase:reset"]
+description = "SupabaseのDBリセット"
+depends = ["docker:check"]
+run = "supabase db reset"
+
+[tasks."supabase:stop"]
+description = "Supabaseローカル環境の停止"
+run = "supabase stop --project-id contents-hub"

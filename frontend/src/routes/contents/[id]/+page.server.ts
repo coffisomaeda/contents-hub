@@ -1,6 +1,9 @@
-import { error, redirect } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
+import { error, fail } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
 import type { Tables } from '$lib/types/supabase';
+import { requireUser } from '$lib/server/auth';
+import { contentEditSchema } from '$lib/validation/content-edit';
+import { shareContentSchema } from '$lib/validation/sharing';
 
 type UserContent = Tables<'user_contents'> & {
   contents: Tables<'contents'> | null;
@@ -28,11 +31,7 @@ const compactVideoSources = (sources: VideoSource[]) => {
 };
 
 export const load: PageServerLoad = async ({ locals, params }) => {
-  const { user } = await locals.safeGetSession();
-
-  if (!user) {
-    redirect(303, '/login');
-  }
+  const user = await requireUser(locals);
 
   const { data: userContent, error: userContentError } = await locals.supabase
     .from('user_contents')
@@ -51,7 +50,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
   const content = userContent.contents;
 
-  const [bookResult, gameResult, videoResult, sourcesResult] = await Promise.all([
+  const [bookResult, gameResult, videoResult, sourcesResult, userBookResult] = await Promise.all([
     content.media_type === 'book'
       ? locals.supabase.from('books').select('*').eq('id', content.id).maybeSingle()
       : Promise.resolve({ data: null, error: null }),
@@ -68,18 +67,199 @@ export const load: PageServerLoad = async ({ locals, params }) => {
           .eq('video_id', content.id)
           .order('fetched_at', { ascending: false })
       : Promise.resolve({ data: [], error: null }),
+    content.media_type === 'book'
+      ? locals.supabase
+          .from('user_books')
+          .select('*')
+          .eq('user_content_id', userContent.id)
+          .maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
   ]);
 
-  if (bookResult.error || gameResult.error || videoResult.error || sourcesResult.error) {
+  if (
+    bookResult.error ||
+    gameResult.error ||
+    videoResult.error ||
+    sourcesResult.error ||
+    userBookResult.error
+  ) {
     error(500, 'コンテンツ詳細の取得に失敗しました。');
   }
 
   return {
     userContent: userContent as UserContent,
     content,
+    userBook: userBookResult.data as Tables<'user_books'> | null,
     book: bookResult.data as Tables<'books'> | null,
     game: gameResult.data as Tables<'games'> | null,
     video: videoResult.data as Tables<'videos'> | null,
     videoSources: compactVideoSources((sourcesResult.data ?? []) as VideoSource[]),
   };
+};
+
+export const actions: Actions = {
+  edit: async ({ request, locals, params }) => {
+    const user = await requireUser(locals);
+
+    const formData = await request.formData();
+    const parsed = contentEditSchema.safeParse({
+      status: formData.get('status'),
+      rating: formData.get('rating'),
+      memo: formData.get('memo'),
+      isEbook: formData.get('isEbook') === 'true' || formData.get('isEbook') === 'on',
+      isSold: formData.get('isSold') === 'true' || formData.get('isSold') === 'on',
+    });
+
+    if (!parsed.success) {
+      return fail(400, {
+        kind: 'edit' as const,
+        message: parsed.error.issues[0].message,
+      });
+    }
+
+    const { status, rating, memo, isEbook, isSold } = parsed.data;
+
+    const { data: uc, error: updateError } = await locals.supabase
+      .from('user_contents')
+      .update({
+        status,
+        rating: rating ?? null,
+        memo: memo ?? null,
+      })
+      .eq('user_id', user.id)
+      .eq('content_id', params.id)
+      .select('id')
+      .single();
+
+    if (updateError || !uc) {
+      return fail(500, {
+        kind: 'edit' as const,
+        message: 'コンテンツの更新に失敗しました。',
+      });
+    }
+
+    const { data: content } = await locals.supabase
+      .from('contents')
+      .select('media_type')
+      .eq('id', params.id)
+      .single();
+
+    if (content?.media_type === 'book') {
+      const { error: bookError } = await locals.supabase.from('user_books').upsert(
+        {
+          user_content_id: uc.id,
+          is_ebook: isEbook,
+          is_sold: isSold,
+        },
+        { onConflict: 'user_content_id' },
+      );
+
+      if (bookError) {
+        return fail(500, {
+          kind: 'edit' as const,
+          message: 'コンテンツの更新に失敗しました。',
+        });
+      }
+    }
+
+    return {
+      kind: 'edit' as const,
+      success: true,
+      message: 'コンテンツを更新しました。',
+    };
+  },
+
+  share: async ({ request, locals, params }) => {
+    const user = await requireUser(locals);
+
+    const formData = await request.formData();
+    const parsed = shareContentSchema.safeParse({
+      recipientUsername: formData.get('recipientUsername'),
+      message: formData.get('message'),
+    });
+
+    if (!parsed.success) {
+      return fail(400, {
+        kind: 'share' as const,
+        message: parsed.error.issues[0].message,
+      });
+    }
+
+    const { data: recipientProfile, error: profileError } = await locals.supabase
+      .from('profiles')
+      .select('id')
+      .eq('username', parsed.data.recipientUsername)
+      .maybeSingle();
+
+    if (profileError) {
+      return fail(500, {
+        kind: 'share' as const,
+        message: 'ユーザーの検索に失敗しました。',
+      });
+    }
+
+    const recipientId = recipientProfile?.id;
+
+    if (!recipientId) {
+      return fail(404, {
+        kind: 'share' as const,
+        message: '指定されたユーザーが見つかりません。',
+      });
+    }
+
+    if (recipientId === user.id) {
+      return fail(400, {
+        kind: 'share' as const,
+        message: '自分自身には共有できません。',
+      });
+    }
+
+    // Verify ownership before sharing
+    const { data: ownership, error: ownershipError } = await locals.supabase
+      .from('user_contents')
+      .select('id')
+      .eq('content_id', params.id)
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (ownershipError) {
+      return fail(500, {
+        kind: 'share' as const,
+        message: '所有権の検証に失敗しました。',
+      });
+    }
+
+    if (!ownership) {
+      return fail(403, {
+        kind: 'share' as const,
+        message: 'このコンテンツを共有する権限がありません。',
+      });
+    }
+
+    const { error: shareError } = await locals.supabase.from('content_shares').insert({
+      sharer_id: user.id,
+      recipient_id: recipientId,
+      content_id: params.id,
+      message: parsed.data.message ?? null,
+    });
+
+    if (shareError) {
+      if (shareError.code === '23505') {
+        return fail(409, {
+          kind: 'share' as const,
+          message: 'このコンテンツは既に共有済みです。',
+        });
+      }
+      return fail(500, {
+        kind: 'share' as const,
+        message: 'コンテンツの共有に失敗しました。',
+      });
+    }
+
+    return {
+      kind: 'share' as const,
+      success: true,
+      message: 'コンテンツを共有しました。',
+    };
+  },
 };

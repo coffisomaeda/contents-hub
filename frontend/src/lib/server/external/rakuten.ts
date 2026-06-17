@@ -150,53 +150,43 @@ export const createRakutenClient = (
   applicationId?: string,
   accessKey?: string,
 ) => {
-  const searchBooks = async (query: string, origin?: string): Promise<ContentSearchResponse> => {
+  const performSearch = async <T>(
+    query: string,
+    origin: string | undefined,
+    cacheType: string,
+    endpoint: string,
+    booksGenreId: string | undefined,
+    outOfStockFlag: boolean | undefined,
+    unavailableMessage: string,
+    mapper: (item: { Item?: T }) => ContentSearchResult | null,
+  ): Promise<ContentSearchResponse> => {
     if (!applicationId || !accessKey) {
       return {
         available: false,
         results: [],
-        message:
-          '楽天 API の Application ID または Access Key が未設定のため、書籍検索は利用できません。',
+        message: unavailableMessage,
       };
     }
 
-    const cacheKey = buildCacheKey('rakuten', 'books', query);
+    const cacheKey = buildCacheKey('rakuten', cacheType, query);
     const cached = await getFromCache<ContentSearchResponse>(kv, cacheKey);
     if (cached) return cached;
 
-    const payload = await searchRakuten<RakutenBookItem>(
+    const payload = await searchRakuten<T>(
       kv,
-      'https://openapi.rakuten.co.jp/services/api/BooksBook/Search/20170404',
+      endpoint,
       query,
       applicationId,
       accessKey,
       origin,
+      booksGenreId,
+      outOfStockFlag,
     );
 
     const result: ContentSearchResponse = {
       available: true,
       results: payload
-        .map(({ Item }): ContentSearchResult | null => {
-          if (!Item?.title) return null;
-
-          return {
-            mediaType: 'book',
-            title: Item.title,
-            titleKana: Item.titleKana,
-            description: Item.itemCaption ?? Item.subTitle,
-            imageUrl: Item.largeImageUrl,
-            releaseDate: normalizeDate(Item.salesDate),
-            itemUrl: Item.itemUrl,
-            isbn: Item.isbn,
-            author: Item.author,
-            authorKana: Item.authorKana,
-            publisherName: Item.publisherName,
-            itemPrice: Item.itemPrice,
-            rakutenGenreId: Item.booksGenreId,
-            reviewCount: Item.reviewCount,
-            reviewAverage: numberOrUndefined(Item.reviewAverage),
-          };
-        })
+        .map(mapper)
         .filter((item): item is ContentSearchResult => item !== null)
         .slice(0, SEARCH_RESULT_LIMIT),
     };
@@ -205,66 +195,75 @@ export const createRakutenClient = (
     return result;
   };
 
-  const searchGames = async (query: string, origin?: string): Promise<ContentSearchResponse> => {
-    if (!applicationId || !accessKey) {
-      return {
-        available: false,
-        results: [],
-        message:
-          '楽天 API の Application ID または Access Key が未設定のため、ゲーム検索は利用できません。',
-      };
-    }
-
-    const cacheKey = buildCacheKey('rakuten', 'games', query);
-    const cached = await getFromCache<ContentSearchResponse>(kv, cacheKey);
-    if (cached) return cached;
-
-    const payload = await searchRakuten<RakutenGameItem>(
-      kv,
-      'https://openapi.rakuten.co.jp/services/api/BooksGame/Search/20170404',
+  const searchBooks = async (query: string, origin?: string): Promise<ContentSearchResponse> => {
+    return performSearch<RakutenBookItem>(
       query,
-      applicationId,
-      accessKey,
       origin,
+      'books',
+      'https://openapi.rakuten.co.jp/services/api/BooksBook/Search/20170404',
+      undefined,
+      undefined,
+      '楽天 API の Application ID または Access Key が未設定のため、書籍検索は利用できません。',
+      ({ Item }) => {
+        if (!Item?.title) return null;
+
+        return {
+          mediaType: 'book',
+          title: Item.title,
+          titleKana: Item.titleKana,
+          description: Item.itemCaption ?? Item.subTitle,
+          imageUrl: Item.largeImageUrl,
+          releaseDate: normalizeDate(Item.salesDate),
+          itemUrl: Item.itemUrl,
+          isbn: Item.isbn,
+          author: Item.author,
+          authorKana: Item.authorKana,
+          publisherName: Item.publisherName,
+          itemPrice: Item.itemPrice,
+          rakutenGenreId: Item.booksGenreId,
+          reviewCount: Item.reviewCount,
+          reviewAverage: numberOrUndefined(Item.reviewAverage),
+        };
+      },
+    );
+  };
+
+  const searchGames = async (query: string, origin?: string): Promise<ContentSearchResponse> => {
+    return performSearch<RakutenGameItem>(
+      query,
+      origin,
+      'games',
+      'https://openapi.rakuten.co.jp/services/api/BooksGame/Search/20170404',
       '006',
       true,
+      '楽天 API の Application ID または Access Key が未設定のため、ゲーム検索は利用できません。',
+      ({ Item }) => {
+        if (
+          !Item?.title ||
+          !isRakutenGameGenre(Item.booksGenreId) ||
+          !isGameHardware(Item.hardware)
+        ) {
+          return null;
+        }
+
+        return {
+          mediaType: 'game',
+          title: Item.title,
+          titleKana: Item.titleKana,
+          description: Item.itemCaption,
+          imageUrl: Item.largeImageUrl,
+          releaseDate: normalizeDate(Item.salesDate),
+          itemUrl: Item.itemUrl,
+          jan: Item.jan,
+          hardware: Item.hardware,
+          label: Item.label,
+          itemPrice: Item.itemPrice,
+          rakutenGenreId: Item.booksGenreId,
+          reviewCount: Item.reviewCount,
+          reviewAverage: numberOrUndefined(Item.reviewAverage),
+        };
+      },
     );
-
-    const result: ContentSearchResponse = {
-      available: true,
-      results: payload
-        .map(({ Item }): ContentSearchResult | null => {
-          if (
-            !Item?.title ||
-            !isRakutenGameGenre(Item.booksGenreId) ||
-            !isGameHardware(Item.hardware)
-          ) {
-            return null;
-          }
-
-          return {
-            mediaType: 'game',
-            title: Item.title,
-            titleKana: Item.titleKana,
-            description: Item.itemCaption,
-            imageUrl: Item.largeImageUrl,
-            releaseDate: normalizeDate(Item.salesDate),
-            itemUrl: Item.itemUrl,
-            jan: Item.jan,
-            hardware: Item.hardware,
-            label: Item.label,
-            itemPrice: Item.itemPrice,
-            rakutenGenreId: Item.booksGenreId,
-            reviewCount: Item.reviewCount,
-            reviewAverage: numberOrUndefined(Item.reviewAverage),
-          };
-        })
-        .filter((item): item is ContentSearchResult => item !== null)
-        .slice(0, SEARCH_RESULT_LIMIT),
-    };
-
-    await setToCache(kv, cacheKey, result, RAKUTEN_CACHE_TTL);
-    return result;
   };
 
   return { searchBooks, searchGames };

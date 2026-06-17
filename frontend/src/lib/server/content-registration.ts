@@ -219,20 +219,43 @@ export const registerContentForUser = async (
   const existingContentId = await findExistingContent(supabase, input);
   const contentId = existingContentId ?? (await createContent(supabase, input, options));
 
-  const { error } = await supabase.from('user_contents').insert({
-    user_id: userId,
-    content_id: contentId,
-    status: input.status,
-    rating: toNull(input.rating),
-    memo: toNull(input.memo),
-  });
+  const { data: newUserContent, error } = await supabase
+    .from('user_contents')
+    .insert({
+      user_id: userId,
+      content_id: contentId,
+      status: input.status,
+      rating: toNull(input.rating),
+      memo: toNull(input.memo),
+    })
+    .select('id')
+    .single();
 
-  if (error) {
-    if (error.code === '23505') {
+  if (error || !newUserContent) {
+    if (error?.code === '23505') {
       throw new Error('このコンテンツはすでに登録されています。');
     }
 
-    throw new Error(error.message);
+    throw new Error(error?.message ?? 'コンテンツの登録に失敗しました。');
+  }
+
+  if (input.mediaType === 'book') {
+    const { error: bookError } = await supabase.from('user_books').insert({
+      user_content_id: newUserContent.id,
+      is_ebook: input.isEbook,
+      is_sold: input.isSold,
+    });
+
+    if (bookError) {
+      const { error: rollbackError } = await supabase
+        .from('user_contents')
+        .delete()
+        .eq('id', newUserContent.id);
+      if (rollbackError) {
+        console.error('Failed to rollback user_contents:', rollbackError);
+      }
+      throw new Error(bookError.message);
+    }
   }
 
   return {

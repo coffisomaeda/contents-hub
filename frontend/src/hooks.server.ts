@@ -1,16 +1,24 @@
 import { createClient } from '$lib/supabase/server';
 import type { Handle } from '@sveltejs/kit';
+import type { Session, User } from '@supabase/supabase-js';
 
 export const handle: Handle = async ({ event, resolve }) => {
   event.locals.supabase = createClient(event.cookies);
 
+  // リクエストスコープでセッション結果をキャッシュし、
+  // layout load と各 page load での重複認証リクエストを排除する
+  let cached: { session: Session | null; user: User | null } | undefined;
+
   event.locals.safeGetSession = async () => {
+    if (cached) return cached;
+
     const {
       data: { session },
     } = await event.locals.supabase.auth.getSession();
 
     if (!session) {
-      return { session: null, user: null };
+      cached = { session: null, user: null };
+      return cached;
     }
 
     const {
@@ -19,10 +27,12 @@ export const handle: Handle = async ({ event, resolve }) => {
     } = await event.locals.supabase.auth.getUser();
 
     if (error) {
-      return { session: null, user: null };
+      cached = { session: null, user: null };
+      return cached;
     }
 
-    return { session, user };
+    cached = { session, user };
+    return cached;
   };
 
   return resolve(event, {

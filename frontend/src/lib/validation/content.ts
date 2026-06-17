@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { optionalBoolean } from './helpers';
 
 const emptyToUndefined = (value: unknown) => (value === '' ? undefined : value);
 const optionalText = z.preprocess(emptyToUndefined, z.string().trim().optional());
@@ -6,14 +7,14 @@ const optionalNumber = z.preprocess(emptyToUndefined, z.coerce.number().finite()
 const optionalInteger = z.preprocess(emptyToUndefined, z.coerce.number().int().optional());
 
 export const mediaTypeSchema = z.enum(['book', 'game', 'movie', 'tv']);
-export const contentStatusSchema = z.enum(['want', 'doing', 'done']);
+const contentStatusSchema = z.enum(['want', 'doing', 'done']);
 
 export const contentSearchSchema = z.object({
   mediaType: mediaTypeSchema,
   query: z.string().trim().min(1, '検索キーワードを入力してください。'),
 });
 
-export const contentRegistrationSchema = z.object({
+const contentRegistrationObjectSchema = z.object({
   mediaType: mediaTypeSchema,
   title: z.string().trim().min(1, 'タイトルを入力してください。'),
   titleKana: optionalText,
@@ -24,6 +25,8 @@ export const contentRegistrationSchema = z.object({
   status: contentStatusSchema.default('want'),
   rating: optionalInteger,
   memo: optionalText,
+  isEbook: optionalBoolean,
+  isSold: optionalBoolean,
   isbn: optionalText,
   author: optionalText,
   authorKana: optionalText,
@@ -51,5 +54,14 @@ export const contentRegistrationSchema = z.object({
   watchmodeId: optionalInteger,
 });
 
-export type ContentSearchInput = z.infer<typeof contentSearchSchema>;
+export const contentRegistrationFields = contentRegistrationObjectSchema.shape;
+
+export const contentRegistrationSchema = contentRegistrationObjectSchema.refine(
+  (data) => !(data.isEbook && data.isSold),
+  {
+    message: '電子書籍は売却済みにできません。',
+    path: ['isSold'],
+  },
+);
+
 export type ContentRegistrationInput = z.infer<typeof contentRegistrationSchema>;

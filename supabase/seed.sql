@@ -58,7 +58,8 @@ values
     '',
     '',
     ''
-  );
+  )
+on conflict (id) do nothing;
 
 -- 1b. テストユーザーの auth.identities 作成（signInWithPassword に必要）
 insert into auth.identities (
@@ -80,9 +81,23 @@ values
     'email',
     '00000000-0000-0000-0000-000000000002',
     now(), now(), now()
-  );
+  )
+on conflict (provider_id, provider) do nothing;
 
 -- profiles はトリガーによって自動生成されるため省略
+update public.profiles
+set
+  username = 'user1',
+  search_media_types = array['book', 'game', 'movie', 'tv'],
+  settings_completed_at = now()
+where id = '00000000-0000-0000-0000-000000000001';
+
+update public.profiles
+set
+  username = 'user2',
+  search_media_types = array['book', 'game', 'movie', 'tv'],
+  settings_completed_at = null
+where id = '00000000-0000-0000-0000-000000000002';
 
 -- 2. コンテンツ (contents) の作成
 insert into public.contents (id, media_type, title, title_kana, description, image_url, release_date, item_url)
@@ -318,3 +333,15 @@ values
     null,
     '周りが絶賛しているので観たい。'
   );
+
+-- 8. コンテンツ共有 (content_shares)
+insert into public.content_shares (id, sharer_id, recipient_id, content_id, message)
+values
+  (
+    '88888888-8888-8888-8888-888888888888',
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000002',
+    '11111111-1111-1111-1111-111111111111',
+    'これ、本当におすすめなのでぜひ読んでみて！'
+  )
+on conflict (sharer_id, recipient_id, content_id) do nothing;

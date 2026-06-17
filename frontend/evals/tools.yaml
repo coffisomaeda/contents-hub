@@ -1,0 +1,84 @@
+# /api/chat のツール定義（src/routes/api/chat/+server.ts と同じ内容を OpenAI function 形式で再現）
+# サーバー側の zod スキーマを変更したら、ここも合わせて更新すること。
+# 注意: description に「: 」(コロン+スペース) を含む場合は YAML が誤解釈するため必ずクォートする。
+- type: function
+  function:
+    name: search_and_add_book
+    description: '本のタイトルや著者名などのキーワードで検索し、ユーザーのライブラリに登録する。'
+    parameters:
+      type: object
+      properties:
+        query:
+          type: string
+          description: '検索キーワード（例: 本のタイトルや著者名）'
+        status:
+          type: string
+          enum: [want, doing, done]
+          description: '読書ステータス'
+        rating:
+          type: number
+          description: '評価（1〜5の数値、任意）'
+        memo:
+          type: string
+          description: '感想やメモ（任意）'
+      required: [query, status]
+
+- type: function
+  function:
+    name: search_and_add_game
+    description: 'ゲームのタイトルなどのキーワードで検索し、ユーザーのライブラリに登録する。'
+    parameters:
+      type: object
+      properties:
+        query:
+          type: string
+          description: '検索キーワード（例: ゲームのタイトル）'
+        status:
+          type: string
+          enum: [want, doing, done]
+          description: 'プレイステータス'
+        rating:
+          type: number
+          description: '評価（1〜5の数値、任意）'
+        memo:
+          type: string
+          description: '感想やメモ（任意）'
+      required: [query, status]
+
+- type: function
+  function:
+    name: search_and_add_video
+    description: '映画やTV番組、アニメなどのキーワードで検索し、ユーザーのライブラリに登録する。'
+    parameters:
+      type: object
+      properties:
+        query:
+          type: string
+          description: '検索キーワード（例: 映画やアニメのタイトル）'
+        media_type:
+          type: string
+          enum: [movie, tv]
+          description: 'メディア種別（movie: 映画, tv: TV番組・アニメなど）'
+        status:
+          type: string
+          enum: [want, doing, done]
+          description: '視聴ステータス'
+        rating:
+          type: number
+          description: '評価（1〜5の数値、任意）'
+        memo:
+          type: string
+          description: '感想やメモ（任意）'
+      required: [query, media_type, status]
+
+- type: function
+  function:
+    name: search_my_library
+    description: 'ユーザーがすでに登録している本、ゲーム、映像作品をキーワードで検索し、登録情報を確認する。'
+    parameters:
+      type: object
+      properties:
+        query:
+          type: string
+          description: '検索キーワード（例: タイトルの一部）'
+      required: [query]
