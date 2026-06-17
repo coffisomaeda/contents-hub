@@ -89,9 +89,15 @@ const registerToolParams = (queryDesc: string, statusDesc: string) =>
     memo: z.string().optional().describe('感想やメモ（任意）'),
   });
 
-const bookToolParams = registerToolParams('検索キーワード（例: 本のタイトルや著者名）', '読書ステータス');
+const bookToolParams = registerToolParams(
+  '検索キーワード（例: 本のタイトルや著者名）',
+  '読書ステータス',
+);
 
-const gameToolParams = registerToolParams('検索キーワード（例: ゲームのタイトル）', 'プレイステータス');
+const gameToolParams = registerToolParams(
+  '検索キーワード（例: ゲームのタイトル）',
+  'プレイステータス',
+);
 
 const videoToolParams = registerToolParams(
   '検索キーワード（例: 映画やアニメのタイトル）',

@@ -134,7 +134,6 @@
   function scrollToBottom() {
     chatEndEl?.scrollIntoView({ behavior: 'smooth' });
   }
-
 </script>
 
 <svelte:head>
