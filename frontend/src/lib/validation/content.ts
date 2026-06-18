@@ -7,7 +7,8 @@ const optionalNumber = z.preprocess(emptyToUndefined, z.coerce.number().finite()
 const optionalInteger = z.preprocess(emptyToUndefined, z.coerce.number().int().optional());
 
 export const mediaTypeSchema = z.enum(['book', 'game', 'movie', 'tv']);
-const contentStatusSchema = z.enum(['want', 'doing', 'done']);
+export const contentStatusSchema = z.enum(['want', 'doing', 'done']);
+export const contentStatusValues = contentStatusSchema.options;
 
 export const contentSearchSchema = z.object({
   mediaType: mediaTypeSchema,

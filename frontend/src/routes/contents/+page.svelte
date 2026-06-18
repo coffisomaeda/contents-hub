@@ -53,6 +53,22 @@
   const hasActiveFilters = $derived(
     Boolean(filters.q || filters.type || filters.status || filters.from || filters.to),
   );
+
+  // 非同期検索: 入力をデバウンスして GET フォームを自動送信する。
+  // SvelteKit が method="GET" の送信をクライアントナビゲーションに変換するため、
+  // フルリロードせず load だけ再実行され、URL（共有可能な状態）も更新される。
+  let formEl = $state<HTMLFormElement | null>(null);
+  let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+
+  const submitNow = () => {
+    clearTimeout(debounceTimer);
+    formEl?.requestSubmit();
+  };
+
+  const submitDebounced = () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => formEl?.requestSubmit(), 300);
+  };
 </script>
 
 <section class="mx-auto grid max-w-[1120px] gap-6">
@@ -66,29 +82,33 @@
 
   <form
     method="GET"
+    bind:this={formEl}
     class="grid gap-3 rounded-sm border border-hairline bg-canvas p-3 sm:p-4"
     data-sveltekit-keepfocus
+    data-sveltekit-noscroll
   >
     {#if data.sharerFilter}
       <input type="hidden" name="sharer" value={data.sharerFilter} />
     {/if}
     <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      <label class="grid gap-1 text-caption">
+      <label class="grid min-w-0 gap-1 text-caption">
         <span class="text-ink-muted-48">タイトル</span>
         <input
           type="search"
           name="q"
           value={filters.q}
           placeholder="タイトルで絞り込む"
-          class="rounded-sm border border-hairline bg-canvas px-3 py-2 text-body"
+          oninput={submitDebounced}
+          class="w-full min-w-0 rounded-sm border border-hairline bg-canvas px-3 py-2 text-body"
         />
       </label>
-      <label class="grid gap-1 text-caption">
+      <label class="grid min-w-0 gap-1 text-caption">
         <span class="text-ink-muted-48">ジャンル</span>
         <select
           name="type"
           value={filters.type}
-          class="rounded-sm border border-hairline bg-canvas px-3 py-2 text-body"
+          onchange={submitNow}
+          class="w-full min-w-0 rounded-sm border border-hairline bg-canvas px-3 py-2 text-body"
         >
           <option value="">すべて</option>
           {#each Object.entries(mediaTypeMeta) as [value, meta] (value)}
@@ -96,12 +116,13 @@
           {/each}
         </select>
       </label>
-      <label class="grid gap-1 text-caption">
+      <label class="grid min-w-0 gap-1 text-caption">
         <span class="text-ink-muted-48">ステータス</span>
         <select
           name="status"
           value={filters.status}
-          class="rounded-sm border border-hairline bg-canvas px-3 py-2 text-body"
+          onchange={submitNow}
+          class="w-full min-w-0 rounded-sm border border-hairline bg-canvas px-3 py-2 text-body"
         >
           <option value="">すべて</option>
           {#each Object.entries(statusMeta) as [value, meta] (value)}
@@ -109,23 +130,25 @@
           {/each}
         </select>
       </label>
-      <div class="grid grid-cols-2 gap-2">
-        <label class="grid gap-1 text-caption">
+      <div class="grid min-w-0 grid-cols-2 gap-2">
+        <label class="grid min-w-0 gap-1 text-caption">
           <span class="text-ink-muted-48">登録日（開始）</span>
           <input
             type="date"
             name="from"
             value={filters.from}
-            class="rounded-sm border border-hairline bg-canvas px-2 py-2 text-body"
+            onchange={submitNow}
+            class="w-full min-w-0 rounded-sm border border-hairline bg-canvas px-2 py-2 text-body"
           />
         </label>
-        <label class="grid gap-1 text-caption">
+        <label class="grid min-w-0 gap-1 text-caption">
           <span class="text-ink-muted-48">登録日（終了）</span>
           <input
             type="date"
             name="to"
             value={filters.to}
-            class="rounded-sm border border-hairline bg-canvas px-2 py-2 text-body"
+            onchange={submitNow}
+            class="w-full min-w-0 rounded-sm border border-hairline bg-canvas px-2 py-2 text-body"
           />
         </label>
       </div>

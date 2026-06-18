@@ -4,6 +4,8 @@ import type { Tables } from '$lib/types/supabase';
 import { z } from 'zod';
 import { requireUser } from '$lib/server/auth';
 import { searchMediaTypeValues } from '$lib/media-types';
+import { contentStatusValues } from '$lib/validation/content';
+import { applyLibraryFilters, isDateString } from '$lib/server/library-filter';
 
 type UserContent = Tables<'user_contents'> & {
   contents: Tables<'contents'> | null;
@@ -13,10 +15,6 @@ type SharedContent = Tables<'content_shares'> & {
   contents: Tables<'contents'> | null;
   profiles: Pick<Tables<'profiles'>, 'id' | 'display_name' | 'avatar_url'> | null;
 };
-
-const statusValues = ['want', 'doing', 'done'] as const;
-
-const isDateString = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value);
 
 export const load: PageServerLoad = async ({ locals, url }) => {
   const user = await requireUser(locals);
@@ -31,32 +29,26 @@ export const load: PageServerLoad = async ({ locals, url }) => {
   const mediaTypeFilter = (searchMediaTypeValues as readonly string[]).includes(mediaTypeParam)
     ? mediaTypeParam
     : '';
-  const statusFilter = (statusValues as readonly string[]).includes(statusParam) ? statusParam : '';
+  const statusFilter = (contentStatusValues as readonly string[]).includes(statusParam)
+    ? statusParam
+    : '';
   const fromFilter = isDateString(fromParam) ? fromParam : '';
   const toFilter = isDateString(toParam) ? toParam : '';
 
-  let itemsQuery = locals.supabase
-    .from('user_contents')
-    .select('*, contents!inner(*)')
-    .eq('user_id', user.id)
-    .order('updated_at', { ascending: false });
-
-  if (titleQuery) {
-    const escaped = titleQuery.replace(/[%_]/g, (match) => `\\${match}`);
-    itemsQuery = itemsQuery.ilike('contents.title', `%${escaped}%`);
-  }
-  if (mediaTypeFilter) {
-    itemsQuery = itemsQuery.eq('contents.media_type', mediaTypeFilter);
-  }
-  if (statusFilter) {
-    itemsQuery = itemsQuery.eq('status', statusFilter);
-  }
-  if (fromFilter) {
-    itemsQuery = itemsQuery.gte('created_at', `${fromFilter}T00:00:00`);
-  }
-  if (toFilter) {
-    itemsQuery = itemsQuery.lte('created_at', `${toFilter}T23:59:59.999`);
-  }
+  const itemsQuery = applyLibraryFilters(
+    locals.supabase
+      .from('user_contents')
+      .select('*, contents!inner(*)')
+      .eq('user_id', user.id)
+      .order('updated_at', { ascending: false }),
+    {
+      title: titleQuery,
+      mediaType: mediaTypeFilter,
+      status: statusFilter,
+      from: fromFilter,
+      to: toFilter,
+    },
+  );
 
   const [itemsResult, sharedResult] = await Promise.all([
     itemsQuery,
