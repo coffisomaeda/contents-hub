@@ -165,8 +165,15 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
   const { message, history, conversationId } = parsed.data;
 
   // モデルの作成（バインディング優先、なければ OpenAI 互換）
+  // AI_GATEWAY_ID が設定されていれば、Workers AI 呼び出しを AI Gateway 経由にする。
+  // Gateway 経由にすると、プロンプト/応答・トークン数・レイテンシ・コストを
+  // ダッシュボードで 1 リクエストずつ閲覧できる。
+  const gatewayId = getPrivateEnv(platform, 'AI_GATEWAY_ID');
   const model = aiBinding
-    ? createWorkersAI({ binding: aiBinding })(modelName)
+    ? createWorkersAI({
+        binding: aiBinding,
+        gateway: gatewayId ? { id: gatewayId } : undefined,
+      })(modelName)
     : createOpenAI({
         apiKey,
         baseURL: getPrivateEnv(platform, 'AI_BASE_URL') || undefined,

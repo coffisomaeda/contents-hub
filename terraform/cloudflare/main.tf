@@ -16,10 +16,12 @@ terraform {
 #
 # 必要な API トークン権限（Account レベル）:
 #   - Workers Scripts: Edit
+#   - AI Gateway: Edit   ← cloudflare_ai_gateway リソースに必要
 #
 # トークン作成方法:
 #   https://dash.cloudflare.com/profile/api-tokens
-#   → "Edit Cloudflare Workers" テンプレートを使用するのが最も簡単です。
+#   → "Edit Cloudflare Workers" テンプレートをベースに、
+#     Permissions に Account > AI Gateway > Edit を追加してください。
 provider "cloudflare" {
   api_token = var.cloudflare_api_token
 }

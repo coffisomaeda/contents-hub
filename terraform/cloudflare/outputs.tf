@@ -12,3 +12,8 @@ output "kv_namespace_id" {
   description = "外部APIキャッシュ用 KV ネームスペースの ID"
   value       = cloudflare_workers_kv_namespace.external_api_cache.id
 }
+
+output "ai_gateway_id" {
+  description = "AI Gateway の ID（Worker の AI_GATEWAY_ID に設定する値）"
+  value       = cloudflare_ai_gateway.contents_hub.id
+}
