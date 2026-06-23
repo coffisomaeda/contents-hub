@@ -53,11 +53,20 @@ const loadSessionMessages = async (
     .bind(userId, conversationId)
     .all<ChatMessageRow>();
 
+  const parseRegisteredContent = (value: string | null) => {
+    if (!value) return null;
+    try {
+      return JSON.parse(value);
+    } catch {
+      return null;
+    }
+  };
+
   return (results ?? []).map((row) => ({
     id: row.id,
     role: row.role === 'user' ? 'user' : 'model',
     content: row.content,
-    registeredContent: row.registered_content ? JSON.parse(row.registered_content) : null,
+    registeredContent: parseRegisteredContent(row.registered_content),
   }));
 };
 
