@@ -13,6 +13,7 @@
     "lint": "prettier --check . && eslint .",
     "format": "prettier --write .",
     "gen": "wrangler types --check",
+    "gen:wrangler": "rm -rf .svelte-kit/cloudflare && svelte-kit sync && wrangler types",
     "gen:types": "supabase gen types typescript --local > src/lib/types/supabase.ts",
     "test": "playwright test",
     "eval": "promptfoo eval -c evals/promptfooconfig.yaml",
