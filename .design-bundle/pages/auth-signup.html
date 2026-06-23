@@ -1,0 +1,67 @@
+<!-- @dsCard group="Pages" name="Signup page" subtitle="/signup — account registration" -->
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>アカウント登録 | Contents Hub</title>
+    <link rel="stylesheet" href="_app.css" />
+    <style>
+      .panel {
+        max-width: 420px;
+        margin: 96px auto 0;
+      }
+      .panel form {
+        display: grid;
+        gap: 18px;
+      }
+      .panel label {
+        display: grid;
+        gap: 8px;
+      }
+      .foot {
+        color: var(--color-ink-muted-48);
+        margin-top: 24px;
+        text-align: center;
+        font-size: 14px;
+      }
+      .foot a {
+        color: var(--color-primary);
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <a class="brand" href="#">Contents Hub</a>
+        <nav>
+          <a href="#">ログイン</a>
+          <a href="#" class="pill-dark">登録</a>
+        </nav>
+      </header>
+      <main class="main">
+        <section class="panel">
+          <p class="eyebrow">Create account</p>
+          <h1 class="t-display-md" style="margin: 8px 0 24px">アカウント登録</h1>
+          <form>
+            <label
+              ><span class="t-body-strong">表示名</span
+              ><input class="input" type="text" placeholder="任意"
+            /></label>
+            <label
+              ><span class="t-body-strong">メールアドレス</span><input class="input" type="email"
+            /></label>
+            <label
+              ><span class="t-body-strong">パスワード</span><input class="input" type="password"
+            /></label>
+            <button type="button" class="btn-primary" style="margin-top: 8px; width: 100%">
+              登録する
+            </button>
+          </form>
+          <p class="foot">すでにアカウントがある場合は <a href="#">ログイン</a></p>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

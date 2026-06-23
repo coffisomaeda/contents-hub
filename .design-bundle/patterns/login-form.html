@@ -1,0 +1,93 @@
+<!-- @dsCard group="Patterns" name="Login form" subtitle="Card composition from tokens + components" -->
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Login form</title>
+    <link rel="stylesheet" href="../_tokens.css" />
+    <style>
+      .panel {
+        max-width: 420px;
+        margin: 0 auto;
+      }
+      .eyebrow {
+        color: var(--color-primary);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin: 0 0 8px;
+      }
+      .title {
+        font-size: clamp(24px, 5vw, 34px);
+        font-weight: 600;
+        line-height: 1.25;
+        letter-spacing: -0.374px;
+        margin: 0 0 24px;
+      }
+      form {
+        display: grid;
+        gap: 18px;
+      }
+      label {
+        display: grid;
+        gap: 8px;
+        font-size: 17px;
+        font-weight: 600;
+        line-height: 1.24;
+        letter-spacing: -0.374px;
+      }
+      .input-standard {
+        background: var(--color-canvas);
+        border: 1px solid var(--color-divider-soft);
+        border-radius: var(--radius-sm);
+        padding: 11px 12px;
+        color: var(--color-ink);
+        font: inherit;
+        font-size: 17px;
+      }
+      .btn-primary {
+        background: var(--color-primary);
+        color: #fff;
+        border: 0;
+        width: 100%;
+        margin-top: 8px;
+        border-radius: var(--radius-pill);
+        padding: 11px 22px;
+        font: inherit;
+        font-size: 17px;
+        cursor: pointer;
+      }
+      .foot {
+        color: var(--color-ink-muted-48);
+        margin-top: 24px;
+        text-align: center;
+        font-size: 14px;
+      }
+      .foot a {
+        color: var(--color-primary);
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <section class="panel">
+        <p class="eyebrow">Login</p>
+        <h1 class="title">ログイン</h1>
+        <form>
+          <label
+            >メールアドレス
+            <input class="input-standard" type="email" autocomplete="email" />
+          </label>
+          <label
+            >パスワード
+            <input class="input-standard" type="password" autocomplete="current-password" />
+          </label>
+          <button type="button" class="btn-primary">ログイン</button>
+        </form>
+        <p class="foot">アカウントがない場合は <a href="#">登録</a></p>
+      </section>
+    </div>
+  </body>
+</html>

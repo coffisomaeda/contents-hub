@@ -1,0 +1,182 @@
+<!-- @dsCard group="Pages" name="Content registration" subtitle="/contents/new — search by media type + results" -->
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>コンテンツ登録 | Contents Hub</title>
+    <link rel="stylesheet" href="_app.css" />
+    <style>
+      .wrap {
+        max-width: 1040px;
+        margin: 0 auto;
+        display: grid;
+        gap: 28px;
+      }
+      .head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+      }
+      .types {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+      .type {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid var(--color-divider-soft);
+        background: var(--color-canvas);
+        border-radius: var(--radius-sm);
+        padding: 10px 12px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      .type.sel {
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+      }
+      .type .ic {
+        width: 28px;
+        height: 28px;
+        display: grid;
+        place-items: center;
+        font-size: 20px;
+      }
+      .results {
+        display: grid;
+        gap: 12px;
+      }
+      .result {
+        display: grid;
+        grid-template-columns: 72px 1fr auto;
+        gap: 16px;
+        padding: 16px;
+        align-items: center;
+      }
+      .result .poster {
+        width: 72px;
+        height: 96px;
+      }
+      .result h3 {
+        font-size: 17px;
+        font-weight: 600;
+        margin: 0;
+      }
+      fieldset {
+        border: 0;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 8px;
+      }
+      legend {
+        font-size: 17px;
+        font-weight: 600;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <a class="brand" href="#">Contents Hub</a>
+        <nav>
+          <a href="#">チャット</a><a href="#">一覧</a><a href="#">登録</a><a href="#">設定</a
+          ><span class="who">maechango</span><button class="pill-dark">ログアウト</button>
+        </nav>
+      </header>
+      <main class="main">
+        <section class="wrap">
+          <div>
+            <p class="eyebrow">Content registration</p>
+            <div class="head">
+              <div>
+                <h1 class="t-display-md" style="margin-top: 8px">コンテンツ登録</h1>
+                <p class="muted80" style="margin: 8px 0 0; max-width: 620px">
+                  設定した検索対象をキーワード検索から登録します。
+                </p>
+              </div>
+              <a class="btn-ghost" href="#">ホーム</a>
+            </div>
+          </div>
+
+          <section style="display: grid; gap: 16px">
+            <div style="display: flex; align-items: center; justify-content: space-between">
+              <h2 class="t-tagline">検索</h2>
+              <p class="t-caption muted" style="margin: 0">楽天: 有効 / TMDB: 有効</p>
+            </div>
+            <form style="display: grid; gap: 12px">
+              <fieldset>
+                <legend>種別</legend>
+                <div class="types">
+                  <label class="type sel"
+                    ><span class="ic">📖</span><span style="font-weight: 600">書籍</span></label
+                  >
+                  <label class="type"
+                    ><span class="ic">🎮</span><span style="font-weight: 600">ゲーム</span></label
+                  >
+                  <label class="type"
+                    ><span class="ic">🎬</span><span style="font-weight: 600">映画</span></label
+                  >
+                  <label class="type"
+                    ><span class="ic">📺</span><span style="font-weight: 600">TV</span></label
+                  >
+                </div>
+              </fieldset>
+              <label style="display: grid; gap: 8px"
+                ><span class="t-body-strong">キーワード</span
+                ><input
+                  class="input"
+                  type="search"
+                  value="君たちはどう生きるか"
+                  placeholder="タイトルで検索"
+              /></label>
+              <button class="btn-primary" type="button" style="justify-self: end; min-width: 88px">
+                検索
+              </button>
+            </form>
+
+            <div class="results">
+              <article class="card result">
+                <div
+                  class="poster"
+                  style="background: linear-gradient(135deg, #dfe7f5, #c3d2ef)"
+                ></div>
+                <div>
+                  <h3>君たちはどう生きるか</h3>
+                  <p class="t-caption muted" style="margin: 4px 0 0">吉野源三郎</p>
+                  <p class="t-caption muted80" style="margin: 4px 0 0">
+                    コペル君と叔父さんのやりとりを通じて、人間としてどう生きるかを問う名著。
+                  </p>
+                </div>
+                <button class="btn-primary" type="button">登録</button>
+              </article>
+              <article class="card result">
+                <div
+                  class="poster"
+                  style="background: linear-gradient(135deg, #eef0f3, #dfe2e7)"
+                ></div>
+                <div>
+                  <h3>漫画 君たちはどう生きるか</h3>
+                  <p class="t-caption muted" style="margin: 4px 0 0">吉野源三郎 / 羽賀翔一</p>
+                </div>
+                <button class="btn-primary" type="button">登録</button>
+              </article>
+            </div>
+          </section>
+
+          <section style="display: grid; gap: 16px">
+            <h2 class="t-tagline">あいまい検索（登録済みコンテンツ）</h2>
+            <form style="display: grid; grid-template-columns: 1fr auto; gap: 12px">
+              <input class="input" type="search" placeholder="タイトルであいまい検索" />
+              <button class="btn-primary" type="button" style="min-width: 88px">検索</button>
+            </form>
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
