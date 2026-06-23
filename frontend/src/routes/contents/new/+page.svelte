@@ -50,13 +50,9 @@
 
 <section class="mx-auto grid max-w-[1040px] gap-6 sm:gap-8">
   <div class="grid gap-3">
-    <p class="text-primary text-[13px] font-bold tracking-normal uppercase m-0">
-      Content registration
-    </p>
     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h1 class="text-display-md m-0 text-ink">コンテンツ登録</h1>
-        <p class="text-ink-muted-80 mt-2 mb-0 sm:mt-3 sm:max-w-[620px]">
+        <p class="text-ink-muted-80 m-0 sm:max-w-[620px]">
           設定した検索対象をキーワード検索から登録します。
         </p>
       </div>

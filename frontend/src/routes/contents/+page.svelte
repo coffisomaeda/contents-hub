@@ -60,6 +60,10 @@
   let formEl = $state<HTMLFormElement | null>(null);
   let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
+  // モバイルでは絞り込みフォームを全画面オーバーレイ（別画面風）として開閉する。
+  // デスクトップ（sm 以上）では常時インライン表示するため、この状態は使わない。
+  let filterOpen = $state(false);
+
   const submitNow = () => {
     clearTimeout(debounceTimer);
     formEl?.requestSubmit();
@@ -72,24 +76,44 @@
 </script>
 
 <section class="mx-auto grid max-w-[1120px] gap-6">
-  <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-    <div>
-      <p class="text-caption text-primary m-0 font-semibold">Library</p>
-      <h1 class="text-display-lg m-0 mt-2">登録済みコンテンツ</h1>
-    </div>
+  <div class="flex items-center justify-between gap-3 sm:justify-end">
+    <button
+      type="button"
+      onclick={() => (filterOpen = true)}
+      class="inline-flex items-center gap-2 rounded-sm border border-hairline bg-canvas px-3 py-2 text-caption text-ink transition-colors hover:border-primary sm:hidden"
+    >
+      絞り込み
+      {#if hasActiveFilters}
+        <span class="inline-block h-2 w-2 rounded-full bg-primary" aria-hidden="true"></span>
+      {/if}
+    </button>
     <a class="btn-primary rounded-sm text-center" href={resolve('/contents/new')}>登録する</a>
   </div>
 
   <form
     method="GET"
     bind:this={formEl}
-    class="grid gap-3 rounded-sm border border-hairline bg-canvas p-3 sm:p-4"
+    class={`gap-3 rounded-sm border border-hairline bg-canvas p-3 sm:p-4 ${
+      filterOpen
+        ? 'fixed inset-0 z-[60] m-0 grid content-start overflow-y-auto rounded-none border-0 p-4 sm:static sm:z-auto sm:content-stretch sm:rounded-sm sm:border'
+        : 'hidden sm:grid'
+    }`}
     data-sveltekit-keepfocus
     data-sveltekit-noscroll
   >
     {#if data.sharerFilter}
       <input type="hidden" name="sharer" value={data.sharerFilter} />
     {/if}
+    <div class="flex items-center justify-between sm:hidden">
+      <span class="text-tagline m-0">絞り込み</span>
+      <button
+        type="button"
+        onclick={() => (filterOpen = false)}
+        class="rounded-sm px-2 py-1 text-caption text-ink-muted-80 hover:text-primary"
+      >
+        閉じる
+      </button>
+    </div>
     <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <label class="grid min-w-0 gap-1 text-caption">
         <span class="text-ink-muted-48">タイトル</span>
@@ -154,7 +178,12 @@
       </div>
     </div>
     <div class="flex items-center gap-3">
-      <button type="submit" class="btn-primary rounded-sm">絞り込む</button>
+      <button type="submit" class="btn-primary rounded-sm hidden sm:inline-flex">絞り込む</button>
+      <button
+        type="button"
+        onclick={() => (filterOpen = false)}
+        class="btn-primary rounded-sm sm:hidden">この条件で表示</button
+      >
       {#if hasActiveFilters}
         <a
           href={data.sharerFilter

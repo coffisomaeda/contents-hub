@@ -190,41 +190,48 @@
   <title>AIアシスタント | Contents Hub</title>
 </svelte:head>
 
-<section class="mx-auto max-w-[800px] flex flex-col h-[calc(100vh-140px)] min-h-[500px]">
-  <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-    <div>
-      <p class="text-caption text-primary m-0 font-semibold text-center sm:text-left">AI Agent</p>
-      <h1 class="text-display-md m-0 mt-1 text-center sm:text-left">AIアシスタントチャット</h1>
-    </div>
-    {#if messages.length > 0}
-      <form
-        method="POST"
-        action="?/newSession"
-        use:enhance={clearHistory}
-        class="flex justify-center sm:justify-end"
+<!--
+  モバイルでもチャット入力欄(composer)が常に画面最下部に見えるよう、
+  シェルをビューポート高に固定する。100dvh を使うことでモバイルブラウザの
+  アドレスバー伸縮にも追従する。オフセットはレイアウト(+layout.svelte)の
+  ヘッダー(44px)＋main の padding ぶん。モバイルは下部固定タブナビの
+  ぶんを main の padding-bottom が確保するため safe-area も差し引く。
+-->
+<section
+  class="mx-auto max-w-[800px] flex flex-col h-[calc(100dvh-132px-env(safe-area-inset-bottom,0px))] sm:h-[calc(100dvh-172px)]"
+>
+  {#if messages.length > 0}
+    <form
+      method="POST"
+      action="?/newSession"
+      use:enhance={clearHistory}
+      class="mb-4 flex justify-center sm:justify-end"
+    >
+      <button
+        type="submit"
+        disabled={isClearing}
+        class="rounded-sm border border-hairline bg-canvas px-3 py-2 text-caption text-ink-muted-80 transition-colors hover:border-primary hover:text-primary disabled:opacity-60"
+        onclick={(event) => {
+          if (
+            !confirm(
+              '表示中の履歴をクリアして新しい会話を始めますか？（履歴はデータベースに保存されたまま残ります）',
+            )
+          ) {
+            event.preventDefault();
+          }
+        }}
       >
-        <button
-          type="submit"
-          disabled={isClearing}
-          class="rounded-sm border border-hairline bg-canvas px-3 py-2 text-caption text-ink-muted-80 transition-colors hover:border-primary hover:text-primary disabled:opacity-60"
-          onclick={(event) => {
-            if (!confirm('表示中の履歴をクリアして新しい会話を始めますか？（履歴はデータベースに保存されたまま残ります）')) {
-              event.preventDefault();
-            }
-          }}
-        >
-          {isClearing ? 'クリア中…' : '履歴をクリア'}
-        </button>
-      </form>
-    {/if}
-  </div>
+        {isClearing ? 'クリア中…' : '履歴をクリア'}
+      </button>
+    </form>
+  {/if}
 
   <!-- チャット履歴と入力コンテナ -->
   <div
     class="flex-1 flex flex-col bg-canvas rounded-sm border border-hairline overflow-hidden shadow-sm"
   >
     <!-- メッセージエリア -->
-    <div class="flex-1 overflow-y-auto p-4 space-y-4 min-h-[200px]">
+    <div class="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
       {#each messages as msg (msg.id)}
         <div class="flex {msg.role === 'user' ? 'justify-end' : 'justify-start'}">
           <div class="max-w-[85%] sm:max-w-[70%]">
@@ -367,7 +374,8 @@
                       </div>
                       <span class="text-body font-semibold truncate text-ink">{result.title}</span>
                       {#if result.registeredAt}
-                        <span class="text-[11px] text-ink-muted-48">登録日: {result.registeredAt}</span
+                        <span class="text-[11px] text-ink-muted-48"
+                          >登録日: {result.registeredAt}</span
                         >
                       {/if}
                     </div>
