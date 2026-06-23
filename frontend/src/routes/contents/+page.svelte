@@ -54,24 +54,20 @@
     Boolean(filters.q || filters.type || filters.status || filters.from || filters.to),
   );
 
-  // 非同期検索: 入力をデバウンスして GET フォームを自動送信する。
+  // ジャンル・ステータス・登録日は選択即時で GET フォームを送信する。
   // SvelteKit が method="GET" の送信をクライアントナビゲーションに変換するため、
   // フルリロードせず load だけ再実行され、URL（共有可能な状態）も更新される。
+  // タイトル（テキスト入力）は 1 文字ごとの自動送信をやめ、Enter または
+  // 「絞り込む」ボタンでのみ送信する。これにより、入力途中のナビゲーション再描画と
+  // 日本語 IME 変換の競合（モバイルで未確定文字が消える）を防ぐ。
   let formEl = $state<HTMLFormElement | null>(null);
-  let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
   // モバイルでは絞り込みフォームを全画面オーバーレイ（別画面風）として開閉する。
   // デスクトップ（sm 以上）では常時インライン表示するため、この状態は使わない。
   let filterOpen = $state(false);
 
   const submitNow = () => {
-    clearTimeout(debounceTimer);
     formEl?.requestSubmit();
-  };
-
-  const submitDebounced = () => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => formEl?.requestSubmit(), 300);
   };
 </script>
 
@@ -121,8 +117,7 @@
           type="search"
           name="q"
           value={filters.q}
-          placeholder="タイトルで絞り込む"
-          oninput={submitDebounced}
+          placeholder="タイトルで絞り込む（Enter で実行）"
           class="w-full min-w-0 rounded-sm border border-hairline bg-canvas px-3 py-2 text-body"
         />
       </label>
@@ -181,7 +176,10 @@
       <button type="submit" class="btn-primary rounded-sm hidden sm:inline-flex">絞り込む</button>
       <button
         type="button"
-        onclick={() => (filterOpen = false)}
+        onclick={() => {
+          filterOpen = false;
+          submitNow();
+        }}
         class="btn-primary rounded-sm sm:hidden">この条件で表示</button
       >
       {#if hasActiveFilters}

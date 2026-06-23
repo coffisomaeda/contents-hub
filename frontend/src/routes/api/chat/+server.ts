@@ -3,7 +3,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createWorkersAI } from 'workers-ai-provider';
-import { generateText, tool, type ModelMessage, stepCountIs } from 'ai';
+import { generateText, tool, type ModelMessage, stepCountIs, hasToolCall } from 'ai';
 import { z } from 'zod';
 import { createRakutenClient } from '$lib/server/external/rakuten';
 import { createTmdbClient } from '$lib/server/external/tmdb';
@@ -223,11 +223,20 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
 コンテンツの登録時には、自動的に適切な検索ツールを呼び出してください。
 登録済みのコンテンツを確認・一覧したい場合や、ジャンル（本・ゲーム・映画・TV）・ステータス（気になる/進行中/完了）・登録日の期間・タイトルで絞り込みたい場合は search_my_library ツールを使ってください。条件が指定されていない項目は省略してください。
 search_my_library の結果は、各コンテンツの画像・リンク付きカードとしてシステムが自動的に画面へ表示します。あなたの返信テキストでは「○件見つかりました」のように件数を伝える短い自然文だけを返してください。HTMLタグやカード風のマークアップ、画像、URL、個別作品の箇条書きは一切書かないでください（それらはカードに含まれます）。
+登録は原則として 1 件だけ行ってください。ユーザーが明示的に複数の作品を挙げていない限り、登録ツールは 1 回だけ呼び出し、登録できたらそれ以上ツールを呼ばずに完了報告を返してください。
 もし登録時にステータス（気になる: want, 読書中・プレイ中・視聴中: doing, 完了・読了・クリア: done）が指定されていない場合は、「気になる（want）」で登録してください。
 評価（1〜5）やメモ（感想）も指定されていれば、ツールに渡してください。
 登録に成功したら、ユーザーに対して登録完了したことを分かりやすく伝えてください。`,
       messages: coreMessages,
-      stopWhen: stepCountIs(5), // 自動ツール実行ループの上限
+      // 自動ツール実行ループの停止条件（いずれか満たした時点で最終応答へ）。
+      // 登録系ツールが 1 回でも実行されたら即座に終了し、複数登録の暴走と
+      // 応答遅延を防ぐ。確認系の search_my_library は停止対象に含めない。
+      stopWhen: [
+        stepCountIs(5),
+        hasToolCall('search_and_add_book'),
+        hasToolCall('search_and_add_game'),
+        hasToolCall('search_and_add_video'),
+      ],
       tools: {
         search_and_add_book: tool({
           description:
