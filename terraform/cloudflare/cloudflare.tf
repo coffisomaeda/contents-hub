@@ -33,13 +33,17 @@ resource "cloudflare_ai_gateway" "contents_hub" {
   # ログ収集（プロンプト/応答本文を保存）。可視化の要。
   collect_logs = true
 
+  # Logpush（外部への自動転送）は使わない。明示的に false 指定が必須。
+  logpush = false
+
   # キャッシュは無効化（毎回モデルへ問い合わせ、動作確認を素直にする）。
   cache_ttl                  = 0
   cache_invalidate_on_update = false
 
-  # レート制限なし（0 = 無制限）。
-  rate_limiting_interval = 0
-  rate_limiting_limit    = 0
+  # レート制限。暴走時のコスト/過負荷の最後の砦として上限を設ける。
+  # 環境ごとに変数で調整可能（0 = 無制限）。
+  rate_limiting_interval = var.ai_gateway_rate_limiting_interval
+  rate_limiting_limit    = var.ai_gateway_rate_limiting_limit
 }
 
 # 外部APIキャッシュおよびレート制限用のKVネームスペース
