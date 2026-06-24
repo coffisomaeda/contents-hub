@@ -54,7 +54,7 @@
     {
       "path": "pages/contents-list.html",
       "group": "Pages",
-      "subtitle": "/contents — filter bar + library cards",
+      "subtitle": "/contents — filter bar + library cards + shared section",
       "name": "Contents list"
     },
     {

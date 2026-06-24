@@ -1,4 +1,4 @@
-<!-- @dsCard group="Pages" name="Contents list" subtitle="/contents — filter bar + library cards" -->
+<!-- @dsCard group="Pages" name="Contents list" subtitle="/contents — filter bar + library cards + shared section" -->
 <!doctype html>
 <html lang="ja">
   <head>
@@ -13,10 +13,11 @@
         display: grid;
         gap: 24px;
       }
-      .head {
+      .actions-row {
         display: flex;
-        align-items: flex-end;
-        justify-content: space-between;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 12px;
       }
       .filter {
         display: grid;
@@ -31,6 +32,7 @@
       .filter label {
         display: grid;
         gap: 4px;
+        min-width: 0;
       }
       .filter .lbl {
         font-size: 14px;
@@ -40,6 +42,16 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 8px;
+      }
+      .filter .submit-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .clear {
+        color: var(--color-primary);
+        font-size: 14px;
+        text-decoration: none;
       }
       .items {
         display: grid;
@@ -62,11 +74,20 @@
       .item h2 {
         font-size: clamp(17px, 3.5vw, 21px);
         font-weight: 600;
-        margin: 6px 0 0;
+        margin: 4px 0 0;
       }
       .item h2 a {
         color: var(--color-ink);
         text-decoration: none;
+      }
+      .ico {
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
       }
       dl.meta {
         display: grid;
@@ -101,6 +122,45 @@
         font-size: 14px;
         text-decoration: none;
       }
+      .shared {
+        display: grid;
+        gap: 12px;
+        border-top: 1px solid var(--color-hairline);
+        padding-top: 24px;
+      }
+      .shared .head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .shared .sharers {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+      }
+      .shared .sharers .lbl {
+        color: var(--color-ink-muted-48);
+      }
+      .shared .sharers a {
+        color: var(--color-primary);
+        text-decoration: none;
+      }
+      .shared-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px;
+      }
+      .shared-item .title {
+        color: var(--color-ink);
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .shared-item .from {
+        font-size: 12px;
+        color: var(--color-ink-muted-48);
+      }
     </style>
   </head>
   <body>
@@ -114,13 +174,8 @@
       </header>
       <main class="main">
         <section class="wrap">
-          <div class="head">
-            <div>
-              <p class="eyebrow" style="text-transform: none; font-size: 14px; font-weight: 600">
-                Library
-              </p>
-              <h1 class="t-display-lg" style="margin-top: 8px">登録済みコンテンツ</h1>
-            </div>
+          <!-- 一覧ページにページ見出しは無く、右寄せのアクション行から始まる -->
+          <div class="actions-row">
             <a class="btn-primary" href="#">登録する</a>
           </div>
 
@@ -128,7 +183,10 @@
             <div class="fields">
               <label
                 ><span class="lbl">タイトル</span
-                ><input class="input input-sm" type="search" placeholder="タイトルで絞り込む"
+                ><input
+                  class="input input-sm"
+                  type="search"
+                  placeholder="タイトルで絞り込む（Enter で実行）"
               /></label>
               <label
                 ><span class="lbl">ジャンル</span
@@ -158,7 +216,10 @@
                 /></label>
               </div>
             </div>
-            <div><button class="btn-primary" type="button">絞り込む</button></div>
+            <div class="submit-row">
+              <button class="btn-primary" type="button">絞り込む</button>
+              <a class="clear" href="#">クリア</a>
+            </div>
           </form>
 
           <div class="items">
@@ -168,7 +229,12 @@
                 style="background: linear-gradient(135deg, #dfe7f5, #c3d2ef)"
               ></div>
               <div>
-                <span class="badge badge-book">📖 書籍</span>
+                <span class="badge badge-book"
+                  ><svg class="ico" viewBox="0 0 24 24">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg
+                  >書籍</span
+                >
                 <h2><a href="#">君たちはどう生きるか</a></h2>
                 <dl class="meta">
                   <div>
@@ -200,7 +266,12 @@
                 style="background: linear-gradient(135deg, #e7dcf3, #d4c0ec)"
               ></div>
               <div>
-                <span class="badge badge-movie">🎬 映画</span>
+                <span class="badge badge-movie"
+                  ><svg class="ico" viewBox="0 0 24 24">
+                    <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" />
+                    <path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5" /></svg
+                  >映画</span
+                >
                 <h2><a href="#">君の名は。</a></h2>
                 <dl class="meta">
                   <div>
@@ -232,7 +303,17 @@
                 style="background: linear-gradient(135deg, #d6efd9, #bfe6c4)"
               ></div>
               <div>
-                <span class="badge badge-game">🎮 ゲーム</span>
+                <span class="badge badge-game"
+                  ><svg class="ico" viewBox="0 0 24 24">
+                    <line x1="6" y1="11" x2="10" y2="11" />
+                    <line x1="8" y1="9" x2="8" y2="13" />
+                    <line x1="15" y1="12" x2="15.01" y2="12" />
+                    <line x1="18" y1="10" x2="18.01" y2="10" />
+                    <path
+                      d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"
+                    /></svg
+                  >ゲーム</span
+                >
                 <h2><a href="#">ゼルダの伝説 ティアーズ オブ ザ キングダム</a></h2>
                 <dl class="meta">
                   <div>
@@ -258,6 +339,25 @@
               </div>
             </article>
           </div>
+
+          <!-- 他ユーザーから共有されたコンテンツ -->
+          <section class="shared">
+            <div class="head">
+              <h2 class="t-tagline">共有されたコンテンツ</h2>
+              <div class="sharers">
+                <span class="lbl">共有元:</span>
+                <a href="#" style="font-weight: 600">全て</a>
+                <a href="#">たろう</a>
+                <a href="#">はなこ</a>
+              </div>
+            </div>
+            <div class="card shared-item">
+              <div>
+                <a class="title" href="#">三体</a>
+                <div class="from">たろうから共有 — これ面白かったよ</div>
+              </div>
+            </div>
+          </section>
         </section>
       </main>
     </div>

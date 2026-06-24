@@ -1,0 +1,7 @@
+{
+  "projectId": "586c2a49-4bd6-40e9-bf7a-21759c6715eb",
+  "projectName": "Contents Hub Design System",
+  "localDir": ".design-bundle",
+  "shape": "html-cards",
+  "note": "Svelte アプリのため React 変換器(/design-sync の既定パス)は使わない。デザインは .design-bundle/ の HTML カード（@dsCard 付き）として手作業で現コードに合わせて維持し、この projectId のプロジェクトへ DesignSync(write_files) でアップロードする。取り込み方向は design-apply。"
+}
