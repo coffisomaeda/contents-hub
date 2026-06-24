@@ -19,8 +19,13 @@
   let selectedMediaTypes = $state<SearchMediaType[]>([]);
   let isSaving = $state(false);
 
+  // 初期値の反映は一度だけ。以降は searchMediaTypes が変わってもユーザーの選択を上書きしない。
+  let initialized = $state(false);
   $effect(() => {
-    selectedMediaTypes = searchMediaTypes;
+    if (!initialized) {
+      selectedMediaTypes = searchMediaTypes;
+      initialized = true;
+    }
   });
 </script>
 

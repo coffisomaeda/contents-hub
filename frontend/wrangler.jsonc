@@ -20,6 +20,11 @@
   },
   "workers_dev": true,
   "preview_urls": true,
+  "vars": {
+    // Workers AI 呼び出しを経由させる AI Gateway の ID。
+    // 値は terraform/cloudflare の ai_gateway_id（cloudflare_ai_gateway.contents_hub）と揃える。
+    "AI_GATEWAY_ID": "contents-hub",
+  },
   "kv_namespaces": [
     {
       "binding": "EXTERNAL_API_CACHE",

@@ -3,6 +3,9 @@ import type { Actions, PageServerLoad } from './$types';
 import type { Tables } from '$lib/types/supabase';
 import { z } from 'zod';
 import { requireUser } from '$lib/server/auth';
+import { searchMediaTypeValues } from '$lib/media-types';
+import { contentStatusValues } from '$lib/validation/content';
+import { applyLibraryFilters, isDateString } from '$lib/server/library-filter';
 
 type UserContent = Tables<'user_contents'> & {
   contents: Tables<'contents'> | null;
@@ -17,12 +20,38 @@ export const load: PageServerLoad = async ({ locals, url }) => {
   const user = await requireUser(locals);
   const sharerFilter = url.searchParams.get('sharer');
 
-  const [itemsResult, sharedResult] = await Promise.all([
+  const titleQuery = url.searchParams.get('q')?.trim() ?? '';
+  const mediaTypeParam = url.searchParams.get('type') ?? '';
+  const statusParam = url.searchParams.get('status') ?? '';
+  const fromParam = url.searchParams.get('from') ?? '';
+  const toParam = url.searchParams.get('to') ?? '';
+
+  const mediaTypeFilter = (searchMediaTypeValues as readonly string[]).includes(mediaTypeParam)
+    ? mediaTypeParam
+    : '';
+  const statusFilter = (contentStatusValues as readonly string[]).includes(statusParam)
+    ? statusParam
+    : '';
+  const fromFilter = isDateString(fromParam) ? fromParam : '';
+  const toFilter = isDateString(toParam) ? toParam : '';
+
+  const itemsQuery = applyLibraryFilters(
     locals.supabase
       .from('user_contents')
-      .select('*, contents(*)')
+      .select('*, contents!inner(*)')
       .eq('user_id', user.id)
       .order('updated_at', { ascending: false }),
+    {
+      title: titleQuery,
+      mediaType: mediaTypeFilter,
+      status: statusFilter,
+      from: fromFilter,
+      to: toFilter,
+    },
+  );
+
+  const [itemsResult, sharedResult] = await Promise.all([
+    itemsQuery,
     locals.supabase
       .from('content_shares')
       .select(
@@ -51,6 +80,13 @@ export const load: PageServerLoad = async ({ locals, url }) => {
     sharedItems: sharedItems as SharedContent[],
     sharers,
     sharerFilter,
+    filters: {
+      q: titleQuery,
+      type: mediaTypeFilter,
+      status: statusFilter,
+      from: fromFilter,
+      to: toFilter,
+    },
   };
 };
 

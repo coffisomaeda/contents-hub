@@ -1,6 +1,11 @@
 <script lang="ts">
   import { slide } from 'svelte/transition';
+  import { onMount } from 'svelte';
+  import { enhance } from '$app/forms';
+  import type { SubmitFunction } from '@sveltejs/kit';
   import { resolve } from '$app/paths';
+
+  let { data } = $props();
 
   // メディア種別のメタデータ
   const mediaTypeMeta: Record<string, { label: string; className: string }> = {
@@ -56,16 +61,45 @@
       rating?: number;
       memo?: string;
     } | null;
+    searchResults?: SearchResultItem[] | null;
   }
 
-  let messages = $state<Message[]>([]);
+  interface SearchResultItem {
+    contentId: string;
+    title: string;
+    mediaType: string;
+    imageUrl?: string | null;
+    status: string;
+    rating?: number | null;
+    memo?: string | null;
+    registeredAt?: string;
+  }
 
-  // 1 回の会話をまとめる ID。ページ表示ごとに発行し、サーバの履歴保存でグルーピングに使う。
-  const conversationId = crypto.randomUUID();
+  // アクティブセッションの履歴（D1 由来）で初期化する。
+  const historyToMessages = (): Message[] =>
+    (data.history ?? []).map((m) => ({
+      id: m.id,
+      role: m.role,
+      content: m.content,
+      registeredContent: m.registeredContent as Message['registeredContent'],
+    }));
+
+  let messages = $state<Message[]>(historyToMessages());
+
+  // 現在のセッション ID。サーバが返したアクティブセッションを引き継ぎ、
+  // 無ければ新規発行する。履歴クリア時は新しいセッションに差し替える。
+  let conversationId = $state(data.conversationId ?? crypto.randomUUID());
 
   let inputVal = $state('');
   let isLoading = $state(false);
+  let isClearing = $state(false);
   let chatEndEl = $state<HTMLElement | null>(null);
+
+  onMount(() => {
+    if (messages.length > 0) {
+      setTimeout(scrollToBottom, 50);
+    }
+  });
 
   async function sendMessage(text: string) {
     if (!text.trim() || isLoading) return;
@@ -99,6 +133,7 @@
       const data = (await response.json()) as {
         reply: string;
         registeredContent: Message['registeredContent'];
+        searchResults?: SearchResultItem[] | null;
       };
       messages = [
         ...messages,
@@ -107,6 +142,7 @@
           role: 'model',
           content: data.reply,
           registeredContent: data.registeredContent,
+          searchResults: data.searchResults,
         },
       ];
     } catch (e) {
@@ -134,24 +170,68 @@
   function scrollToBottom() {
     chatEndEl?.scrollIntoView({ behavior: 'smooth' });
   }
+
+  // 履歴クリア（＝新しいセッションへ切り替え）。
+  // メッセージ本体は DB に残り、画面と送信先セッションだけが切り替わる。
+  const clearHistory: SubmitFunction = () => {
+    isClearing = true;
+    return async ({ result }) => {
+      isClearing = false;
+      if (result.type === 'success') {
+        messages = [];
+        const newId = result.data?.conversationId;
+        conversationId = typeof newId === 'string' ? newId : crypto.randomUUID();
+      }
+    };
+  };
 </script>
 
 <svelte:head>
   <title>AIアシスタント | Contents Hub</title>
 </svelte:head>
 
-<section class="mx-auto max-w-[800px] flex flex-col h-[calc(100vh-140px)] min-h-[500px]">
-  <div class="mb-4">
-    <p class="text-caption text-primary m-0 font-semibold text-center sm:text-left">AI Agent</p>
-    <h1 class="text-display-md m-0 mt-1 text-center sm:text-left">AIアシスタントチャット</h1>
-  </div>
+<!--
+  モバイルでもチャット入力欄(composer)が常に画面最下部に見えるよう、
+  シェルをビューポート高に固定する。100dvh を使うことでモバイルブラウザの
+  アドレスバー伸縮にも追従する。オフセットはレイアウト(+layout.svelte)の
+  ヘッダー(44px)＋main の padding ぶん。モバイルは下部固定タブナビの
+  ぶんを main の padding-bottom が確保するため safe-area も差し引く。
+-->
+<section
+  class="mx-auto max-w-[800px] flex flex-col h-[calc(100dvh-132px-env(safe-area-inset-bottom,0px))] sm:h-[calc(100dvh-172px)]"
+>
+  {#if messages.length > 0}
+    <form
+      method="POST"
+      action="?/newSession"
+      use:enhance={clearHistory}
+      class="mb-4 flex justify-center sm:justify-end"
+    >
+      <button
+        type="submit"
+        disabled={isClearing}
+        class="rounded-sm border border-hairline bg-canvas px-3 py-2 text-caption text-ink-muted-80 transition-colors hover:border-primary hover:text-primary disabled:opacity-60"
+        onclick={(event) => {
+          if (
+            !confirm(
+              '表示中の履歴をクリアして新しい会話を始めますか？（履歴はデータベースに保存されたまま残ります）',
+            )
+          ) {
+            event.preventDefault();
+          }
+        }}
+      >
+        {isClearing ? 'クリア中…' : '履歴をクリア'}
+      </button>
+    </form>
+  {/if}
 
   <!-- チャット履歴と入力コンテナ -->
   <div
     class="flex-1 flex flex-col bg-canvas rounded-sm border border-hairline overflow-hidden shadow-sm"
   >
     <!-- メッセージエリア -->
-    <div class="flex-1 overflow-y-auto p-4 space-y-4 min-h-[200px]">
+    <div class="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
       {#each messages as msg (msg.id)}
         <div class="flex {msg.role === 'user' ? 'justify-end' : 'justify-start'}">
           <div class="max-w-[85%] sm:max-w-[70%]">
@@ -243,6 +323,64 @@
                     </div>
                   </div>
                 </article>
+              </div>
+            {/if}
+
+            <!-- ライブラリ検索/フィルタ結果のカード一覧 -->
+            {#if msg.searchResults && msg.searchResults.length > 0}
+              <div transition:slide={{ duration: 200 }} class="mt-3 grid gap-2">
+                {#each msg.searchResults as result (result.contentId)}
+                  {@const mediaMeta = mediaTypeMeta[result.mediaType]}
+                  {@const statMeta = statusMeta[result.status]}
+                  <a
+                    href={resolve(`/contents/${result.contentId}`)}
+                    class="flex gap-3 rounded-sm border border-hairline bg-surface-pearl p-2.5 no-underline shadow-sm transition-all hover:border-primary"
+                  >
+                    {#if result.imageUrl}
+                      <img
+                        src={result.imageUrl}
+                        alt=""
+                        class="h-[72px] w-[54px] rounded-xs bg-canvas object-cover shadow-xs"
+                        loading="lazy"
+                      />
+                    {:else}
+                      <div
+                        class="h-[72px] w-[54px] rounded-xs bg-canvas border border-divider-soft flex items-center justify-center text-ink-muted-48 text-[10px]"
+                      >
+                        No Image
+                      </div>
+                    {/if}
+                    <div class="flex-1 min-w-0 flex flex-col justify-center gap-1">
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        {#if mediaMeta}
+                          <span
+                            class="px-1.5 py-0.5 rounded-xs border text-[10px] font-semibold tracking-wider {mediaMeta.className}"
+                          >
+                            {mediaMeta.label}
+                          </span>
+                        {/if}
+                        {#if statMeta}
+                          <span
+                            class="px-1.5 py-0.5 rounded-xs border text-[10px] font-semibold tracking-wider {statMeta.className}"
+                          >
+                            {statMeta.label}
+                          </span>
+                        {/if}
+                        {#if result.rating}
+                          <span class="text-amber-500 font-semibold text-[11px]"
+                            >★ {result.rating}</span
+                          >
+                        {/if}
+                      </div>
+                      <span class="text-body font-semibold truncate text-ink">{result.title}</span>
+                      {#if result.registeredAt}
+                        <span class="text-[11px] text-ink-muted-48"
+                          >登録日: {result.registeredAt}</span
+                        >
+                      {/if}
+                    </div>
+                  </a>
+                {/each}
               </div>
             {/if}
           </div>

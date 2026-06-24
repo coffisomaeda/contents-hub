@@ -1,0 +1,265 @@
+<!-- @dsCard group="Pages" name="Contents list" subtitle="/contents — filter bar + library cards" -->
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>登録済みコンテンツ | Contents Hub</title>
+    <link rel="stylesheet" href="_app.css" />
+    <style>
+      .wrap {
+        max-width: 1120px;
+        margin: 0 auto;
+        display: grid;
+        gap: 24px;
+      }
+      .head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+      }
+      .filter {
+        display: grid;
+        gap: 12px;
+        padding: 16px;
+      }
+      .filter .fields {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+      .filter label {
+        display: grid;
+        gap: 4px;
+      }
+      .filter .lbl {
+        font-size: 14px;
+        color: var(--color-ink-muted-48);
+      }
+      .dates {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .items {
+        display: grid;
+        gap: 12px;
+      }
+      .item {
+        display: grid;
+        grid-template-columns: 96px 1fr auto;
+        gap: 16px;
+        padding: 16px;
+        align-items: center;
+      }
+      .item:hover {
+        border-color: var(--color-primary);
+      }
+      .item .poster {
+        width: 96px;
+        height: 132px;
+      }
+      .item h2 {
+        font-size: clamp(17px, 3.5vw, 21px);
+        font-weight: 600;
+        margin: 6px 0 0;
+      }
+      .item h2 a {
+        color: var(--color-ink);
+        text-decoration: none;
+      }
+      dl.meta {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        font-size: 14px;
+        margin: 12px 0 0;
+      }
+      dl.meta dt {
+        color: var(--color-ink-muted-48);
+      }
+      dl.meta dd {
+        margin: 2px 0 0;
+      }
+      .actions {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 12px;
+      }
+      .actions .del {
+        border: 1px solid #fecdd3;
+        background: #fff1f2;
+        color: #be123c;
+        border-radius: var(--radius-sm);
+        padding: 8px 12px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      .detail {
+        color: var(--color-primary);
+        font-size: 14px;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <a class="brand" href="#">Contents Hub</a>
+        <nav>
+          <a href="#">チャット</a><a href="#">一覧</a><a href="#">登録</a><a href="#">設定</a
+          ><span class="who">maechango</span><button class="pill-dark">ログアウト</button>
+        </nav>
+      </header>
+      <main class="main">
+        <section class="wrap">
+          <div class="head">
+            <div>
+              <p class="eyebrow" style="text-transform: none; font-size: 14px; font-weight: 600">
+                Library
+              </p>
+              <h1 class="t-display-lg" style="margin-top: 8px">登録済みコンテンツ</h1>
+            </div>
+            <a class="btn-primary" href="#">登録する</a>
+          </div>
+
+          <form class="card filter">
+            <div class="fields">
+              <label
+                ><span class="lbl">タイトル</span
+                ><input class="input input-sm" type="search" placeholder="タイトルで絞り込む"
+              /></label>
+              <label
+                ><span class="lbl">ジャンル</span
+                ><select class="input input-sm">
+                  <option>すべて</option>
+                  <option>書籍</option>
+                  <option>ゲーム</option>
+                  <option>映画</option>
+                  <option>TV</option>
+                </select></label
+              >
+              <label
+                ><span class="lbl">ステータス</span
+                ><select class="input input-sm">
+                  <option>すべて</option>
+                  <option>気になる</option>
+                  <option>進行中</option>
+                  <option>完了</option>
+                </select></label
+              >
+              <div class="dates">
+                <label
+                  ><span class="lbl">登録日（開始）</span><input class="input input-sm" type="date"
+                /></label>
+                <label
+                  ><span class="lbl">登録日（終了）</span><input class="input input-sm" type="date"
+                /></label>
+              </div>
+            </div>
+            <div><button class="btn-primary" type="button">絞り込む</button></div>
+          </form>
+
+          <div class="items">
+            <article class="card item">
+              <div
+                class="poster"
+                style="background: linear-gradient(135deg, #dfe7f5, #c3d2ef)"
+              ></div>
+              <div>
+                <span class="badge badge-book">📖 書籍</span>
+                <h2><a href="#">君たちはどう生きるか</a></h2>
+                <dl class="meta">
+                  <div>
+                    <dt>登録日</dt>
+                    <dd>2026-05-02</dd>
+                  </div>
+                  <div>
+                    <dt>ステータス</dt>
+                    <dd><span class="badge badge-done">完了</span></dd>
+                  </div>
+                  <div>
+                    <dt>評価</dt>
+                    <dd>4/5</dd>
+                  </div>
+                  <div>
+                    <dt>メモ</dt>
+                    <dd>あり</dd>
+                  </div>
+                </dl>
+              </div>
+              <div class="actions">
+                <a class="detail" href="#">詳細</a><button class="del">削除</button>
+              </div>
+            </article>
+
+            <article class="card item">
+              <div
+                class="poster"
+                style="background: linear-gradient(135deg, #e7dcf3, #d4c0ec)"
+              ></div>
+              <div>
+                <span class="badge badge-movie">🎬 映画</span>
+                <h2><a href="#">君の名は。</a></h2>
+                <dl class="meta">
+                  <div>
+                    <dt>登録日</dt>
+                    <dd>2026-04-18</dd>
+                  </div>
+                  <div>
+                    <dt>ステータス</dt>
+                    <dd><span class="badge badge-doing">進行中</span></dd>
+                  </div>
+                  <div>
+                    <dt>評価</dt>
+                    <dd>未評価</dd>
+                  </div>
+                  <div>
+                    <dt>メモ</dt>
+                    <dd>なし</dd>
+                  </div>
+                </dl>
+              </div>
+              <div class="actions">
+                <a class="detail" href="#">詳細</a><button class="del">削除</button>
+              </div>
+            </article>
+
+            <article class="card item">
+              <div
+                class="poster"
+                style="background: linear-gradient(135deg, #d6efd9, #bfe6c4)"
+              ></div>
+              <div>
+                <span class="badge badge-game">🎮 ゲーム</span>
+                <h2><a href="#">ゼルダの伝説 ティアーズ オブ ザ キングダム</a></h2>
+                <dl class="meta">
+                  <div>
+                    <dt>登録日</dt>
+                    <dd>2026-03-30</dd>
+                  </div>
+                  <div>
+                    <dt>ステータス</dt>
+                    <dd><span class="badge badge-want">気になる</span></dd>
+                  </div>
+                  <div>
+                    <dt>評価</dt>
+                    <dd>未評価</dd>
+                  </div>
+                  <div>
+                    <dt>メモ</dt>
+                    <dd>なし</dd>
+                  </div>
+                </dl>
+              </div>
+              <div class="actions">
+                <a class="detail" href="#">詳細</a><button class="del">削除</button>
+              </div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

@@ -74,11 +74,25 @@
 - type: function
   function:
     name: search_my_library
-    description: 'ユーザーがすでに登録している本、ゲーム、映像作品をキーワードで検索し、登録情報を確認する。'
+    description: 'ユーザーがすでに登録している本・ゲーム・映像作品を検索・一覧して登録情報を確認する。タイトル（部分一致）、ジャンル（media_type）、ステータス、登録日の期間で絞り込める。「登録したものを見せて」「完了した本は？」「先月登録したゲーム」などの確認・フィルタ要求に使う。各条件は任意で、何も指定しなければ登録済みすべてを登録日の新しい順で返す。'
     parameters:
       type: object
       properties:
         query:
           type: string
-          description: '検索キーワード（例: タイトルの一部）'
-      required: [query]
+          description: 'タイトルの部分一致キーワード（任意）'
+        media_type:
+          type: string
+          enum: [book, game, movie, tv]
+          description: 'ジャンル/メディア種別（book: 本, game: ゲーム, movie: 映画, tv: TV・アニメ）'
+        status:
+          type: string
+          enum: [want, doing, done]
+          description: 'ステータス（want: 気になる, doing: 進行中, done: 完了）'
+        registered_from:
+          type: string
+          description: '登録日の開始（YYYY-MM-DD 形式。その日を含む）'
+        registered_to:
+          type: string
+          description: '登録日の終了（YYYY-MM-DD 形式。その日を含む）'
+      required: []

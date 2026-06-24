@@ -1,0 +1,163 @@
+<!-- @dsCard group="Foundations" name="Colors" subtitle="Primary / surfaces / ink / lines" -->
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Colors</title>
+    <link rel="stylesheet" href="../_tokens.css" />
+    <style>
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 16px;
+      }
+      .swatch {
+        background: var(--color-canvas);
+        border: 1px solid var(--color-divider-soft);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+      }
+      .chip {
+        height: 88px;
+      }
+      .meta {
+        padding: 10px 12px;
+      }
+      .name {
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.29;
+        letter-spacing: -0.224px;
+      }
+      .val {
+        font-size: 12px;
+        color: var(--color-ink-muted-48);
+        letter-spacing: -0.12px;
+      }
+      h2 {
+        font-family: var(--font-display);
+        font-size: 24px;
+        font-weight: 600;
+        margin: 0 0 6px;
+      }
+      .sub {
+        color: var(--color-ink-muted-48);
+        font-size: 14px;
+        margin: 0 0 24px;
+      }
+      .group {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--color-ink-muted-48);
+        margin: 28px 0 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <h2>Colors</h2>
+      <p class="sub">frontend/src/app.css の @theme カラートークン</p>
+
+      <div class="group">Brand</div>
+      <div class="grid">
+        <div class="swatch">
+          <div class="chip" style="background: #0066cc"></div>
+          <div class="meta">
+            <div class="name">primary</div>
+            <div class="val">#0066cc</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: #0071e3"></div>
+          <div class="meta">
+            <div class="name">primary-focus</div>
+            <div class="val">#0071e3</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: #2997ff"></div>
+          <div class="meta">
+            <div class="name">primary-on-dark</div>
+            <div class="val">#2997ff</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">Surfaces</div>
+      <div class="grid">
+        <div class="swatch">
+          <div
+            class="chip"
+            style="background: #ffffff; border-bottom: 1px solid var(--color-divider-soft)"
+          ></div>
+          <div class="meta">
+            <div class="name">canvas</div>
+            <div class="val">#ffffff</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: #f5f5f7"></div>
+          <div class="meta">
+            <div class="name">canvas-parchment</div>
+            <div class="val">#f5f5f7</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: #fafafc"></div>
+          <div class="meta">
+            <div class="name">surface-pearl</div>
+            <div class="val">#fafafc</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: #272729"></div>
+          <div class="meta">
+            <div class="name">surface-tile-1</div>
+            <div class="val">#272729</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: #000000"></div>
+          <div class="meta">
+            <div class="name">surface-black</div>
+            <div class="val">#000000</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group">Ink &amp; lines</div>
+      <div class="grid">
+        <div class="swatch">
+          <div class="chip" style="background: #1d1d1f"></div>
+          <div class="meta">
+            <div class="name">ink</div>
+            <div class="val">#1d1d1f</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: #333333"></div>
+          <div class="meta">
+            <div class="name">ink-muted-80</div>
+            <div class="val">#333333</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: #7a7a7a"></div>
+          <div class="meta">
+            <div class="name">ink-muted-48</div>
+            <div class="val">#7a7a7a</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="chip" style="background: #e0e0e0"></div>
+          <div class="meta">
+            <div class="name">hairline</div>
+            <div class="val">#e0e0e0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

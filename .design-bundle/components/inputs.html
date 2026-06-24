@@ -1,0 +1,97 @@
+<!-- @dsCard group="Components" name="Inputs & alerts" subtitle="Text field, focus, success / error banners" -->
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Inputs &amp; alerts</title>
+    <link rel="stylesheet" href="../_tokens.css" />
+    <style>
+      h2 {
+        font-family: var(--font-display);
+        font-size: 24px;
+        font-weight: 600;
+        margin: 0 0 6px;
+      }
+      .sub {
+        color: var(--color-ink-muted-48);
+        font-size: 14px;
+        margin: 0 0 28px;
+      }
+      .group {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--color-ink-muted-48);
+        margin: 24px 0 12px;
+      }
+      .field {
+        max-width: 420px;
+        display: grid;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+      .label {
+        font-size: 17px;
+        font-weight: 600;
+        line-height: 1.24;
+        letter-spacing: -0.374px;
+      }
+      .input-standard {
+        background: var(--color-canvas);
+        border: 1px solid var(--color-divider-soft);
+        border-radius: var(--radius-sm);
+        padding: 11px 12px;
+        color: var(--color-ink);
+        font: inherit;
+        font-size: 17px;
+        width: 100%;
+      }
+      .input-focus {
+        outline: 2px solid var(--color-primary-focus);
+        border-color: transparent;
+      }
+      .alert {
+        max-width: 420px;
+        border-radius: var(--radius-sm);
+        padding: 12px;
+        font-size: 14px;
+        line-height: 1.43;
+        letter-spacing: -0.224px;
+        margin-bottom: 12px;
+      }
+      .alert-error {
+        background: #fff1f2;
+        border: 1px solid #fecdd3;
+        color: #be123c;
+      }
+      .alert-success {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #15803d;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <h2>Inputs &amp; alerts</h2>
+      <p class="sub">@utility input-standard と、フォーム結果のステータスバナー</p>
+
+      <div class="group">Text field</div>
+      <div class="field">
+        <span class="label">メールアドレス</span>
+        <input class="input-standard" type="email" placeholder="you@example.com" value="" />
+      </div>
+      <div class="field">
+        <span class="label">パスワード（focus）</span>
+        <input class="input-standard input-focus" type="password" value="passw0rd" />
+      </div>
+
+      <div class="group">Alerts</div>
+      <div class="alert alert-error" role="alert">
+        メールアドレスまたはパスワードが正しくありません。
+      </div>
+      <div class="alert alert-success" role="status">検索設定を保存しました。</div>
+    </div>
+  </body>
+</html>

@@ -14,3 +14,11 @@
 ### テスト
 
 - Playwright API テストでHappy Pathのテストを作成すること
+
+### インフラ
+
+- CloudflareとSupabaseのコンソールの変更はterraformで行う。
+
+### レビュー
+
+- coderabbit cliを使ってレビューする

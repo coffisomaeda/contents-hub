@@ -1,0 +1,213 @@
+{
+  "namespace": "ContentsHubDesignSystem_586c2a",
+  "components": [],
+  "startingPoints": [],
+  "cards": [
+    {
+      "path": "components/buttons.html",
+      "group": "Components",
+      "subtitle": "Primary / secondary, default / active / disabled",
+      "name": "Buttons"
+    },
+    {
+      "path": "components/inputs.html",
+      "group": "Components",
+      "subtitle": "Text field, focus, success / error banners",
+      "name": "Inputs & alerts"
+    },
+    {
+      "path": "foundations/colors.html",
+      "group": "Foundations",
+      "subtitle": "Primary / surfaces / ink / lines",
+      "name": "Colors"
+    },
+    {
+      "path": "foundations/typography.html",
+      "group": "Foundations",
+      "subtitle": "Display / lead / body / caption scale",
+      "name": "Typography"
+    },
+    {
+      "path": "patterns/login-form.html",
+      "group": "Patterns",
+      "subtitle": "Card composition from tokens + components",
+      "name": "Login form"
+    },
+    {
+      "path": "pages/auth-login.html",
+      "group": "Pages",
+      "subtitle": "/login — full page with logged-out shell",
+      "name": "Login page"
+    },
+    {
+      "path": "pages/auth-signup.html",
+      "group": "Pages",
+      "subtitle": "/signup — account registration",
+      "name": "Signup page"
+    },
+    {
+      "path": "pages/home-chat.html",
+      "group": "Pages",
+      "subtitle": "/ — AIアシスタントチャット with inline content card",
+      "name": "Home / AI chat"
+    },
+    {
+      "path": "pages/contents-list.html",
+      "group": "Pages",
+      "subtitle": "/contents — filter bar + library cards",
+      "name": "Contents list"
+    },
+    {
+      "path": "pages/content-new.html",
+      "group": "Pages",
+      "subtitle": "/contents/new — search by media type + results",
+      "name": "Content registration"
+    },
+    {
+      "path": "pages/content-detail.html",
+      "group": "Pages",
+      "subtitle": "/contents/[id] — poster, meta, edit & share",
+      "name": "Content detail"
+    }
+  ],
+  "templates": [],
+  "globalCssPaths": ["_tokens.css"],
+  "tokens": [
+    {
+      "name": "--font-sans",
+      "value": "'SF Pro Text', 'Inter', system-ui, sans-serif",
+      "kind": "font",
+      "definedIn": "_tokens.css"
+    },
+    {
+      "name": "--font-display",
+      "value": "'SF Pro Display', 'Inter', system-ui, sans-serif",
+      "kind": "font",
+      "definedIn": "_tokens.css"
+    },
+    { "name": "--color-primary", "value": "#0066cc", "kind": "color", "definedIn": "_tokens.css" },
+    {
+      "name": "--color-primary-focus",
+      "value": "#0071e3",
+      "kind": "color",
+      "definedIn": "_tokens.css"
+    },
+    {
+      "name": "--color-primary-on-dark",
+      "value": "#2997ff",
+      "kind": "color",
+      "definedIn": "_tokens.css"
+    },
+    { "name": "--color-canvas", "value": "#ffffff", "kind": "color", "definedIn": "_tokens.css" },
+    {
+      "name": "--color-canvas-parchment",
+      "value": "#f5f5f7",
+      "kind": "color",
+      "definedIn": "_tokens.css"
+    },
+    {
+      "name": "--color-surface-pearl",
+      "value": "#fafafc",
+      "kind": "color",
+      "definedIn": "_tokens.css"
+    },
+    {
+      "name": "--color-surface-tile-1",
+      "value": "#272729",
+      "kind": "color",
+      "definedIn": "_tokens.css"
+    },
+    {
+      "name": "--color-surface-tile-2",
+      "value": "#2a2a2c",
+      "kind": "color",
+      "definedIn": "_tokens.css"
+    },
+    {
+      "name": "--color-surface-tile-3",
+      "value": "#252527",
+      "kind": "color",
+      "definedIn": "_tokens.css"
+    },
+    {
+      "name": "--color-surface-black",
+      "value": "#000000",
+      "kind": "color",
+      "definedIn": "_tokens.css"
+    },
+    {
+      "name": "--color-surface-chip-translucent",
+      "value": "rgba(210, 210, 215, 0.64)",
+      "kind": "color",
+      "definedIn": "_tokens.css"
+    },
+    { "name": "--color-ink", "value": "#1d1d1f", "kind": "color", "definedIn": "_tokens.css" },
+    { "name": "--color-body", "value": "#1d1d1f", "kind": "color", "definedIn": "_tokens.css" },
+    {
+      "name": "--color-body-on-dark",
+      "value": "#ffffff",
+      "kind": "color",
+      "definedIn": "_tokens.css"
+    },
+    {
+      "name": "--color-body-muted",
+      "value": "#cccccc",
+      "kind": "color",
+      "definedIn": "_tokens.css"
+    },
+    {
+      "name": "--color-ink-muted-80",
+      "value": "#333333",
+      "kind": "color",
+      "definedIn": "_tokens.css"
+    },
+    {
+      "name": "--color-ink-muted-48",
+      "value": "#7a7a7a",
+      "kind": "color",
+      "definedIn": "_tokens.css"
+    },
+    {
+      "name": "--color-divider-soft",
+      "value": "rgba(0, 0, 0, 0.04)",
+      "kind": "color",
+      "definedIn": "_tokens.css"
+    },
+    { "name": "--color-hairline", "value": "#e0e0e0", "kind": "color", "definedIn": "_tokens.css" },
+    { "name": "--radius-xs", "value": "5px", "kind": "radius", "definedIn": "_tokens.css" },
+    { "name": "--radius-sm", "value": "8px", "kind": "radius", "definedIn": "_tokens.css" },
+    { "name": "--radius-md", "value": "11px", "kind": "radius", "definedIn": "_tokens.css" },
+    { "name": "--radius-lg", "value": "18px", "kind": "radius", "definedIn": "_tokens.css" },
+    { "name": "--radius-pill", "value": "9999px", "kind": "radius", "definedIn": "_tokens.css" },
+    {
+      "name": "--shadow-product",
+      "value": "3px 5px 30px 0 rgba(0, 0, 0, 0.22)",
+      "kind": "shadow",
+      "definedIn": "_tokens.css"
+    },
+    { "name": "--spacing-xxs", "value": "4px", "kind": "spacing", "definedIn": "_tokens.css" },
+    { "name": "--spacing-xs", "value": "8px", "kind": "spacing", "definedIn": "_tokens.css" },
+    { "name": "--spacing-sm", "value": "12px", "kind": "spacing", "definedIn": "_tokens.css" },
+    { "name": "--spacing-md", "value": "17px", "kind": "spacing", "definedIn": "_tokens.css" },
+    { "name": "--spacing-lg", "value": "24px", "kind": "spacing", "definedIn": "_tokens.css" },
+    { "name": "--spacing-xl", "value": "32px", "kind": "spacing", "definedIn": "_tokens.css" },
+    { "name": "--spacing-xxl", "value": "48px", "kind": "spacing", "definedIn": "_tokens.css" }
+  ],
+  "themes": [],
+  "fonts": [],
+  "brandFonts": [
+    {
+      "family": "SF Pro Text",
+      "status": "no-face",
+      "tokens": ["--font-sans"],
+      "path": "_tokens.css"
+    },
+    {
+      "family": "SF Pro Display",
+      "status": "no-face",
+      "tokens": ["--font-display"],
+      "path": "_tokens.css"
+    }
+  ],
+  "source": "spa"
+}

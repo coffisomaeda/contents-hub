@@ -3,13 +3,15 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createWorkersAI } from 'workers-ai-provider';
-import { generateText, tool, type ModelMessage, stepCountIs } from 'ai';
+import { generateText, tool, type ModelMessage, stepCountIs, hasToolCall } from 'ai';
 import { z } from 'zod';
 import { createRakutenClient } from '$lib/server/external/rakuten';
 import { createTmdbClient } from '$lib/server/external/tmdb';
 import { createWatchmodeClient } from '$lib/server/external/watchmode';
 import { registerContentForUser } from '$lib/server/content-registration';
 import type { ContentRegistrationInput } from '$lib/validation/content';
+import { contentStatusSchema, mediaTypeSchema } from '$lib/validation/content';
+import { applyLibraryFilters } from '$lib/server/library-filter';
 
 interface RegisteredContentInfo {
   mediaType: string;
@@ -24,6 +26,18 @@ interface RegisteredContentInfo {
   memo?: string;
   contentId: string;
   releaseDate?: string;
+}
+
+// search_my_library がフロントに返す検索結果カード 1 件分。
+interface LibrarySearchResultItem {
+  contentId: string;
+  title: string;
+  mediaType: string;
+  imageUrl: string | null;
+  status: string;
+  rating: number | null;
+  memo: string | null;
+  registeredAt?: string;
 }
 
 const chatRequestSchema = z.object({
@@ -151,8 +165,15 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
   const { message, history, conversationId } = parsed.data;
 
   // モデルの作成（バインディング優先、なければ OpenAI 互換）
+  // AI_GATEWAY_ID が設定されていれば、Workers AI 呼び出しを AI Gateway 経由にする。
+  // Gateway 経由にすると、プロンプト/応答・トークン数・レイテンシ・コストを
+  // ダッシュボードで 1 リクエストずつ閲覧できる。
+  const gatewayId = getPrivateEnv(platform, 'AI_GATEWAY_ID');
   const model = aiBinding
-    ? createWorkersAI({ binding: aiBinding })(modelName)
+    ? createWorkersAI({
+        binding: aiBinding,
+        gateway: gatewayId ? { id: gatewayId } : undefined,
+      })(modelName)
     : createOpenAI({
         apiKey,
         baseURL: getPrivateEnv(platform, 'AI_BASE_URL') || undefined,
@@ -160,6 +181,8 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
 
   // 登録されたコンテンツの情報をフロントエンドに返すための変数
   let registeredContentInfo: RegisteredContentInfo | null = null;
+  // search_my_library の結果（直近の呼び出し分）をフロントへ返すための変数
+  let librarySearchResults: LibrarySearchResultItem[] | null = null;
 
   // 外部APIクライアントの初期化
   const origin = request.headers.get('origin') ?? new URL(request.url).origin;
@@ -196,13 +219,24 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
       // eval（temperature:0 で 8/8）と同条件に揃える意味もある。
       temperature: 0,
       system: `あなたは優秀なコンテンツ管理アシスタントです。
-ユーザーの指示に従って、本、ゲーム、映像作品（映画やTV番組、アニメ）をライブラリに登録したり、登録されたコンテンツを検索したりします。
+ユーザーの指示に従って、本、ゲーム、映像作品（映画やTV番組、アニメ）をライブラリに登録したり、登録されたコンテンツを確認・検索したりします。
 コンテンツの登録時には、自動的に適切な検索ツールを呼び出してください。
+登録済みのコンテンツを確認・一覧したい場合や、ジャンル（本・ゲーム・映画・TV）・ステータス（気になる/進行中/完了）・登録日の期間・タイトルで絞り込みたい場合は search_my_library ツールを使ってください。条件が指定されていない項目は省略してください。
+search_my_library の結果は、各コンテンツの画像・リンク付きカードとしてシステムが自動的に画面へ表示します。あなたの返信テキストでは「○件見つかりました」のように件数を伝える短い自然文だけを返してください。HTMLタグやカード風のマークアップ、画像、URL、個別作品の箇条書きは一切書かないでください（それらはカードに含まれます）。
+登録は原則として 1 件だけ行ってください。ユーザーが明示的に複数の作品を挙げていない限り、登録ツールは 1 回だけ呼び出し、登録できたらそれ以上ツールを呼ばずに完了報告を返してください。
 もし登録時にステータス（気になる: want, 読書中・プレイ中・視聴中: doing, 完了・読了・クリア: done）が指定されていない場合は、「気になる（want）」で登録してください。
 評価（1〜5）やメモ（感想）も指定されていれば、ツールに渡してください。
 登録に成功したら、ユーザーに対して登録完了したことを分かりやすく伝えてください。`,
       messages: coreMessages,
-      stopWhen: stepCountIs(5), // 自動ツール実行ループの上限
+      // 自動ツール実行ループの停止条件（いずれか満たした時点で最終応答へ）。
+      // 登録系ツールが 1 回でも実行されたら即座に終了し、複数登録の暴走と
+      // 応答遅延を防ぐ。確認系の search_my_library は停止対象に含めない。
+      stopWhen: [
+        stepCountIs(5),
+        hasToolCall('search_and_add_book'),
+        hasToolCall('search_and_add_game'),
+        hasToolCall('search_and_add_video'),
+      ],
       tools: {
         search_and_add_book: tool({
           description:
@@ -401,42 +435,76 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
         }),
         search_my_library: tool({
           description:
-            'ユーザーがすでに登録している本、ゲーム、映像作品をキーワードで検索し、登録情報を確認する。',
+            'ユーザーがすでに登録している本・ゲーム・映像作品を検索・一覧して登録情報を確認する。タイトル（部分一致）、ジャンル（media_type）、ステータス、登録日の期間で絞り込める。「登録したものを見せて」「完了した本は？」「先月登録したゲーム」などの確認・フィルタ要求に使う。各条件は任意で、何も指定しなければ登録済みすべてを登録日の新しい順で返す。',
           inputSchema: z.object({
-            query: z.string().describe('検索キーワード（例: タイトルの一部）'),
+            query: z.string().optional().describe('タイトルの部分一致キーワード（任意）'),
+            media_type: mediaTypeSchema
+              .optional()
+              .describe(
+                'ジャンル/メディア種別（book: 本, game: ゲーム, movie: 映画, tv: TV・アニメ）',
+              ),
+            status: contentStatusSchema
+              .optional()
+              .describe('ステータス（want: 気になる, doing: 進行中, done: 完了）'),
+            registered_from: z
+              .string()
+              .optional()
+              .describe('登録日の開始（YYYY-MM-DD 形式。その日を含む）'),
+            registered_to: z
+              .string()
+              .optional()
+              .describe('登録日の終了（YYYY-MM-DD 形式。その日を含む）'),
           }),
-          execute: async ({ query }) => {
-            const escaped = query.trim().replace(/[%_\\]/g, '\\$&');
-            const { data, error } = await locals.supabase
-              .from('user_contents')
-              .select(
-                `
+          execute: async ({ query, media_type, status, registered_from, registered_to }) => {
+            const libraryQuery = applyLibraryFilters(
+              locals.supabase
+                .from('user_contents')
+                .select(
+                  `
                 id,
                 status,
                 rating,
                 memo,
+                created_at,
                 contents!inner(id, title, media_type, image_url, release_date)
               `,
-              )
-              .eq('user_id', userId)
-              .ilike('contents.title', `%${escaped}%`)
-              .limit(10);
+                )
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false })
+                .limit(20),
+              {
+                title: query,
+                mediaType: media_type,
+                status,
+                from: registered_from,
+                to: registered_to,
+              },
+            );
+
+            const { data, error } = await libraryQuery;
 
             if (error) {
               return { success: false, message: 'ライブラリ検索中にエラーが発生しました。' };
             }
 
+            const results = (data || []).map((item) => ({
+              contentId: item.contents.id,
+              title: item.contents.title,
+              mediaType: item.contents.media_type,
+              imageUrl: item.contents.image_url,
+              status: item.status,
+              rating: item.rating,
+              memo: item.memo,
+              registeredAt: item.created_at?.slice(0, 10),
+            }));
+
+            // フロントでカード一覧として描画するため、結果を保持する。
+            librarySearchResults = results;
+
             return {
               success: true,
-              results: (data || []).map((item) => ({
-                contentId: item.contents.id,
-                title: item.contents.title,
-                mediaType: item.contents.media_type,
-                imageUrl: item.contents.image_url,
-                status: item.status,
-                rating: item.rating,
-                memo: item.memo,
-              })),
+              count: results.length,
+              results,
             };
           },
         }),
@@ -461,6 +529,7 @@ export const POST: RequestHandler = async ({ request, locals, platform }) => {
     return json({
       reply: result.text,
       registeredContent: registeredContentInfo,
+      searchResults: librarySearchResults,
     });
   } catch (error: unknown) {
     console.error('AI chat error:', error);

@@ -1,0 +1,70 @@
+[
+  {
+    "query": "Claude Designでhome-chatのデザインいじったんだけど、それをこのリポジトリのコードに反映して本番まで上げてほしい",
+    "should_trigger": true
+  },
+  {
+    "query": "content-new のページ、claude.ai/design 側でレイアウト変えたから実装に落とし込んで",
+    "should_trigger": true
+  },
+  {
+    "query": "デザイン側を変更したのでコードに反映してデプロイしてください",
+    "should_trigger": true
+  },
+  {
+    "query": "さっきContents Hub Design Systemのcontents-listを直したので、その変更を+page.svelteに持ってきて",
+    "should_trigger": true
+  },
+  {
+    "query": "デザインツールで作った新しいログイン画面のスタイル、実コードに翻訳して入れてくれる？",
+    "should_trigger": true
+  },
+  {
+    "query": "claude designでボタンの見た目を更新したからアプリ側にも同じように当てて",
+    "should_trigger": true
+  },
+  {
+    "query": "デザインエージェントが作ったcontent-detailの修正を取り込みたい。SvelteのコードにしてPRにして",
+    "should_trigger": true
+  },
+  {
+    "query": "home-chatのチャット入力欄、デザイン上ではモバイルで下固定になってるのに実機だとそうなってない。デザインに合わせて直して",
+    "should_trigger": true
+  },
+  {
+    "query": "Claude Designで色のトークンをいくつか変えたんだけど、それをapp.css側に反映できる？",
+    "should_trigger": true
+  },
+  {
+    "query": "デザインの方で signup フォーム作り直したから、それ見て実装更新しといて",
+    "should_trigger": true
+  },
+  {
+    "query": "このリポジトリのコンポーネントをClaude Designにアップロードして、デザインエージェントが使えるように同期して",
+    "should_trigger": false
+  },
+  {
+    "query": "/design-sync を実行して最新のコンポーネントをデザインシステムに反映したい",
+    "should_trigger": false
+  },
+  {
+    "query": "新しく作ったButtonコンポーネントをclaude.ai/designのプロジェクトにpushして",
+    "should_trigger": false
+  },
+  {
+    "query": "home-chatのチャット入力欄をモバイルで最下部固定にしたいんだけど、CSSどう直せばいい？",
+    "should_trigger": false
+  },
+  { "query": "contents-list のフィルタ機能にバグがあるので直してほしい", "should_trigger": false },
+  { "query": "Figmaのデザインを見ながらこの新規登録ページを作りたい", "should_trigger": false },
+  { "query": "本番にデプロイして", "should_trigger": false },
+  {
+    "query": "デザインシステムのコンポーネント一覧をClaude Designで確認したいんだけど、プロジェクトのファイル一覧見せて",
+    "should_trigger": false
+  },
+  {
+    "query": "+page.svelteのチャット画面、もう少し余白を広げてフォントを大きくしたい",
+    "should_trigger": false
+  },
+  { "query": "楽天APIの検索結果が本番で出ないので調査して", "should_trigger": false }
+]

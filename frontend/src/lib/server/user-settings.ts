@@ -51,14 +51,24 @@ const saveUserSearchSettings = async (
   supabase: SupabaseClient<Database>,
   userId: string,
   searchMediaTypes: SearchMediaType[],
-) =>
-  supabase
+) => {
+  // 初回設定完了の時刻は一度だけ記録する。設定を更新するたびに上書きしない。
+  const { data: existing } = await supabase
+    .from('profiles')
+    .select('settings_completed_at')
+    .eq('id', userId)
+    .maybeSingle();
+
+  return supabase
     .from('profiles')
     .update({
       search_media_types: searchMediaTypes,
-      settings_completed_at: new Date().toISOString(),
+      ...(existing?.settings_completed_at
+        ? {}
+        : { settings_completed_at: new Date().toISOString() }),
     })
     .eq('id', userId);
+};
 
 export const handleSettingsUpdate = async (request: Request, locals: App.Locals) => {
   const user = await requireUser(locals);

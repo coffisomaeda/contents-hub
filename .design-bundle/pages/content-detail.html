@@ -1,0 +1,178 @@
+<!-- @dsCard group="Pages" name="Content detail" subtitle="/contents/[id] — poster, meta, edit & share" -->
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>コンテンツ詳細 | Contents Hub</title>
+    <link rel="stylesheet" href="_app.css" />
+    <style>
+      .wrap {
+        max-width: 1120px;
+        margin: 0 auto;
+        display: grid;
+        gap: 32px;
+      }
+      .back {
+        color: var(--color-primary);
+        font-size: 14px;
+        text-decoration: none;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        gap: 32px;
+        align-items: start;
+      }
+      .cover {
+        width: 100%;
+        max-width: 260px;
+        height: 360px;
+        border-radius: var(--radius-sm);
+        background: linear-gradient(135deg, #dfe7f5, #c3d2ef);
+        box-shadow: var(--shadow-product);
+      }
+      .body {
+        display: grid;
+        gap: 24px;
+      }
+      section.box {
+        border: 1px solid var(--color-hairline);
+        background: var(--color-canvas);
+        border-radius: var(--radius-sm);
+        padding: 20px;
+        display: grid;
+        gap: 20px;
+      }
+      dl.meta {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        font-size: 14px;
+        margin: 0;
+      }
+      dl.meta dt {
+        color: var(--color-ink-muted-48);
+      }
+      dl.meta dd {
+        margin: 2px 0 0;
+      }
+      .field {
+        display: grid;
+        gap: 8px;
+      }
+      .field label {
+        font-size: 14px;
+        color: var(--color-ink-muted-48);
+      }
+      .row2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .share-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .link {
+        color: var(--color-primary);
+        font-size: 14px;
+        background: none;
+        border: 0;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <a class="brand" href="#">Contents Hub</a>
+        <nav>
+          <a href="#">チャット</a><a href="#">一覧</a><a href="#">登録</a><a href="#">設定</a
+          ><span class="who">maechango</span><button class="pill-dark">ログアウト</button>
+        </nav>
+      </header>
+      <main class="main">
+        <section class="wrap">
+          <div><a class="back" href="#">一覧に戻る</a></div>
+          <article class="grid">
+            <div><div class="cover"></div></div>
+            <div class="body">
+              <div>
+                <p class="eyebrow" style="text-transform: none; font-size: 14px; font-weight: 600">
+                  書籍
+                </p>
+                <h1 class="t-display-lg" style="margin-top: 8px">君たちはどう生きるか</h1>
+                <p class="t-caption muted" style="margin-top: 8px">きみたちはどういきるか</p>
+              </div>
+
+              <section class="box">
+                <dl class="meta">
+                  <div>
+                    <dt>登録日</dt>
+                    <dd>2026/5/2 21:14</dd>
+                  </div>
+                  <div>
+                    <dt>更新日</dt>
+                    <dd>2026/5/10 9:02</dd>
+                  </div>
+                  <div>
+                    <dt>発売日</dt>
+                    <dd>2017-08-24</dd>
+                  </div>
+                </dl>
+              </section>
+
+              <section class="box">
+                <div class="row2">
+                  <div class="field">
+                    <label>ステータス</label
+                    ><select class="input input-sm">
+                      <option>完了</option>
+                      <option>進行中</option>
+                      <option>気になる</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>評価</label
+                    ><select class="input input-sm">
+                      <option>4/5</option>
+                      <option>未評価</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>メモ</label
+                  ><textarea
+                    class="input input-sm"
+                    rows="4"
+                    placeholder="感想やメモを自由に入力..."
+                  >
+読み返したい一冊。</textarea
+                  >
+                </div>
+                <div class="row2">
+                  <label class="t-caption" style="display: flex; align-items: center; gap: 8px"
+                    ><input type="checkbox" checked />電子書籍</label
+                  >
+                  <label class="t-caption" style="display: flex; align-items: center; gap: 8px"
+                    ><input type="checkbox" />売却済み</label
+                  >
+                </div>
+                <div><button class="btn-secondary" type="button">保存</button></div>
+              </section>
+
+              <section class="box">
+                <div class="share-head">
+                  <h3 class="t-caption muted" style="margin: 0">共有</h3>
+                  <button class="link" type="button">共有する</button>
+                </div>
+              </section>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

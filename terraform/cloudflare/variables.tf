@@ -16,6 +16,24 @@ variable "worker_name" {
   default     = "contents-hub"
 }
 
+variable "ai_gateway_id" {
+  description = "AI Gateway の ID（名前）。Worker からはこの ID で AI 呼び出しを経由させる。"
+  type        = string
+  default     = "contents-hub"
+}
+
+variable "ai_gateway_rate_limiting_interval" {
+  description = "AI Gateway のレート制限ウィンドウ（秒）。0 で無制限。"
+  type        = number
+  default     = 60
+}
+
+variable "ai_gateway_rate_limiting_limit" {
+  description = "AI Gateway のウィンドウあたり最大リクエスト数。0 で無制限。"
+  type        = number
+  default     = 60
+}
+
 variable "custom_domain" {
   description = "カスタムドメイン（不要な場合は null）"
   type        = string

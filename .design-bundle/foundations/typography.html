@@ -1,0 +1,114 @@
+<!-- @dsCard group="Foundations" name="Typography" subtitle="Display / lead / body / caption scale" -->
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Typography</title>
+    <link rel="stylesheet" href="../_tokens.css" />
+    <style>
+      h2 {
+        font-family: var(--font-display);
+        font-size: 24px;
+        font-weight: 600;
+        margin: 0 0 24px;
+      }
+      .row {
+        padding: 18px 0;
+        border-bottom: 1px solid var(--color-divider-soft);
+      }
+      .tag {
+        font-size: 12px;
+        color: var(--color-ink-muted-48);
+        letter-spacing: -0.12px;
+        margin-bottom: 8px;
+      }
+      .text-hero-display {
+        font-family: var(--font-display);
+        font-size: clamp(36px, 8vw, 56px);
+        font-weight: 600;
+        line-height: 1.07;
+        letter-spacing: -0.28px;
+      }
+      .text-display-lg {
+        font-family: var(--font-display);
+        font-size: clamp(28px, 6vw, 40px);
+        font-weight: 600;
+        line-height: 1.1;
+      }
+      .text-display-md {
+        font-size: clamp(24px, 5vw, 34px);
+        font-weight: 600;
+        line-height: 1.25;
+        letter-spacing: -0.374px;
+      }
+      .text-lead {
+        font-size: clamp(21px, 4vw, 28px);
+        font-weight: 400;
+        line-height: 1.14;
+        letter-spacing: 0.196px;
+      }
+      .text-tagline {
+        font-size: clamp(17px, 3.5vw, 21px);
+        font-weight: 600;
+        line-height: 1.19;
+        letter-spacing: 0.231px;
+      }
+      .text-body-strong {
+        font-size: 17px;
+        font-weight: 600;
+        line-height: 1.24;
+        letter-spacing: -0.374px;
+      }
+      .text-body {
+        font-size: 17px;
+        font-weight: 400;
+        line-height: 1.47;
+        letter-spacing: -0.374px;
+      }
+      .text-caption {
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.43;
+        letter-spacing: -0.224px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <h2>Typography</h2>
+      <div class="row">
+        <div class="tag">text-hero-display · SF Pro Display 600</div>
+        <div class="text-hero-display">あなたの記録を、ひとつに</div>
+      </div>
+      <div class="row">
+        <div class="tag">text-display-lg</div>
+        <div class="text-display-lg">コンテンツを登録</div>
+      </div>
+      <div class="row">
+        <div class="tag">text-display-md</div>
+        <div class="text-display-md">ログイン</div>
+      </div>
+      <div class="row">
+        <div class="tag">text-lead</div>
+        <div class="text-lead">観た・読んだを、ひとつの場所に。</div>
+      </div>
+      <div class="row">
+        <div class="tag">text-tagline</div>
+        <div class="text-tagline">検索対象を選んでください</div>
+      </div>
+      <div class="row">
+        <div class="tag">text-body-strong</div>
+        <div class="text-body-strong">メールアドレス</div>
+      </div>
+      <div class="row">
+        <div class="tag">text-body</div>
+        <div class="text-body">本文テキスト。17px、行間 1.47、字間 -0.374px。</div>
+      </div>
+      <div class="row">
+        <div class="tag">text-caption</div>
+        <div class="text-caption">アカウントがない場合は登録してください。</div>
+      </div>
+    </div>
+  </body>
+</html>

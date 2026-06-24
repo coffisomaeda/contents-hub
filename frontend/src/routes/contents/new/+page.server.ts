@@ -186,46 +186,4 @@ export const actions: Actions = {
       });
     }
   },
-
-  fuzzySearch: async ({ request, locals }) => {
-    await requireUser(locals);
-
-    const formData = await request.formData();
-    const query = formData.get('query');
-
-    if (!query || typeof query !== 'string' || query.trim().length === 0) {
-      return fail(400, {
-        kind: 'fuzzySearch',
-        message: '検索キーワードを入力してください。',
-      });
-    }
-
-    // text-based ILIKE search (escape LIKE wildcards to prevent pattern injection)
-    const escaped = query.trim().replace(/[%_\\]/g, '\\$&');
-    const { data, error: searchError } = await locals.supabase
-      .from('contents')
-      .select('id, title, media_type, image_url, release_date')
-      .ilike('title', `%${escaped}%`)
-      .limit(10);
-
-    if (searchError) {
-      return fail(500, {
-        kind: 'fuzzySearch' as const,
-        query: query.trim(),
-        message: '検索に失敗しました。',
-      });
-    }
-
-    return {
-      kind: 'fuzzySearch' as const,
-      query: query.trim(),
-      fuzzyResults: (data ?? []).map((item) => ({
-        title: item.title,
-        mediaType: item.media_type,
-        imageUrl: item.image_url,
-        releaseDate: item.release_date,
-        contentId: item.id,
-      })),
-    };
-  },
 };
